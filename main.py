@@ -225,8 +225,17 @@ def apply_generic_language_hints(plan: QueryPlan, user_request: str) -> QueryPla
     return plan
 
 
-def build_query_plan(user_request: str) -> QueryPlan:
-    categories = get_category_options()
+def build_query_prompt(
+    user_request: str,
+    categories: list[CategoryOption],
+    use_guardrails: bool,
+) -> str:
+    guardrail_rules = """
+- If the user says under, below, less than, cheaper than, at most, or up to a price, set max_price.
+- If the user says above, over, greater than, or at least a rating, set min_rating.
+- Do not use min_price for "under a price".
+- Do not use max_rating for "rating above".
+""".strip()
     prompt = f"""
 You are a product database search planner. Convert the user's request into JSON only.
 
@@ -248,10 +257,7 @@ available_only, sort_by, sort_order
 Rules:
 - Use null when a field is not requested.
 - category must be null or exactly one of the valid category names above.
-- If the user says under, below, less than, cheaper than, at most, or up to a price, set max_price.
-- If the user says above, over, greater than, or at least a rating, set min_rating.
-- Do not use min_price for "under a price".
-- Do not use max_rating for "rating above".
+{guardrail_rules if use_guardrails else ""}
 - available_only should be true unless the user asks for unavailable/out-of-stock items.
 - sort_by must be one of: relevance, price, rating, name.
 - sort_order must be asc or desc.
@@ -259,11 +265,19 @@ Rules:
 
 User request: {user_request}
 """.strip()
+    return re.sub(r"\n{3,}", "\n\n", prompt)
+
+
+def build_query_plan(user_request: str, use_guardrails: bool = True) -> QueryPlan:
+    categories = get_category_options()
+    prompt = build_query_prompt(user_request, categories, use_guardrails)
 
     raw_plan = call_ollama(prompt)
     plan = QueryPlan.model_validate(raw_plan)
     plan.category = normalize_category(plan.category, user_request, categories)
-    return apply_generic_language_hints(plan, user_request)
+    if use_guardrails:
+        plan = apply_generic_language_hints(plan, user_request)
+    return plan
 
 
 def search_products(plan: QueryPlan, limit: int) -> list[dict[str, Any]]:
@@ -346,7 +360,8 @@ def root():
     return {
         "message": "FastAPI backend is running",
         "db_test": "Open /db-test to test the Supabase database connection.",
-        "agent": "POST /agent with JSON like {'request': 'show laptops under 2000 with rating above 4.5'}",
+        "agent": "POST /agent or /agent-guarded for safer results.",
+        "agent_raw": "POST /agent-raw to see the Ollama-only plan without language guardrails.",
     }
 
 
@@ -372,10 +387,9 @@ def ollama_test():
     return {"connected": True, "model": get_ollama_model(), "plan": plan.model_dump()}
 
 
-@app.post("/agent")
-def agent_search(agent_request: AgentRequest):
+def run_agent_search(agent_request: AgentRequest, use_guardrails: bool):
     try:
-        plan = build_query_plan(agent_request.request)
+        plan = build_query_plan(agent_request.request, use_guardrails=use_guardrails)
         results = search_products(plan, agent_request.limit)
     except psycopg.Error as error:
         raise HTTPException(status_code=500, detail=f"Database query failed: {error}") from error
@@ -384,7 +398,23 @@ def agent_search(agent_request: AgentRequest):
 
     return {
         "request": agent_request.request,
+        "mode": "guarded" if use_guardrails else "raw",
         "plan": plan.model_dump(),
         "count": len(results),
         "results": results,
     }
+
+
+@app.post("/agent")
+def agent_search(agent_request: AgentRequest):
+    return run_agent_search(agent_request, use_guardrails=True)
+
+
+@app.post("/agent-guarded")
+def agent_search_guarded(agent_request: AgentRequest):
+    return run_agent_search(agent_request, use_guardrails=True)
+
+
+@app.post("/agent-raw")
+def agent_search_raw(agent_request: AgentRequest):
+    return run_agent_search(agent_request, use_guardrails=False)
