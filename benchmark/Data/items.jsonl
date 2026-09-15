@@ -1,0 +1,60 @@
+{"id":"001","text":"The headphones are comfortable, the sound is clear, and the battery lasts all day.","label":"positive"}
+{"id":"002","text":"The package arrived damaged and the product stopped working after two days.","label":"negative"}
+{"id":"003","text":"The laptop has 16 GB of RAM and a 512 GB SSD.","label":"neutral"}
+{"id":"004","text":"The display looks beautiful, but the keyboard feels cheap and uncomfortable.","label":"mixed"}
+{"id":"005","text":"I am extremely happy with this purchase. Everything works perfectly.","label":"positive"}
+{"id":"006","text":"The delivery was late and customer support never answered my messages.","label":"negative"}
+{"id":"007","text":"The phone is available in three storage configurations.","label":"neutral"}
+{"id":"008","text":"The camera takes excellent photos, although the battery drains quickly.","label":"mixed"}
+{"id":"009","text":"The build quality is impressive and the device feels premium.","label":"positive"}
+{"id":"010","text":"The screen is dim, the speakers are weak, and the charger broke immediately.","label":"negative"}
+{"id":"011","text":"The box contains the phone, a charging cable, and a user manual.","label":"neutral"}
+{"id":"012","text":"I like the design, but the software is frustrating and buggy.","label":"mixed"}
+{"id":"013","text":"This is one of the best keyboards I have ever used.","label":"positive"}
+{"id":"014","text":"The chair became uncomfortable after only an hour of sitting.","label":"negative"}
+{"id":"015","text":"The chair weighs approximately 12 kilograms.","label":"neutral"}
+{"id":"016","text":"The chair looks great in my office, but the armrests are poorly designed.","label":"mixed"}
+{"id":"017","text":"The battery life exceeded my expectations.","label":"positive"}
+{"id":"018","text":"The battery barely lasts five hours, which is unacceptable.","label":"negative"}
+{"id":"019","text":"The manufacturer lists a battery capacity of 5000 mAh.","label":"neutral"}
+{"id":"020","text":"The battery lasts a long time, but charging the device takes forever.","label":"mixed"}
+{"id":"021","text":"The delivery was incredibly fast and the package was carefully protected.","label":"positive"}
+{"id":"022","text":"The package arrived a week late and several items were missing.","label":"negative"}
+{"id":"023","text":"The order was shipped on Monday and delivered on Thursday.","label":"neutral"}
+{"id":"024","text":"The delivery was fast, but the packaging was badly damaged.","label":"mixed"}
+{"id":"025","text":"Customer support solved my problem quickly and professionally.","label":"positive"}
+{"id":"026","text":"Customer support ignored my requests and closed the ticket without solving anything.","label":"negative"}
+{"id":"027","text":"Customer support is available by email, phone, and live chat.","label":"neutral"}
+{"id":"028","text":"The support agent was friendly, but the issue took several days to resolve.","label":"mixed"}
+{"id":"029","text":"The software is intuitive and very easy to use.","label":"positive"}
+{"id":"030","text":"The application crashes constantly and loses my work.","label":"negative"}
+{"id":"031","text":"The application requires Windows 11 or later.","label":"neutral"}
+{"id":"032","text":"The interface looks modern, but navigating through the settings is confusing.","label":"mixed"}
+{"id":"033","text":"The picture quality is sharp and the colors look natural.","label":"positive"}
+{"id":"034","text":"The image is blurry and the colors look completely washed out.","label":"negative"}
+{"id":"035","text":"The monitor has a resolution of 2560 by 1440 pixels.","label":"neutral"}
+{"id":"036","text":"The resolution is excellent, but the monitor has noticeable backlight bleeding.","label":"mixed"}
+{"id":"037","text":"The meal was delicious and the portions were generous.","label":"positive"}
+{"id":"038","text":"The food was cold and tasted stale.","label":"negative"}
+{"id":"039","text":"The restaurant serves lunch from noon until three o'clock.","label":"neutral"}
+{"id":"040","text":"The food tasted great, but the service was extremely slow.","label":"mixed"}
+{"id":"041","text":"The hotel room was spotless and the staff were incredibly welcoming.","label":"positive"}
+{"id":"042","text":"The room was dirty and the air conditioner did not work.","label":"negative"}
+{"id":"043","text":"The hotel offers free Wi-Fi and breakfast is served from 7 to 10 AM.","label":"neutral"}
+{"id":"044","text":"The location was perfect, but the room was much smaller than expected.","label":"mixed"}
+{"id":"045","text":"The shoes are comfortable and provide excellent support.","label":"positive"}
+{"id":"046","text":"The shoes caused painful blisters after a short walk.","label":"negative"}
+{"id":"047","text":"The shoes are available in sizes 39 through 46.","label":"neutral"}
+{"id":"048","text":"The shoes look stylish, but they are not very comfortable for long walks.","label":"mixed"}
+{"id":"049","text":"I would definitely buy this product again.","label":"positive"}
+{"id":"050","text":"I regret buying this product and would not recommend it to anyone.","label":"negative"}
+{"id":"051","text":"The product was purchased in March for $79.","label":"neutral"}
+{"id":"052","text":"The product performs well, although its price is higher than I expected.","label":"mixed"}
+{"id":"053","text":"The new update made the application faster and more reliable.","label":"positive"}
+{"id":"054","text":"The latest update introduced several serious bugs.","label":"negative"}
+{"id":"055","text":"The application was updated to version 4.2 yesterday.","label":"neutral"}
+{"id":"056","text":"The update improves performance, but it also removed several useful features.","label":"mixed"}
+{"id":"057","text":"The headphones are lightweight and surprisingly comfortable.","label":"positive"}
+{"id":"058","text":"The headphones produce distorted sound at higher volumes.","label":"negative"}
+{"id":"059","text":"The headphones use Bluetooth 5.3 and support USB-C charging.","label":"neutral"}
+{"id":"060","text":"The sound quality is excellent, but the headphones become uncomfortable after extended use.","label":"mixed"}

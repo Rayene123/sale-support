@@ -2,3 +2,10 @@
 __pycache__/
 .tools/
 venv/
+.env
+__pycache__/
+.tools/
+venv/
+
+# Benchmark generated results
+benchmark/results/*.csv
