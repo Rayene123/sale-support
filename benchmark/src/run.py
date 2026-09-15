@@ -1,9 +1,9 @@
 """
-Run the sentiment classification benchmark with Groq.
+Run the sentiment classification benchmark with local Ollama.
 
 Required packages:
 
-    pip install openai python-dotenv
+    pip install ollama python-dotenv
 
 Run:
 
@@ -18,8 +18,8 @@ import os
 import time
 from pathlib import Path
 
+import ollama
 from dotenv import load_dotenv
-from openai import OpenAI
 
 from prompt import build_messages
 
@@ -27,7 +27,7 @@ from prompt import build_messages
 ROOT = Path(__file__).resolve().parents[1]
 
 ITEMS_PATH = ROOT / "data" / "items.jsonl"
-OUTPUT_PATH = ROOT / "results" / "per_item.csv"
+OUTPUT_PATH = ROOT / "results" / "per_item_ollama.csv"
 
 load_dotenv(ROOT.parent / ".env")
 
@@ -41,18 +41,34 @@ def load_items():
         ]
 
 
-def call_groq(
-    client: OpenAI,
+def get_model() -> str:
+    return os.getenv(
+        "OLLAMA_MODEL",
+        "qwen2.5:14b",
+    )
+
+
+def get_ollama_url() -> str:
+    return os.getenv(
+        "OLLAMA_URL",
+        "http://localhost:11434",
+    ).rstrip("/")
+
+
+def call_ollama(
+    client: ollama.Client,
     model: str,
     text: str,
 ):
     start = time.perf_counter()
 
-    response = client.chat.completions.create(
+    response = client.chat(
         model=model,
         messages=build_messages(text),
-        temperature=0,
-        max_tokens=256,
+        options={
+            "temperature": 0,
+            "num_predict": 256,
+        },
     )
 
     latency_ms = (
@@ -60,22 +76,16 @@ def call_groq(
     ) * 1000
 
     output = (
-        response.choices[0].message.content
+        response["message"]["content"]
         or ""
     )
 
-    usage = response.usage
-
-    input_tokens = getattr(
-        usage,
-        "prompt_tokens",
-        None,
+    input_tokens = response.get(
+        "prompt_eval_count",
     )
 
-    output_tokens = getattr(
-        usage,
-        "completion_tokens",
-        None,
+    output_tokens = response.get(
+        "eval_count",
     )
 
     return (
@@ -88,31 +98,19 @@ def call_groq(
 
 def main():
 
-    api_key = os.getenv("GROQ_API_KEY")
-    model = os.getenv("GROQ_MODEL")
-
-    if not api_key:
-        raise RuntimeError(
-            "GROQ_API_KEY is not configured."
-        )
-
-    if not model:
-        raise RuntimeError(
-            "GROQ_MODEL is not configured."
-        )
+    model = get_model()
 
     items = load_items()
 
-    client = OpenAI(
-        api_key=api_key,
-        base_url="https://api.groq.com/openai/v1",
+    client = ollama.Client(
+        host=get_ollama_url(),
     )
 
     rows = []
 
     print()
     print("=" * 60)
-    print("Groq benchmark")
+    print("Ollama benchmark")
     print(model)
     print("=" * 60)
 
@@ -138,7 +136,7 @@ def main():
                 latency_ms,
                 input_tokens,
                 output_tokens,
-            ) = call_groq(
+            ) = call_ollama(
                 client,
                 model,
                 item["text"],
@@ -156,7 +154,7 @@ def main():
             print("ERROR")
 
         rows.append({
-            "provider": "groq",
+            "provider": "ollama",
             "model": model,
             "item_id": item["id"],
             "text": item["text"],

@@ -1,60 +1,75 @@
-{"id":"001","text":"The headphones are comfortable, the sound is clear, and the battery lasts all day.","label":"positive"}
-{"id":"002","text":"The package arrived damaged and the product stopped working after two days.","label":"negative"}
-{"id":"003","text":"The laptop has 16 GB of RAM and a 512 GB SSD.","label":"neutral"}
-{"id":"004","text":"The display looks beautiful, but the keyboard feels cheap and uncomfortable.","label":"mixed"}
-{"id":"005","text":"I am extremely happy with this purchase. Everything works perfectly.","label":"positive"}
-{"id":"006","text":"The delivery was late and customer support never answered my messages.","label":"negative"}
-{"id":"007","text":"The phone is available in three storage configurations.","label":"neutral"}
-{"id":"008","text":"The camera takes excellent photos, although the battery drains quickly.","label":"mixed"}
-{"id":"009","text":"The build quality is impressive and the device feels premium.","label":"positive"}
-{"id":"010","text":"The screen is dim, the speakers are weak, and the charger broke immediately.","label":"negative"}
-{"id":"011","text":"The box contains the phone, a charging cable, and a user manual.","label":"neutral"}
-{"id":"012","text":"I like the design, but the software is frustrating and buggy.","label":"mixed"}
-{"id":"013","text":"This is one of the best keyboards I have ever used.","label":"positive"}
-{"id":"014","text":"The chair became uncomfortable after only an hour of sitting.","label":"negative"}
-{"id":"015","text":"The chair weighs approximately 12 kilograms.","label":"neutral"}
-{"id":"016","text":"The chair looks great in my office, but the armrests are poorly designed.","label":"mixed"}
-{"id":"017","text":"The battery life exceeded my expectations.","label":"positive"}
-{"id":"018","text":"The battery barely lasts five hours, which is unacceptable.","label":"negative"}
-{"id":"019","text":"The manufacturer lists a battery capacity of 5000 mAh.","label":"neutral"}
-{"id":"020","text":"The battery lasts a long time, but charging the device takes forever.","label":"mixed"}
-{"id":"021","text":"The delivery was incredibly fast and the package was carefully protected.","label":"positive"}
-{"id":"022","text":"The package arrived a week late and several items were missing.","label":"negative"}
-{"id":"023","text":"The order was shipped on Monday and delivered on Thursday.","label":"neutral"}
-{"id":"024","text":"The delivery was fast, but the packaging was badly damaged.","label":"mixed"}
-{"id":"025","text":"Customer support solved my problem quickly and professionally.","label":"positive"}
-{"id":"026","text":"Customer support ignored my requests and closed the ticket without solving anything.","label":"negative"}
-{"id":"027","text":"Customer support is available by email, phone, and live chat.","label":"neutral"}
-{"id":"028","text":"The support agent was friendly, but the issue took several days to resolve.","label":"mixed"}
-{"id":"029","text":"The software is intuitive and very easy to use.","label":"positive"}
-{"id":"030","text":"The application crashes constantly and loses my work.","label":"negative"}
-{"id":"031","text":"The application requires Windows 11 or later.","label":"neutral"}
-{"id":"032","text":"The interface looks modern, but navigating through the settings is confusing.","label":"mixed"}
-{"id":"033","text":"The picture quality is sharp and the colors look natural.","label":"positive"}
-{"id":"034","text":"The image is blurry and the colors look completely washed out.","label":"negative"}
-{"id":"035","text":"The monitor has a resolution of 2560 by 1440 pixels.","label":"neutral"}
-{"id":"036","text":"The resolution is excellent, but the monitor has noticeable backlight bleeding.","label":"mixed"}
-{"id":"037","text":"The meal was delicious and the portions were generous.","label":"positive"}
-{"id":"038","text":"The food was cold and tasted stale.","label":"negative"}
-{"id":"039","text":"The restaurant serves lunch from noon until three o'clock.","label":"neutral"}
-{"id":"040","text":"The food tasted great, but the service was extremely slow.","label":"mixed"}
-{"id":"041","text":"The hotel room was spotless and the staff were incredibly welcoming.","label":"positive"}
-{"id":"042","text":"The room was dirty and the air conditioner did not work.","label":"negative"}
-{"id":"043","text":"The hotel offers free Wi-Fi and breakfast is served from 7 to 10 AM.","label":"neutral"}
-{"id":"044","text":"The location was perfect, but the room was much smaller than expected.","label":"mixed"}
-{"id":"045","text":"The shoes are comfortable and provide excellent support.","label":"positive"}
-{"id":"046","text":"The shoes caused painful blisters after a short walk.","label":"negative"}
-{"id":"047","text":"The shoes are available in sizes 39 through 46.","label":"neutral"}
-{"id":"048","text":"The shoes look stylish, but they are not very comfortable for long walks.","label":"mixed"}
-{"id":"049","text":"I would definitely buy this product again.","label":"positive"}
-{"id":"050","text":"I regret buying this product and would not recommend it to anyone.","label":"negative"}
-{"id":"051","text":"The product was purchased in March for $79.","label":"neutral"}
-{"id":"052","text":"The product performs well, although its price is higher than I expected.","label":"mixed"}
-{"id":"053","text":"The new update made the application faster and more reliable.","label":"positive"}
-{"id":"054","text":"The latest update introduced several serious bugs.","label":"negative"}
-{"id":"055","text":"The application was updated to version 4.2 yesterday.","label":"neutral"}
-{"id":"056","text":"The update improves performance, but it also removed several useful features.","label":"mixed"}
-{"id":"057","text":"The headphones are lightweight and surprisingly comfortable.","label":"positive"}
-{"id":"058","text":"The headphones produce distorted sound at higher volumes.","label":"negative"}
-{"id":"059","text":"The headphones use Bluetooth 5.3 and support USB-C charging.","label":"neutral"}
-{"id":"060","text":"The sound quality is excellent, but the headphones become uncomfortable after extended use.","label":"mixed"}
+{"id":"001","text":"Not bad at all — honestly better than the one I paid twice as much for.","label":"positive"}
+{"id":"002","text":"The battery life is the first real claim a brand has ever actually met.","label":"positive"}
+{"id":"003","text":"Hard to find fault anywhere; it's been flawless through a month of heavy use.","label":"positive"}
+{"id":"004","text":"I can't recall the last time a product just worked this quietly well.","label":"positive"}
+{"id":"005","text":"Nothing about it feels cheap, and I have owned far pricier alternatives.","label":"positive"}
+{"id":"006","text":"Even my pickiest friend admitted it was a genuinely good buy.","label":"positive"}
+{"id":"007","text":"The sound is beyond what the price suggests — clear, warm, and never shrill.","label":"positive"}
+{"id":"008","text":"Given the price, I expected flimsy; the build is anything but.","label":"positive"}
+{"id":"009","text":"It repaired my opinion of the whole category in a single afternoon.","label":"positive"}
+{"id":"010","text":"This is the rare gadget that does exactly what it says, no asterisks.","label":"positive"}
+{"id":"011","text":"Five years and countless trips later, it still looks and works like the day I bought it.","label":"positive"}
+{"id":"012","text":"If this is the 'budget' option, I dread how good the flagship must be.","label":"positive"}
+{"id":"013","text":"Support resolved my issue so smoothly I forgot I'd had one.","label":"positive"}
+{"id":"014","text":"It has no business being this good at this price — yet here we are.","label":"positive"}
+{"id":"015","text":"The coffee stays hot for hours and the carafe never drips; I've stopped using my old machine.","label":"positive"}
+{"id":"016","text":"Despite my low expectations, the stitching, zippers, and fabric all hold up beautifully.","label":"positive"}
+{"id":"017","text":"The interface is so intuitive that I only opened the manual to confirm it wasn't a fluke.","label":"positive"}
+{"id":"018","text":"Not a single complaint in three months — and I complain about everything.","label":"positive"}
+{"id":"019","text":"Wow, what a 'deal.' It stopped working on the third day.","label":"negative"}
+{"id":"020","text":"Just what I wanted: a charger that shorts out whenever the price of copper goes up.","label":"negative"}
+{"id":"021","text":"The 'premium' feel lasts exactly as long as the thirty-day return window.","label":"negative"}
+{"id":"022","text":"Great, another firmware update that resets my settings every single time.","label":"negative"}
+{"id":"023","text":"As advertised ('unbreakable'), it shattered the first time I dropped it.","label":"negative"}
+{"id":"024","text":"It works fine — right up until the moment you actually need it.","label":"negative"}
+{"id":"025","text":"If you enjoy support queues and automated replies, this is the product for you.","label":"negative"}
+{"id":"026","text":"The sound is 'studio-grade' in the same way a kazoo is a wind instrument.","label":"negative"}
+{"id":"027","text":"Battery barely lasted a day, despite the 'two-day battery' plastered on the box.","label":"negative"}
+{"id":"028","text":"The fabric pills, the seams split, and the buttons fall off — in that order, predictably.","label":"negative"}
+{"id":"029","text":"I have never been so impressed by how quickly a product can disappoint.","label":"negative"}
+{"id":"030","text":"It arrived on time, which is the only accurate thing about this listing.","label":"negative"}
+{"id":"031","text":"Not exactly a machine I can rely on — it freezes mid-task every few hours.","label":"negative"}
+{"id":"032","text":"The 'about this item' section said quiet; my neighbor now knows every word I type.","label":"negative"}
+{"id":"033","text":"Quality you can't argue with, because it dissolves before you can use it.","label":"negative"}
+{"id":"034","text":"Customer service thanked me for my patience, then never wrote back.","label":"negative"}
+{"id":"035","text":"The price was the only good thing, and it's not worth what I paid.","label":"negative"}
+{"id":"036","text":"It's cheap, it's flimsy, it's noisy, and it broke — four out of four.","label":"negative"}
+{"id":"037","text":"This product made me appreciate the ones I previously hated.","label":"negative"}
+{"id":"038","text":"The manufacturer lists the capacity at five thousand mAh and ships a USB-C cable in the box.","label":"neutral"}
+{"id":"039","text":"The warranty covers repair or replacement for the first twelve months.","label":"neutral"}
+{"id":"040","text":"The app updates to version 4.2, which changes how settings are organized.","label":"neutral"}
+{"id":"041","text":"The box reportedly contains a manual, a power adapter, and a quick-start card.","label":"neutral"}
+{"id":"042","text":"The vendor states the product ships within one business day.","label":"neutral"}
+{"id":"043","text":"Available in black, white, titanium, and a limited green edition.","label":"neutral"}
+{"id":"044","text":"The product was released last quarter, after a year of development.","label":"neutral"}
+{"id":"045","text":"The display is rated for five hundred nits of peak brightness and hardened glass.","label":"neutral"}
+{"id":"046","text":"Support hours are eight in the morning to six in the evening on weekdays.","label":"neutral"}
+{"id":"047","text":"The listing was updated on Tuesday to reflect the new pricing.","label":"neutral"}
+{"id":"048","text":"It comes in a fifty, one hundred, and two hundred millilitre size; refills are sold separately.","label":"neutral"}
+{"id":"049","text":"The software asks for a firmware update on first launch; the prompt can be dismissed.","label":"neutral"}
+{"id":"050","text":"The subscription renews automatically each month unless canceled before the renewal date.","label":"neutral"}
+{"id":"051","text":"Weight is listed at three hundred twenty grams including battery and strap.","label":"neutral"}
+{"id":"052","text":"The event is scheduled for Thursday; attendees are expected to confirm in advance.","label":"neutral"}
+{"id":"053","text":"According to the manual, the device should be charged at least once a month.","label":"neutral"}
+{"id":"054","text":"The item references 'environmentally conscious materials' in its online description.","label":"neutral"}
+{"id":"055","text":"Returns are accepted within thirty days with a receipt, though shipping is at the customer's cost.","label":"neutral"}
+{"id":"056","text":"Delivery is typically made between nine and five, depending on the local courier.","label":"neutral"}
+{"id":"057","text":"The screen is gorgeous, but the software periodically stutters.","label":"mixed"}
+{"id":"058","text":"It's comfortable and quiet, yet the battery drains twice as fast as promised.","label":"mixed"}
+{"id":"059","text":"The price is great and it looks premium, though the build feels fragile around the ports.","label":"mixed"}
+{"id":"060","text":"Sound quality is superb for music; for calls, everyone says I sound far away.","label":"mixed"}
+{"id":"061","text":"Fast shipping and a fair price, but the item smelled strongly of solvent out of the box.","label":"mixed"}
+{"id":"062","text":"It performs brilliantly at home, and disappointingly whenever I travel.","label":"mixed"}
+{"id":"063","text":"The warranty is generous, but parts availability is spotty at best.","label":"mixed"}
+{"id":"064","text":"The design is striking and innovative, while the controls are counterintuitive.","label":"mixed"}
+{"id":"065","text":"Battery life is excellent, except the wireless charging is finicky and slow.","label":"mixed"}
+{"id":"066","text":"Customer service is friendly yet unhelpful — polite answers, no resolution.","label":"mixed"}
+{"id":"067","text":"The food was delicious, but the service was glacial even when the place was empty.","label":"mixed"}
+{"id":"068","text":"It's great for light work and unlucky for anything demanding — pick your use case.","label":"mixed"}
+{"id":"069","text":"The finish is beautiful; the durability is anything but.","label":"mixed"}
+{"id":"070","text":"Half the features are brilliant and half are half-baked — it's a grab bag.","label":"mixed"}
+{"id":"071","text":"It looks and feels great, but it underperforms exactly where I bought it for.","label":"mixed"}
+{"id":"072","text":"The media play, while the controls and software lag behind badly.","label":"mixed"}
+{"id":"073","text":"Quality is inconsistent: superb unit, dreadful support, and mediocre accessories.","label":"mixed"}
+{"id":"074","text":"It nails the basics and fumbles the details.","label":"mixed"}
+{"id":"075","text":"The build is solid, though the included software is bloated and sluggish.","label":"mixed"}

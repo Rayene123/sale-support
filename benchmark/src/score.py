@@ -8,10 +8,7 @@ is exactly one of the four labels and matches the reference.
 from __future__ import annotations
 
 import csv
-import re
-import statistics
 from pathlib import Path
-from unittest import result
 
 
 ROOT = Path(__file__).resolve().parents[1]
