@@ -1,293 +1,110 @@
-"""
-Score the sentiment classification benchmark.
-
-A prediction is correct only when the normalized model output
-is exactly one of the four labels and matches the reference.
-"""
-
+"""Provider-independent sentiment scoring; raw CSVs are never rewritten."""
 from __future__ import annotations
-
+import argparse
 import csv
+import json
+import math
 from pathlib import Path
+from run import ITEMS_PATH, RESULTS_DIR, LABELS, load_items
+
+VALID_LABELS = LABELS
 
 
-ROOT = Path(__file__).resolve().parents[1]
-
-RESULTS_DIR = ROOT / "results"
-
-SUMMARY_PATH = RESULTS_DIR / "summary.csv"
-
-VALID_LABELS = {
-    "positive",
-    "negative",
-    "neutral",
-    "mixed",
-}
+def normalize_answer(value):
+    return (value or "").strip().lower()
 
 
-def find_result_files() -> list[Path]:
-    """
-    Discover all per-item result files produced by run.py.
-
-    run.py writes one file per provider/model combination, named
-    "per_item_<provider>_<model-slug>.csv". We glob for that pattern
-    instead of hardcoding provider-specific filenames, so scoring
-    automatically picks up any provider/model that was benchmarked.
-    """
-    if not RESULTS_DIR.exists():
-        return []
-
-    return sorted(
-        path
-        for path in RESULTS_DIR.glob("per_item_*.csv")
-        if path.name != SUMMARY_PATH.name
-    )
+def percentile(values, p):
+    if not values:
+        return ""
+    values = sorted(values)
+    pos = (len(values) - 1) * p
+    low = int(pos)
+    return values[low] + (values[min(low + 1, len(values) - 1)] - values[low]) * (pos - low)
 
 
-def normalize_answer(value: str) -> str:
-    value = (value or "").strip().lower()
-
-    # Remove surrounding whitespace only.
-    # Anything other than an exact label remains wrong.
-    return value
-
-
-def score_file(path: Path):
-
-    if not path.exists():
-        return None
-
-    with path.open(
-        "r",
-        encoding="utf-8",
-        newline="",
-    ) as file:
-
-        rows = list(csv.DictReader(file))
-
+def score_file(path, items=None):
+    with Path(path).open(encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+        required = {"provider", "model", "item_id", "text", "reference_answer", "generated_answer"}
+        if not required.issubset(reader.fieldnames or []):
+            raise ValueError(f"Missing required columns: {path}")
+        rows = list(reader)
     if not rows:
-        return None
-
-    correct = 0
-    parse_errors = 0
-    execution_errors = 0
-
-    latencies = []
-
+        raise ValueError(f"Empty result file: {path}")
+    seen = set()
+    expected = {item["id"]: item for item in items} if items is not None else None
+    kinds = {"parse_errors": 0, "execution_errors": 0, "refusals": 0, "timeouts": 0, "truncations": 0}
+    correct, latencies = 0, []
     for row in rows:
-
-        reference = normalize_answer(
-            row["reference_answer"]
-        )
-
-        generated = normalize_answer(
-            row["generated_answer"]
-        )
-
-        if row.get("error"):
-            parse_errors += 1
-            row["correct"] = "0"
-            continue
-
-        if generated not in VALID_LABELS:
-            parse_errors += 1
-            row["correct"] = "0"
-            continue
-
-        if generated == reference:
-            correct += 1
-            row["correct"] = "1"
-        else:
-            row["correct"] = "0"
-
+        identifier = row["item_id"]
+        if identifier in seen:
+            raise ValueError(f"Duplicate item {identifier}: {path}")
+        seen.add(identifier)
+        if (row["provider"], row["model"]) != (rows[0]["provider"], rows[0]["model"]):
+            raise ValueError("Each per-item file must contain one provider/model.")
+        if expected is not None:
+            item = expected.get(identifier)
+            if not item or (row["text"], row["reference_answer"]) != (item["text"], item["label"]):
+                raise ValueError(f"Dataset mismatch for {identifier}: {path}")
+        reference = normalize_answer(row["reference_answer"])
+        if reference not in LABELS:
+            raise ValueError(f"Invalid reference label for {identifier}")
         if row.get("latency_ms"):
-            latencies.append(
-                float(row["latency_ms"])
-            )
-
-    total = len(rows)
-
-    accuracy = (
-        correct / total
-        if total
-        else 0
-    )
-
-    latencies.sort()
-
-    def percentile(values, percentile):
-        if not values:
-            return ""
-
-        index = (
-            (len(values) - 1)
-            * percentile
-        )
-
-        lower = int(index)
-        upper = min(
-            lower + 1,
-            len(values) - 1,
-        )
-
-        fraction = index - lower
-
-        return (
-            values[lower]
-            + (
-                values[upper]
-                - values[lower]
-            )
-            * fraction
-        )
-
-    p50 = percentile(
-        latencies,
-        0.50,
-    )
-
-    p95 = percentile(
-        latencies,
-        0.95,
-    )
-
-    input_tokens = sum(
-        int(row["input_tokens"])
-        for row in rows
-        if row.get("input_tokens")
-    )
-
-    output_tokens = sum(
-        int(row["output_tokens"])
-        for row in rows
-        if row.get("output_tokens")
-    )
-
-    # Rewrite the per-item file with the correct column.
-    with path.open(
-        "w",
-        encoding="utf-8",
-        newline="",
-    ) as file:
-
-        fieldnames = list(rows[0].keys())
-
-        if "correct" not in fieldnames:
-            fieldnames.append("correct")
-
-        writer = csv.DictWriter(
-            file,
-            fieldnames=fieldnames,
-        )
-
-        writer.writeheader()
-        writer.writerows(rows)
-
-    return {
-        "provider": rows[0]["provider"],
-        "model": rows[0]["model"],
-        "items": total,
-        "correct": correct,
-        "accuracy": accuracy,
-        "parse_errors": parse_errors,
-        "execution_errors": execution_errors,
-        "p50_latency_ms": p50,
-        "p95_latency_ms": p95,
-        "input_tokens": input_tokens,
-        "output_tokens": output_tokens,
-    }
+            latency = float(row["latency_ms"])
+            if not math.isfinite(latency) or latency < 0:
+                raise ValueError("Latency must be finite and nonnegative.")
+            latencies.append(latency)
+        answer = normalize_answer(row["generated_answer"])
+        error_type = row.get("error_type", "")
+        if row.get("error") or error_type:
+            field = {"refusal": "refusals", "timeout": "timeouts", "truncated": "truncations"}.get(error_type, "execution_errors")
+            kinds[field] += 1
+            row["correct"] = "0"
+        elif answer not in LABELS:
+            kinds["parse_errors"] += 1
+            row["correct"] = "0"
+        else:
+            row["correct"] = str(int(answer == reference))
+            correct += int(row["correct"])
+    total = len(expected) if expected is not None else len(rows)
+    missing = total - len(rows)
+    summary = dict(provider=rows[0]["provider"], model=rows[0]["model"],
+                   items=total, recorded_items=len(rows), missing_items=missing,
+                   correct=correct, accuracy=correct / total, **kinds,
+                   p50_latency_ms=percentile(latencies, .5),
+                   p95_latency_ms=percentile(latencies, .95), latency_samples=len(latencies))
+    for key in ("input_tokens", "output_tokens"):
+        known = [int(row[key]) for row in rows if row.get(key) not in (None, "")]
+        if any(x < 0 for x in known):
+            raise ValueError("Token counts must be nonnegative.")
+        summary[key] = sum(known) if len(known) == len(rows) and not missing else ""
+        summary["recorded_" + key] = sum(known) if known else ""
+    return summary
 
 
 def main():
-
-    summaries = []
-
-    for path in find_result_files():
-
-        result = score_file(path)
-
-        if result:
-            summaries.append(result)
-
-    if not summaries:
-        raise RuntimeError(
-            "No benchmark result files found."
-        )
-
-    SUMMARY_PATH.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    with SUMMARY_PATH.open(
-        "w",
-        encoding="utf-8",
-        newline="",
-    ) as file:
-
-        fieldnames = [
-            "provider",
-            "model",
-            "items",
-            "correct",
-            "accuracy",
-            "parse_errors",
-            "execution_errors",
-            "p50_latency_ms",
-            "p95_latency_ms",
-            "input_tokens",
-            "output_tokens",
-        ]
-
-        writer = csv.DictWriter(
-            file,
-            fieldnames=fieldnames,
-        )
-
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--results-dir", type=Path, default=RESULTS_DIR)
+    p.add_argument("--items", type=Path, default=ITEMS_PATH)
+    p.add_argument("--output", type=Path, help="Defaults to RESULTS_DIR/summary.csv.")
+    args = p.parse_args()
+    items = load_items(args.items)
+    paths = sorted(args.results_dir.glob("per_item_*.csv"))
+    if not paths:
+        raise ValueError("No per_item_*.csv files found.")
+    summaries = [dict(score_file(path, items), result_file=path.name) for path in paths]
+    output = args.output or args.results_dir / "summary.csv"
+    if output.resolve() in [path.resolve() for path in paths] or output.resolve() == args.items.resolve():
+        raise ValueError("Summary output cannot overwrite source data.")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=list(summaries[0]))
         writer.writeheader()
         writer.writerows(summaries)
-
-    print()
-    print("=" * 60)
-    print("BENCHMARK RESULTS")
-    print("=" * 60)
-
     for result in summaries:
-
-        print()
-        print(
-            f"{result['provider']} / "
-            f"{result['model']}"
-        )
-
-        print(
-            f"Accuracy: "
-            f"{result['correct']}/"
-            f"{result['items']} "
-            f"({result['accuracy']:.2%})"
-        )
-
-        if result["p50_latency_ms"] != "":
-            print(
-                f"P50 latency: "
-                f"{result['p50_latency_ms']:.2f} ms"
-            )
-
-        if result["p95_latency_ms"] != "":
-            print(
-                f"P95 latency: "
-                f"{result['p95_latency_ms']:.2f} ms"
-            )
-
-        print(
-            f"Parse errors: "
-            f"{result['parse_errors']}"
-        )
-
-    print()
-    print(
-        f"Saved summary to: {SUMMARY_PATH}"
-    )
+        print(f"{result['provider']} / {result['model']}: {result['correct']}/{result['items']} ({result['accuracy']:.2%}), missing={result['missing_items']}")
+    print(output)
 
 
 if __name__ == "__main__":
