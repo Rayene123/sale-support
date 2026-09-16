@@ -1,0 +1,76 @@
+provider,model,item_id,text,reference_answer,generated_answer,latency_ms,input_tokens,output_tokens,error,correct
+chat_nonblind,gpt-6-astra,001,Not bad at all — honestly better than the one I paid twice as much for.,positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,002,The battery life is the first real claim a brand has ever actually met.,positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,003,Hard to find fault anywhere; it's been flawless through a month of heavy use.,positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,004,I can't recall the last time a product just worked this quietly well.,positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,005,"Nothing about it feels cheap, and I have owned far pricier alternatives.",positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,006,Even my pickiest friend admitted it was a genuinely good buy.,positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,007,"The sound is beyond what the price suggests — clear, warm, and never shrill.",positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,008,"Given the price, I expected flimsy; the build is anything but.",positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,009,It repaired my opinion of the whole category in a single afternoon.,positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,010,"This is the rare gadget that does exactly what it says, no asterisks.",positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,011,"Five years and countless trips later, it still looks and works like the day I bought it.",positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,012,"If this is the 'budget' option, I dread how good the flagship must be.",positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,013,Support resolved my issue so smoothly I forgot I'd had one.,positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,014,It has no business being this good at this price — yet here we are.,positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,015,The coffee stays hot for hours and the carafe never drips; I've stopped using my old machine.,positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,016,"Despite my low expectations, the stitching, zippers, and fabric all hold up beautifully.",positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,017,The interface is so intuitive that I only opened the manual to confirm it wasn't a fluke.,positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,018,Not a single complaint in three months — and I complain about everything.,positive,positive,,,,,1
+chat_nonblind,gpt-6-astra,019,"Wow, what a 'deal.' It stopped working on the third day.",negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,020,Just what I wanted: a charger that shorts out whenever the price of copper goes up.,negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,021,The 'premium' feel lasts exactly as long as the thirty-day return window.,negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,022,"Great, another firmware update that resets my settings every single time.",negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,023,"As advertised ('unbreakable'), it shattered the first time I dropped it.",negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,024,It works fine — right up until the moment you actually need it.,negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,025,"If you enjoy support queues and automated replies, this is the product for you.",negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,026,The sound is 'studio-grade' in the same way a kazoo is a wind instrument.,negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,027,"Battery barely lasted a day, despite the 'two-day battery' plastered on the box.",negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,028,"The fabric pills, the seams split, and the buttons fall off — in that order, predictably.",negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,029,I have never been so impressed by how quickly a product can disappoint.,negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,030,"It arrived on time, which is the only accurate thing about this listing.",negative,mixed,,,,,0
+chat_nonblind,gpt-6-astra,031,Not exactly a machine I can rely on — it freezes mid-task every few hours.,negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,032,The 'about this item' section said quiet; my neighbor now knows every word I type.,negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,033,"Quality you can't argue with, because it dissolves before you can use it.",negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,034,"Customer service thanked me for my patience, then never wrote back.",negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,035,"The price was the only good thing, and it's not worth what I paid.",negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,036,"It's cheap, it's flimsy, it's noisy, and it broke — four out of four.",negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,037,This product made me appreciate the ones I previously hated.,negative,negative,,,,,1
+chat_nonblind,gpt-6-astra,038,The manufacturer lists the capacity at five thousand mAh and ships a USB-C cable in the box.,neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,039,The warranty covers repair or replacement for the first twelve months.,neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,040,"The app updates to version 4.2, which changes how settings are organized.",neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,041,"The box reportedly contains a manual, a power adapter, and a quick-start card.",neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,042,The vendor states the product ships within one business day.,neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,043,"Available in black, white, titanium, and a limited green edition.",neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,044,"The product was released last quarter, after a year of development.",neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,045,The display is rated for five hundred nits of peak brightness and hardened glass.,neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,046,Support hours are eight in the morning to six in the evening on weekdays.,neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,047,The listing was updated on Tuesday to reflect the new pricing.,neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,048,"It comes in a fifty, one hundred, and two hundred millilitre size; refills are sold separately.",neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,049,The software asks for a firmware update on first launch; the prompt can be dismissed.,neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,050,The subscription renews automatically each month unless canceled before the renewal date.,neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,051,Weight is listed at three hundred twenty grams including battery and strap.,neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,052,The event is scheduled for Thursday; attendees are expected to confirm in advance.,neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,053,"According to the manual, the device should be charged at least once a month.",neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,054,The item references 'environmentally conscious materials' in its online description.,neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,055,"Returns are accepted within thirty days with a receipt, though shipping is at the customer's cost.",neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,056,"Delivery is typically made between nine and five, depending on the local courier.",neutral,neutral,,,,,1
+chat_nonblind,gpt-6-astra,057,"The screen is gorgeous, but the software periodically stutters.",mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,058,"It's comfortable and quiet, yet the battery drains twice as fast as promised.",mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,059,"The price is great and it looks premium, though the build feels fragile around the ports.",mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,060,"Sound quality is superb for music; for calls, everyone says I sound far away.",mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,061,"Fast shipping and a fair price, but the item smelled strongly of solvent out of the box.",mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,062,"It performs brilliantly at home, and disappointingly whenever I travel.",mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,063,"The warranty is generous, but parts availability is spotty at best.",mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,064,"The design is striking and innovative, while the controls are counterintuitive.",mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,065,"Battery life is excellent, except the wireless charging is finicky and slow.",mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,066,"Customer service is friendly yet unhelpful — polite answers, no resolution.",mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,067,"The food was delicious, but the service was glacial even when the place was empty.",mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,068,It's great for light work and unlucky for anything demanding — pick your use case.,mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,069,The finish is beautiful; the durability is anything but.,mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,070,Half the features are brilliant and half are half-baked — it's a grab bag.,mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,071,"It looks and feels great, but it underperforms exactly where I bought it for.",mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,072,"The media play, while the controls and software lag behind badly.",mixed,negative,,,,,0
+chat_nonblind,gpt-6-astra,073,"Quality is inconsistent: superb unit, dreadful support, and mediocre accessories.",mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,074,It nails the basics and fumbles the details.,mixed,mixed,,,,,1
+chat_nonblind,gpt-6-astra,075,"The build is solid, though the included software is bloated and sluggish.",mixed,mixed,,,,,1
