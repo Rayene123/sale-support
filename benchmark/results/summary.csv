@@ -1,0 +1,3 @@
+provider,model,items,correct,accuracy,parse_errors,execution_errors,p50_latency_ms,p95_latency_ms,input_tokens,output_tokens
+groq,openai/gpt-oss-20b,75,69,0.92,1,0,2402.4626499999613,2660.9471750001376,15050,6049
+ollama,tinyllama:1.1b,75,0,0.0,75,0,,,15621,6844

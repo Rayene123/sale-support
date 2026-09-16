@@ -1,0 +1,76 @@
+provider,model,item_id,text,reference_answer,generated_answer,latency_ms,input_tokens,output_tokens,error,correct
+groq,openai/gpt-oss-20b,001,Not bad at all — honestly better than the one I paid twice as much for.,positive,positive,744.446200000084,202,76,,1
+groq,openai/gpt-oss-20b,002,The battery life is the first real claim a brand has ever actually met.,positive,positive,432.6336999999967,200,93,,1
+groq,openai/gpt-oss-20b,003,Hard to find fault anywhere; it's been flawless through a month of heavy use.,positive,positive,374.66360000007626,201,66,,1
+groq,openai/gpt-oss-20b,004,I can't recall the last time a product just worked this quietly well.,positive,positive,207.722399999966,199,47,,1
+groq,openai/gpt-oss-20b,005,"Nothing about it feels cheap, and I have owned far pricier alternatives.",positive,positive,448.8317999998799,200,97,,1
+groq,openai/gpt-oss-20b,006,Even my pickiest friend admitted it was a genuinely good buy.,positive,positive,380.0767000000178,198,56,,1
+groq,openai/gpt-oss-20b,007,"The sound is beyond what the price suggests — clear, warm, and never shrill.",positive,positive,234.7199000000728,203,58,,1
+groq,openai/gpt-oss-20b,008,"Given the price, I expected flimsy; the build is anything but.",positive,positive,458.76300000008996,200,85,,1
+groq,openai/gpt-oss-20b,009,It repaired my opinion of the whole category in a single afternoon.,positive,positive,374.32269999999335,198,103,,1
+groq,openai/gpt-oss-20b,010,"This is the rare gadget that does exactly what it says, no asterisks.",positive,positive,237.9703999999947,203,78,,1
+groq,openai/gpt-oss-20b,011,"Five years and countless trips later, it still looks and works like the day I bought it.",positive,positive,387.0963000001666,204,59,,1
+groq,openai/gpt-oss-20b,012,"If this is the 'budget' option, I dread how good the flagship must be.",positive,negative,302.2753999998713,203,101,,0
+groq,openai/gpt-oss-20b,013,Support resolved my issue so smoothly I forgot I'd had one.,positive,positive,170.5475999999635,197,49,,1
+groq,openai/gpt-oss-20b,014,It has no business being this good at this price — yet here we are.,positive,positive,414.1927000000578,201,98,,1
+groq,openai/gpt-oss-20b,015,The coffee stays hot for hours and the carafe never drips; I've stopped using my old machine.,positive,positive,376.63950000001023,206,64,,1
+groq,openai/gpt-oss-20b,016,"Despite my low expectations, the stitching, zippers, and fabric all hold up beautifully.",positive,positive,383.32900000000336,203,70,,1
+groq,openai/gpt-oss-20b,017,The interface is so intuitive that I only opened the manual to confirm it wasn't a fluke.,positive,positive,252.4819000000207,204,61,,1
+groq,openai/gpt-oss-20b,018,Not a single complaint in three months — and I complain about everything.,positive,mixed,385.63750000002983,199,256,,0
+groq,openai/gpt-oss-20b,019,"Wow, what a 'deal.' It stopped working on the third day.",negative,negative,279.1270000000168,200,96,,1
+groq,openai/gpt-oss-20b,020,Just what I wanted: a charger that shorts out whenever the price of copper goes up.,negative,negative,372.25790000002235,203,68,,1
+groq,openai/gpt-oss-20b,021,The 'premium' feel lasts exactly as long as the thirty-day return window.,negative,negative,557.8789000001052,201,146,,1
+groq,openai/gpt-oss-20b,022,"Great, another firmware update that resets my settings every single time.",negative,negative,211.36410000008254,198,92,,1
+groq,openai/gpt-oss-20b,023,"As advertised ('unbreakable'), it shattered the first time I dropped it.",negative,negative,189.6538999999393,201,53,,1
+groq,openai/gpt-oss-20b,024,It works fine — right up until the moment you actually need it.,negative,negative,408.19340000007287,199,77,,1
+groq,openai/gpt-oss-20b,025,"If you enjoy support queues and automated replies, this is the product for you.",negative,negative,556.4021999998658,201,145,,1
+groq,openai/gpt-oss-20b,026,The sound is 'studio-grade' in the same way a kazoo is a wind instrument.,negative,,590.6587000001764,204,256,,0
+groq,openai/gpt-oss-20b,027,"Battery barely lasted a day, despite the 'two-day battery' plastered on the box.",negative,negative,184.8170000000664,204,58,,1
+groq,openai/gpt-oss-20b,028,"The fabric pills, the seams split, and the buttons fall off — in that order, predictably.",negative,negative,417.84710000001724,206,72,,1
+groq,openai/gpt-oss-20b,029,I have never been so impressed by how quickly a product can disappoint.,negative,negative,243.45619999985502,199,111,,1
+groq,openai/gpt-oss-20b,030,"It arrived on time, which is the only accurate thing about this listing.",negative,negative,481.2228999999206,200,123,,1
+groq,openai/gpt-oss-20b,031,Not exactly a machine I can rely on — it freezes mid-task every few hours.,negative,negative,2450.5122000000483,202,60,,1
+groq,openai/gpt-oss-20b,032,The 'about this item' section said quiet; my neighbor now knows every word I type.,negative,negative,2548.0916999999863,204,82,,1
+groq,openai/gpt-oss-20b,033,"Quality you can't argue with, because it dissolves before you can use it.",negative,mixed,2648.8146000001507,201,161,,0
+groq,openai/gpt-oss-20b,034,"Customer service thanked me for my patience, then never wrote back.",negative,negative,2422.6916000000074,198,57,,1
+groq,openai/gpt-oss-20b,035,"The price was the only good thing, and it's not worth what I paid.",negative,negative,2439.3781999999646,201,92,,1
+groq,openai/gpt-oss-20b,036,"It's cheap, it's flimsy, it's noisy, and it broke — four out of four.",negative,negative,2610.1622000001043,204,58,,1
+groq,openai/gpt-oss-20b,037,This product made me appreciate the ones I previously hated.,negative,positive,2512.4415000000226,196,94,,0
+groq,openai/gpt-oss-20b,038,The manufacturer lists the capacity at five thousand mAh and ships a USB-C cable in the box.,neutral,neutral,2302.794699999822,205,60,,1
+groq,openai/gpt-oss-20b,039,The warranty covers repair or replacement for the first twelve months.,neutral,neutral,2362.6772000000074,197,49,,1
+groq,openai/gpt-oss-20b,040,"The app updates to version 4.2, which changes how settings are organized.",neutral,neutral,2464.350599999989,202,54,,1
+groq,openai/gpt-oss-20b,041,"The box reportedly contains a manual, a power adapter, and a quick-start card.",neutral,neutral,2272.956099999874,202,50,,1
+groq,openai/gpt-oss-20b,042,The vendor states the product ships within one business day.,neutral,neutral,2480.400500000087,196,47,,1
+groq,openai/gpt-oss-20b,043,"Available in black, white, titanium, and a limited green edition.",neutral,neutral,2740.8821999999873,199,49,,1
+groq,openai/gpt-oss-20b,044,"The product was released last quarter, after a year of development.",neutral,neutral,2689.1612000001714,198,42,,1
+groq,openai/gpt-oss-20b,045,The display is rated for five hundred nits of peak brightness and hardened glass.,neutral,neutral,2431.1241000000336,201,50,,1
+groq,openai/gpt-oss-20b,046,Support hours are eight in the morning to six in the evening on weekdays.,neutral,neutral,2504.6120000001793,200,51,,1
+groq,openai/gpt-oss-20b,047,The listing was updated on Tuesday to reflect the new pricing.,neutral,neutral,2441.265700000031,197,50,,1
+groq,openai/gpt-oss-20b,048,"It comes in a fifty, one hundred, and two hundred millilitre size; refills are sold separately.",neutral,neutral,2524.84840000011,208,63,,1
+groq,openai/gpt-oss-20b,049,The software asks for a firmware update on first launch; the prompt can be dismissed.,neutral,neutral,2517.6298000001225,202,103,,1
+groq,openai/gpt-oss-20b,050,The subscription renews automatically each month unless canceled before the renewal date.,neutral,neutral,2493.390800000043,199,52,,1
+groq,openai/gpt-oss-20b,051,Weight is listed at three hundred twenty grams including battery and strap.,neutral,neutral,2548.164199999974,198,46,,1
+groq,openai/gpt-oss-20b,052,The event is scheduled for Thursday; attendees are expected to confirm in advance.,neutral,neutral,2345.813200000066,200,53,,1
+groq,openai/gpt-oss-20b,053,"According to the manual, the device should be charged at least once a month.",neutral,neutral,2362.767399999939,201,71,,1
+groq,openai/gpt-oss-20b,054,The item references 'environmentally conscious materials' in its online description.,neutral,positive,2414.6871999998893,199,81,,0
+groq,openai/gpt-oss-20b,055,"Returns are accepted within thirty days with a receipt, though shipping is at the customer's cost.",neutral,neutral,2415.9508000000187,203,63,,1
+groq,openai/gpt-oss-20b,056,"Delivery is typically made between nine and five, depending on the local courier.",neutral,neutral,2524.547400000074,200,49,,1
+groq,openai/gpt-oss-20b,057,"The screen is gorgeous, but the software periodically stutters.",mixed,mixed,2457.870099999809,197,59,,1
+groq,openai/gpt-oss-20b,058,"It's comfortable and quiet, yet the battery drains twice as fast as promised.",mixed,mixed,2412.2764999999617,200,56,,1
+groq,openai/gpt-oss-20b,059,"The price is great and it looks premium, though the build feels fragile around the ports.",mixed,mixed,2577.6734000000943,203,59,,1
+groq,openai/gpt-oss-20b,060,"Sound quality is superb for music; for calls, everyone says I sound far away.",mixed,mixed,2610.5483000001186,202,115,,1
+groq,openai/gpt-oss-20b,061,"Fast shipping and a fair price, but the item smelled strongly of solvent out of the box.",mixed,mixed,2420.690700000023,204,68,,1
+groq,openai/gpt-oss-20b,062,"It performs brilliantly at home, and disappointingly whenever I travel.",mixed,mixed,2576.7546999998103,198,87,,1
+groq,openai/gpt-oss-20b,063,"The warranty is generous, but parts availability is spotty at best.",mixed,mixed,2356.4460000000054,199,87,,1
+groq,openai/gpt-oss-20b,064,"The design is striking and innovative, while the controls are counterintuitive.",mixed,mixed,2778.7848000000395,200,66,,1
+groq,openai/gpt-oss-20b,065,"Battery life is excellent, except the wireless charging is finicky and slow.",mixed,mixed,2524.821299999985,200,78,,1
+groq,openai/gpt-oss-20b,066,"Customer service is friendly yet unhelpful — polite answers, no resolution.",mixed,mixed,2518.145900000036,200,85,,1
+groq,openai/gpt-oss-20b,067,"The food was delicious, but the service was glacial even when the place was empty.",mixed,mixed,2451.9551999999294,203,65,,1
+groq,openai/gpt-oss-20b,068,It's great for light work and unlucky for anything demanding — pick your use case.,mixed,mixed,2387.935700000071,201,104,,1
+groq,openai/gpt-oss-20b,069,The finish is beautiful; the durability is anything but.,mixed,mixed,2421.0603999999876,196,65,,1
+groq,openai/gpt-oss-20b,070,Half the features are brilliant and half are half-baked — it's a grab bag.,mixed,mixed,2402.996999999914,202,89,,1
+groq,openai/gpt-oss-20b,071,"It looks and feels great, but it underperforms exactly where I bought it for.",mixed,mixed,2565.752699999848,203,97,,1
+groq,openai/gpt-oss-20b,072,"The media play, while the controls and software lag behind badly.",mixed,mixed,2683.4791000001132,198,131,,1
+groq,openai/gpt-oss-20b,073,"Quality is inconsistent: superb unit, dreadful support, and mediocre accessories.",mixed,mixed,2589.358299999958,199,99,,1
+groq,openai/gpt-oss-20b,074,It nails the basics and fumbles the details.,mixed,mixed,2401.9283000000087,195,44,,1
+groq,openai/gpt-oss-20b,075,"The build is solid, though the included software is bloated and sluggish.",mixed,mixed,2624.3650999999772,200,94,,1

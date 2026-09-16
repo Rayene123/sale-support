@@ -1,5 +1,5 @@
 """
-Fixed benchmark prompt.
+
 
 The exact same prompt is used for every model.
 """

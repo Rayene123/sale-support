@@ -15,9 +15,6 @@ ROOT = Path(__file__).resolve().parents[1]
 
 RESULTS_DIR = ROOT / "results"
 
-GROQ_RESULTS = RESULTS_DIR / "per_item.csv"
-OLLAMA_RESULTS = RESULTS_DIR / "per_item_ollama.csv"
-
 SUMMARY_PATH = RESULTS_DIR / "summary.csv"
 
 VALID_LABELS = {
@@ -26,6 +23,25 @@ VALID_LABELS = {
     "neutral",
     "mixed",
 }
+
+
+def find_result_files() -> list[Path]:
+    """
+    Discover all per-item result files produced by run.py.
+
+    run.py writes one file per provider/model combination, named
+    "per_item_<provider>_<model-slug>.csv". We glob for that pattern
+    instead of hardcoding provider-specific filenames, so scoring
+    automatically picks up any provider/model that was benchmarked.
+    """
+    if not RESULTS_DIR.exists():
+        return []
+
+    return sorted(
+        path
+        for path in RESULTS_DIR.glob("per_item_*.csv")
+        if path.name != SUMMARY_PATH.name
+    )
 
 
 def normalize_answer(value: str) -> str:
@@ -186,10 +202,7 @@ def main():
 
     summaries = []
 
-    for path in [
-        GROQ_RESULTS,
-        OLLAMA_RESULTS,
-    ]:
+    for path in find_result_files():
 
         result = score_file(path)
 
@@ -254,17 +267,18 @@ def main():
             f"({result['accuracy']:.2%})"
         )
 
-    if result["p50_latency_ms"] != "":
-        print(
-        f"P50 latency: "
-        f"{result['p50_latency_ms']:.2f} ms"
-    )
+        if result["p50_latency_ms"] != "":
+            print(
+                f"P50 latency: "
+                f"{result['p50_latency_ms']:.2f} ms"
+            )
 
-    if result["p95_latency_ms"] != "":
-        print(
-        f"P95 latency: "
-        f"{result['p95_latency_ms']:.2f} ms"
-    )
+        if result["p95_latency_ms"] != "":
+            print(
+                f"P95 latency: "
+                f"{result['p95_latency_ms']:.2f} ms"
+            )
+
         print(
             f"Parse errors: "
             f"{result['parse_errors']}"

@@ -7,5 +7,3 @@ __pycache__/
 .tools/
 venv/
 
-# Benchmark generated results
-benchmark/results/*.csv
