@@ -1,0 +1,76 @@
+provider,model,item_id,text,reference_answer,generated_answer,latency_ms,input_tokens,output_tokens,error,correct
+ollama,qwen2.5:14b,001,Not bad at all — honestly better than the one I paid twice as much for.,positive,positive,13711.61630000097,141,2,,1
+ollama,qwen2.5:14b,002,The battery life is the first real claim a brand has ever actually met.,positive,positive,966.917800000374,139,2,,1
+ollama,qwen2.5:14b,003,Hard to find fault anywhere; it's been flawless through a month of heavy use.,positive,positive,869.4016999997984,141,2,,1
+ollama,qwen2.5:14b,004,I can't recall the last time a product just worked this quietly well.,positive,positive,807.4679999990622,139,2,,1
+ollama,qwen2.5:14b,005,"Nothing about it feels cheap, and I have owned far pricier alternatives.",positive,positive,861.9221999997535,140,2,,1
+ollama,qwen2.5:14b,006,Even my pickiest friend admitted it was a genuinely good buy.,positive,positive,793.2952999999543,137,2,,1
+ollama,qwen2.5:14b,007,"The sound is beyond what the price suggests — clear, warm, and never shrill.",positive,positive,923.4046000001399,142,2,,1
+ollama,qwen2.5:14b,008,"Given the price, I expected flimsy; the build is anything but.",positive,positive,876.9264000002295,140,2,,1
+ollama,qwen2.5:14b,009,It repaired my opinion of the whole category in a single afternoon.,positive,positive,757.9640000003565,137,2,,1
+ollama,qwen2.5:14b,010,"This is the rare gadget that does exactly what it says, no asterisks.",positive,positive,1022.7436000004673,140,2,,1
+ollama,qwen2.5:14b,011,"Five years and countless trips later, it still looks and works like the day I bought it.",positive,positive,965.8128999999462,143,2,,1
+ollama,qwen2.5:14b,012,"If this is the 'budget' option, I dread how good the flagship must be.",positive,negative,944.6253000005527,142,2,,0
+ollama,qwen2.5:14b,013,Support resolved my issue so smoothly I forgot I'd had one.,positive,positive,925.3857000003336,137,2,,1
+ollama,qwen2.5:14b,014,It has no business being this good at this price — yet here we are.,positive,positive,968.3875999999145,140,2,,1
+ollama,qwen2.5:14b,015,The coffee stays hot for hours and the carafe never drips; I've stopped using my old machine.,positive,positive,991.1976000003051,146,2,,1
+ollama,qwen2.5:14b,016,"Despite my low expectations, the stitching, zippers, and fabric all hold up beautifully.",positive,positive,1066.2325999983295,142,2,,1
+ollama,qwen2.5:14b,017,The interface is so intuitive that I only opened the manual to confirm it wasn't a fluke.,positive,positive,961.6834000007657,144,2,,1
+ollama,qwen2.5:14b,018,Not a single complaint in three months — and I complain about everything.,positive,positive,938.1764999998268,138,2,,1
+ollama,qwen2.5:14b,019,"Wow, what a 'deal.' It stopped working on the third day.",negative,negative,947.7636999999959,139,2,,1
+ollama,qwen2.5:14b,020,Just what I wanted: a charger that shorts out whenever the price of copper goes up.,negative,negative,932.8158000007534,142,2,,1
+ollama,qwen2.5:14b,021,The 'premium' feel lasts exactly as long as the thirty-day return window.,negative,negative,968.3650999995734,140,2,,1
+ollama,qwen2.5:14b,022,"Great, another firmware update that resets my settings every single time.",negative,negative,930.7336999991094,137,2,,1
+ollama,qwen2.5:14b,023,"As advertised ('unbreakable'), it shattered the first time I dropped it.",negative,negative,898.5324999994191,140,2,,1
+ollama,qwen2.5:14b,024,It works fine — right up until the moment you actually need it.,negative,negative,942.6818000010826,138,2,,1
+ollama,qwen2.5:14b,025,"If you enjoy support queues and automated replies, this is the product for you.",negative,negative,968.128100001195,140,2,,1
+ollama,qwen2.5:14b,026,The sound is 'studio-grade' in the same way a kazoo is a wind instrument.,negative,negative,954.8927999985608,143,2,,1
+ollama,qwen2.5:14b,027,"Battery barely lasted a day, despite the 'two-day battery' plastered on the box.",negative,negative,1067.0859000001656,143,2,,1
+ollama,qwen2.5:14b,028,"The fabric pills, the seams split, and the buttons fall off — in that order, predictably.",negative,negative,1032.1490999995149,145,2,,1
+ollama,qwen2.5:14b,029,I have never been so impressed by how quickly a product can disappoint.,negative,negative,943.778899998506,138,2,,1
+ollama,qwen2.5:14b,030,"It arrived on time, which is the only accurate thing about this listing.",negative,negative,939.1514999988431,139,2,,1
+ollama,qwen2.5:14b,031,Not exactly a machine I can rely on — it freezes mid-task every few hours.,negative,negative,908.5165999986202,141,2,,1
+ollama,qwen2.5:14b,032,The 'about this item' section said quiet; my neighbor now knows every word I type.,negative,negative,1068.749600000956,143,2,,1
+ollama,qwen2.5:14b,033,"Quality you can't argue with, because it dissolves before you can use it.",negative,negative,914.0524000013102,141,2,,1
+ollama,qwen2.5:14b,034,"Customer service thanked me for my patience, then never wrote back.",negative,negative,905.73939999922,137,2,,1
+ollama,qwen2.5:14b,035,"The price was the only good thing, and it's not worth what I paid.",negative,negative,1000.5248999987089,141,2,,1
+ollama,qwen2.5:14b,036,"It's cheap, it's flimsy, it's noisy, and it broke — four out of four.",negative,negative,1013.5458999993716,147,2,,1
+ollama,qwen2.5:14b,037,This product made me appreciate the ones I previously hated.,negative,positive,863.6151999999129,135,2,,0
+ollama,qwen2.5:14b,038,The manufacturer lists the capacity at five thousand mAh and ships a USB-C cable in the box.,neutral,neutral,1052.0135999995546,144,2,,1
+ollama,qwen2.5:14b,039,The warranty covers repair or replacement for the first twelve months.,neutral,neutral,814.6500000002561,136,2,,1
+ollama,qwen2.5:14b,040,"The app updates to version 4.2, which changes how settings are organized.",neutral,neutral,992.2784999998839,141,2,,1
+ollama,qwen2.5:14b,041,"The box reportedly contains a manual, a power adapter, and a quick-start card.",neutral,neutral,953.6477000001469,141,2,,1
+ollama,qwen2.5:14b,042,The vendor states the product ships within one business day.,neutral,neutral,775.041599999895,135,2,,1
+ollama,qwen2.5:14b,043,"Available in black, white, titanium, and a limited green edition.",neutral,neutral,940.1371000003564,138,2,,1
+ollama,qwen2.5:14b,044,"The product was released last quarter, after a year of development.",neutral,neutral,944.4808999996894,137,2,,1
+ollama,qwen2.5:14b,045,The display is rated for five hundred nits of peak brightness and hardened glass.,neutral,neutral,885.2860999995755,140,2,,1
+ollama,qwen2.5:14b,046,Support hours are eight in the morning to six in the evening on weekdays.,neutral,neutral,982.7670000013313,139,2,,1
+ollama,qwen2.5:14b,047,The listing was updated on Tuesday to reflect the new pricing.,neutral,neutral,854.9669000003632,136,2,,1
+ollama,qwen2.5:14b,048,"It comes in a fifty, one hundred, and two hundred millilitre size; refills are sold separately.",neutral,neutral,1017.5118000006478,147,2,,1
+ollama,qwen2.5:14b,049,The software asks for a firmware update on first launch; the prompt can be dismissed.,neutral,neutral,1007.1779999998398,141,2,,1
+ollama,qwen2.5:14b,050,The subscription renews automatically each month unless canceled before the renewal date.,neutral,neutral,925.7347000002483,138,2,,1
+ollama,qwen2.5:14b,051,Weight is listed at three hundred twenty grams including battery and strap.,neutral,neutral,856.6461999998864,137,2,,1
+ollama,qwen2.5:14b,052,The event is scheduled for Thursday; attendees are expected to confirm in advance.,neutral,neutral,891.772700000729,139,2,,1
+ollama,qwen2.5:14b,053,"According to the manual, the device should be charged at least once a month.",neutral,neutral,928.8219000009121,140,2,,1
+ollama,qwen2.5:14b,054,The item references 'environmentally conscious materials' in its online description.,neutral,neutral,870.803200001319,138,2,,1
+ollama,qwen2.5:14b,055,"Returns are accepted within thirty days with a receipt, though shipping is at the customer's cost.",neutral,neutral,1071.876699999848,143,2,,1
+ollama,qwen2.5:14b,056,"Delivery is typically made between nine and five, depending on the local courier.",neutral,neutral,867.7112000004854,139,2,,1
+ollama,qwen2.5:14b,057,"The screen is gorgeous, but the software periodically stutters.",mixed,mixed,907.2020000003249,136,2,,1
+ollama,qwen2.5:14b,058,"It's comfortable and quiet, yet the battery drains twice as fast as promised.",mixed,mixed,982.8006000007008,140,2,,1
+ollama,qwen2.5:14b,059,"The price is great and it looks premium, though the build feels fragile around the ports.",mixed,mixed,933.8767000008374,142,2,,1
+ollama,qwen2.5:14b,060,"Sound quality is superb for music; for calls, everyone says I sound far away.",mixed,mixed,1009.2994000006001,141,2,,1
+ollama,qwen2.5:14b,061,"Fast shipping and a fair price, but the item smelled strongly of solvent out of the box.",mixed,mixed,1045.1912000007724,143,2,,1
+ollama,qwen2.5:14b,062,"It performs brilliantly at home, and disappointingly whenever I travel.",mixed,mixed,837.6785000000382,137,2,,1
+ollama,qwen2.5:14b,063,"The warranty is generous, but parts availability is spotty at best.",mixed,mixed,962.625800000751,138,2,,1
+ollama,qwen2.5:14b,064,"The design is striking and innovative, while the controls are counterintuitive.",mixed,mixed,944.707999999082,139,2,,1
+ollama,qwen2.5:14b,065,"Battery life is excellent, except the wireless charging is finicky and slow.",mixed,mixed,891.3592000008066,139,2,,1
+ollama,qwen2.5:14b,066,"Customer service is friendly yet unhelpful — polite answers, no resolution.",mixed,mixed,984.9991999999475,139,2,,1
+ollama,qwen2.5:14b,067,"The food was delicious, but the service was glacial even when the place was empty.",mixed,mixed,1029.6385000001465,142,2,,1
+ollama,qwen2.5:14b,068,It's great for light work and unlucky for anything demanding — pick your use case.,mixed,mixed,885.796599999594,141,2,,1
+ollama,qwen2.5:14b,069,The finish is beautiful; the durability is anything but.,mixed,mixed,841.0671000001457,135,2,,1
+ollama,qwen2.5:14b,070,Half the features are brilliant and half are half-baked — it's a grab bag.,mixed,mixed,991.4057999994839,142,2,,1
+ollama,qwen2.5:14b,071,"It looks and feels great, but it underperforms exactly where I bought it for.",mixed,mixed,951.684400000886,142,2,,1
+ollama,qwen2.5:14b,072,"The media play, while the controls and software lag behind badly.",mixed,negative,928.0739999994694,137,2,,0
+ollama,qwen2.5:14b,073,"Quality is inconsistent: superb unit, dreadful support, and mediocre accessories.",mixed,mixed,944.6284999994532,138,2,,1
+ollama,qwen2.5:14b,074,It nails the basics and fumbles the details.,mixed,mixed,771.1120999993,134,2,,1
+ollama,qwen2.5:14b,075,"The build is solid, though the included software is bloated and sluggish.",mixed,mixed,965.2136000004248,139,2,,1
