@@ -12,11 +12,9 @@ from reportlab.lib.pagesizes import A4
 
 ROOT = Path(__file__).resolve().parent
 RESULTS = ROOT / 'results'
-source = RESULTS / 'chat_evaluation/per_item_chat_gpt-6-astra.csv'
 target = RESULTS / 'per_item_chat_gpt-6-astra.csv'
-if target.exists() and target.read_bytes() != source.read_bytes():
-    raise RuntimeError('Existing Astra result differs; resolve before rebuilding.')
-target.write_bytes(source.read_bytes())
+if not target.is_file():
+    raise FileNotFoundError('The main Astra per-item result is required to rebuild the report.')
 items = [json.loads(line) for line in (ROOT/'Data/items.jsonl').read_text(encoding='utf-8').splitlines() if line.strip()]
 labels = {'positive','negative','neutral','mixed'}
 def percentile(values, p):
