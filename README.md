@@ -133,9 +133,9 @@ The team must confirm names and individual responsibilities before submission. R
 
 | Contributor | Contribution record |
 | --- | --- |
-| Rayene123 | Team to confirm individual work |
-| notSelimm | Team to confirm individual work |
-| oussama44444 | Team to confirm individual work |
-| OmarAbid1 | Requested the generalized runner/scorer and combined report; confirm final team attribution |
+| Rayene123 | Setup enviroment and tested the tiny llama model assisted in documentation|
+| notSelimm | Tested the qwen 14b model and created the dataset assisted in documentation|
+| oussama44444 | Tested the groq model and assisted in creating the dataset assisted in documentation|
+| OmarAbid1 | Rupdate runner/scorer and assisted in documentation|
 
 AI assistance was used for the runner/scorer adaptation, verification tests, report assembly and supplementary chat answers. Team members remain responsible for reviewing the implementation and explaining their submitted work.
