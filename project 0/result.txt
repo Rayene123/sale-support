@@ -1,0 +1,38 @@
+"request":"show me laptops under 2000 with rating above 4.5",
+"plan":{"name":null,
+    "category":"Laptops",
+    "brand":null,
+    "min_rating":null,
+    "max_rating":4.5,
+    "min_price":2000.0,
+    "max_price":null,
+    "available_only":false,
+    "sort_by":"price",
+    "sort_order":"asc"},
+    "count":0,
+    "results":[]
+
+
+"request":"show me laptops under 2000 with rating above 4.5",
+"plan":{
+    "name":null,
+    "category":"Laptops",
+    "brand":null,
+    "min\_rating":4.5,
+    "max\_rating":null,
+    "min\_price":null,
+    "max\_price":2000.0,
+    "available\_only":true,
+    "sort\_by":"price",
+    "sort\_order":"asc"},
+    "count":9,
+    "results":
+    [{"id":26,"name":"MacBook Air 13","brand":"Apple","sku":"APL-MBA13-256","price":1199.99,"discount":5.0,"rating":4.8,"stock\_quantity":45,"is\_available":true,"description":"Compact lightweight laptop designed for productivity and everyday use.","image\_url":"[https://example.com/images/macbook-air13.jpg","attributes":{"ram":"16GB","storage":"256GB](https://example.com/images/macbook-air13.jpg","attributes":{"ram":"16GB","storage":"256GB) SSD","processor":"Apple M4","screen\_size":"13.6 inch"},"category":"Laptops","category\_code":"LAPTOP"},
+    {"id":28,"name":"ASUS Zenbook 14","brand":"ASUS","sku":"ASUS-ZB14-512","price":1199.99,"discount":10.0,"rating":4.6,"stock\_quantity":37,"is\_available":true,"description":"Thin premium laptop with OLED display and long battery life.","image\_url":"[https://example.com/images/zenbook14.jpg","attributes":{"ram":"16GB","storage":"512GB](https://example.com/images/zenbook14.jpg","attributes":{"ram":"16GB","storage":"512GB) SSD","processor":"Intel Core Ultra 7","screen\_size":"14 inch"},"category":"Laptops","category\_code":"LAPTOP"},
+    {"id":30,"name":"Microsoft Surface Laptop 7","brand":"Microsoft","sku":"MS-SL7-512","price":1299.99,"discount":10.0,"rating":4.5,"stock\_quantity":26,"is\_available":true,"description":"Premium Windows laptop with a slim design and long battery life.","image\_url":"[https://example.com/images/surface-laptop.jpg","attributes":{"ram":"16GB","storage":"512GB](https://example.com/images/surface-laptop.jpg","attributes":{"ram":"16GB","storage":"512GB) SSD","processor":"Snapdragon X Elite","screen\_size":"13.8 inch"},"category":"Laptops","category\_code":"LAPTOP"},
+    {"id":27,"name":"HP Spectre x360 14","brand":"HP","sku":"HP-SPX360-14","price":1399.99,"discount":12.0,"rating":4.6,"stock\_quantity":21,"is\_available":true,"description":"Premium convertible laptop with OLED display and touchscreen.","image\_url":"[https://example.com/images/hp-spectre.jpg","attributes":{"ram":"16GB","storage":"1TB](https://example.com/images/hp-spectre.jpg","attributes":{"ram":"16GB","storage":"1TB) SSD","processor":"Intel Core Ultra 7","screen\_size":"14 inch","touchscreen":true},"category":"Laptops","category\_code":"LAPTOP"},
+    {"id":25,"name":"MacBook Air 15","brand":"Apple","sku":"APL-MBA15-512","price":1499.99,"discount":8.0,"rating":4.8,"stock\_quantity":32,"is\_available":true,"description":"Thin and lightweight laptop with Apple Silicon performance.","image\_url":"[https://example.com/images/macbook-air15.jpg","attributes":{"ram":"16GB","storage":"512GB](https://example.com/images/macbook-air15.jpg","attributes":{"ram":"16GB","storage":"512GB) SSD","processor":"Apple M4","screen\_size":"15.3 inch"},"category":"Laptops","category\_code":"LAPTOP"},
+    {"id":6,"name":"Lenovo ThinkPad X1 Carbon","brand":"Lenovo","sku":"LEN-X1C-512","price":1599.99,"discount":8.0,"rating":4.7,"stock\_quantity":19,"is\_available":true,"description":"Business laptop with lightweight design and excellent keyboard.","image\_url":"[https://example.com/images/thinkpad.jpg","attributes":{"ram":"16GB","storage":"512GB](https://example.com/images/thinkpad.jpg","attributes":{"ram":"16GB","storage":"512GB) SSD","processor":"Intel Core Ultra 7","screen\_size":"14 inch"},"category":"Laptops","category\_code":"LAPTOP"},
+    {"id":5,"name":"Dell XPS 15","brand":"Dell","sku":"DELL-XPS15-512","price":1799.99,"discount":15.0,"rating":4.5,"stock\_quantity":23,"is\_available":true,"description":"Premium Windows laptop for professionals and developers.","image\_url":"[https://example.com/images/dell-xps15.jpg","attributes":{"ram":"32GB","storage":"1TB](https://example.com/images/dell-xps15.jpg","attributes":{"ram":"32GB","storage":"1TB) SSD","processor":"Intel Core Ultra 7","screen\_size":"15.6 inch"},"category":"Laptops","category\_code":"LAPTOP"},
+    {"id":33,"name":"Lenovo Legion 7i","brand":"Lenovo","sku":"LEN-LEG7I-1TB","price":1899.99,"discount":8.0,"rating":4.7,"stock\_quantity":22,"is\_available":true,"description":"Premium gaming laptop with powerful graphics and high-refresh-rate display.","image\_url":"[https://example.com/images/legion7i.jpg","attributes":{"gpu":"RTX](https://example.com/images/legion7i.jpg","attributes":{"gpu":"RTX) 5070","ram":"32GB","storage":"1TB SSD","processor":"Intel Core Ultra 9","screen\_size":"16 inch"},"category":"Laptops","category\_code":"LAPTOP"},{"id":32,"name":"ASUS ROG Zephyrus G16","brand":"ASUS","sku":"ASUS-G16-1TB","price":1999.99,"discount":5.0,"rating":4.8,"stock\_quantity":17,"is\_available":true,"description":"High-performance gaming laptop with powerful graphics and OLED display.","image\_url":"[https://example.com/images/rog-g16.jpg","attributes":{"gpu":"RTX](https://example.com/images/rog-g16.jpg","attributes":{"gpu":"RTX) 5070","ram":"32GB","storage":"1TB SSD","processor":"AMD Ryzen 9","screen\_size":"16 inch"},"category":"Laptops","category\_code":"LAPTOP"}]}
+

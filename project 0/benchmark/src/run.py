@@ -24,7 +24,7 @@ FIELDS = ["provider", "model", "item_id", "text", "reference_answer",
           "generated_answer", "latency_ms", "input_tokens", "output_tokens",
           "error", "error_type", "finish_reason", "response_model", "tokens_per_second"]
 PRESETS = {
-    "ollama": ("http://localhost:11434", "ollama", None, "qwen2.5:14b"),
+    "ollama": ("http://localhost:11434", "ollama", None, "llama3.2:1b"),
     "openai": ("https://api.openai.com/v1", "responses", "OPENAI_API_KEY", None),
     "groq": ("https://api.groq.com/openai/v1", "chat", "GROQ_API_KEY", "openai/gpt-oss-20b"),
     "compatible": ("http://localhost:1234/v1", "chat", None, None),

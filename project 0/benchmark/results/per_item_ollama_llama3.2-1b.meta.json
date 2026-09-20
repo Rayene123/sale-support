@@ -1,0 +1,19 @@
+{
+  "provider": "ollama",
+  "model": "llama3.2:1b",
+  "base_url": "http://localhost:11434",
+  "api_format": "ollama",
+  "api_key_env": null,
+  "temperature": 0.0,
+  "max_tokens": 256,
+  "timeout": 120,
+  "reasoning_effort": null,
+  "token_parameter": "max_tokens",
+  "started_at": "2026-09-16T12:25:36.095555+00:00",
+  "dataset_sha256": "fd172c671257733045b09dc30e86e6214ed9bca7fd1e533f275136885799ae49",
+  "prompt_sha256": "5a3d6ac1ff542be7e8377a9cee3dd215376f69a1bad4f8a463117ff1987f47a0",
+  "expected_items": 75,
+  "completed_items": 75,
+  "status": "complete",
+  "finished_at": "2026-09-16T12:28:41.807259+00:00"
+}
