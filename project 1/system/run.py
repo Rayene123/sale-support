@@ -7,7 +7,7 @@ from pathlib import Path
 from groq import Groq
 
 
-PROMPT_PATH = Path(__file__).resolve().parent.parent / "prompts" / "system_v2.txt"
+PROMPT_PATH = Path(__file__).resolve().parent.parent / "prompts" / "system_v3.txt"
 
 
 def load_system_prompt():
@@ -52,7 +52,7 @@ def generate_response(client, model, system_prompt, item):
         "prompt_tokens": usage.prompt_tokens if usage else None,
         "completion_tokens": usage.completion_tokens if usage else None,
         "total_tokens": usage.total_tokens if usage else None,
-        "prompt_version": "v2",
+        "prompt_version": "v3",
     }
 
 
@@ -113,3 +113,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
