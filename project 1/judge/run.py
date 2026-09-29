@@ -123,10 +123,16 @@ def summarize(records, labels, reviewed=False):
                               "judge_reason": row["result"]["reason"],
                               "human_reason": label.get("explanation", "")})
     successful = sum(r["status"] == "ok" for r in records)
+    scores = [r["result"]["scores"] for r in records if r["status"] == "ok"]
     total_pairs = sum(len(p) for p in judge_pairs.values())
     return {"label_status": "independently_reviewed_user_attestation" if reviewed else "seeded_unverified",
             "attempted_responses": len(records), "successful_responses": successful,
             "failed_responses": len(records) - successful,
+            "quality": {
+                "average_total_out_of_8": sum(s["total"] for s in scores) / len(scores) if scores else None,
+                "score_distribution": {str(n): sum(s["total"] == n for s in scores) for n in range(9)},
+                "average_by_criterion": {k: sum(s[k] for s in scores) / len(scores) if scores else None for k in LIMITS},
+                "note": "Model-assigned scores; judge accuracy requires independent human validation. Failed calls excluded."},
             "unlabeled_responses": sum((r["item_id"], r["response_id"]) not in labels for r in records),
             "human_agreement": agreement(human_pairs),
             "judge_agreement_by_evaluator": {k: agreement(v) for k, v in judge_pairs.items()},
@@ -188,6 +194,7 @@ def main(argv=None):
              "responses": args.responses, "pairs": args.pairs}
     write_json(args.output / "metadata.json", {
         "started_utc": datetime.now(timezone.utc).isoformat(), "model": judge.model,
+        "prompt_version": judge.prompt_version,
         "base_url": judge.base, "temperature": 0, "max_tokens": judge.max_tokens,
         "timeout_seconds": judge.timeout, "prompt_sha256": judge.prompt_hash,
         "pairwise_prompt_suffix": "See client.py prefer() in saved source snapshot",

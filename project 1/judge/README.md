@@ -30,7 +30,7 @@ By default this grades the replies in `human_labels.jsonl` associated with the d
 
 ## Actual replies from Person 4
 
-The judge accepts Person 4's existing `results/baseline_v1.jsonl` or `results/baseline_v2.jsonl` directly. Those files use UTF-16 and fields named `id` and `response`; the judge converts them while reading and uses the filename as the response set ID. It also accepts a UTF-8 JSONL file with one object per line using either schema:
+The judge accepts Person 4's `results/baseline_v1.jsonl`, `results/baseline_v2.jsonl`, and merged `results/baseline_v3.jsonl` directly. UTF-16 and UTF-8 are supported. The files use fields named `id` and `response`; the judge converts them while reading and uses the filename as the response set ID. It also accepts a UTF-8 JSONL file with one object per line using either schema:
 
 ```json
 {"item_id":"P1-001","response_id":"baseline-v1","response_text":"Your order is pending."}
@@ -41,6 +41,26 @@ python -m judge.run --responses results/baseline_v1.jsonl --output results/judge
 ```
 
 Human comparisons require labels with the same item_id, response_id, and exact response_text. Unlabeled replies can be graded but are counted as unlabeled, not matched to reference-answer grades. Pass an updated labels file with `--labels`.
+
+## Compare the merged Person 4 versions
+
+```powershell
+python -m judge.evaluate_versions --output results/judge-comparison-01
+```
+
+This verifies that all three saved versions cover the same 40 development items and that the local model is available. It grades all 120 replies with the same frozen judge prompt. For v3 it also grades ten padded replies and evaluates ten distinct v1/v3 answer pairs in both orders (150 model requests total). Pair selection is deterministic, covering different categories first. These are screening experiments; review the pair texts and padding before interpreting bias. No human winner labels are assumed.
+
+Each version gets per-answer scores and a `reliability.json` with the average `/8`, score distribution, per-criterion averages, and coverage. `comparison.json` collects the three versions. All runs record their source, prompt, input hashes, model, request timing, and raw model responses. Existing output directories are refused. Interrupted runs retain completed rows; there is no automatic resume.
+
+Person 4's `system/metrics.py` measures time and tokens; it does not calculate the quality rubric. These judge outputs supply quality scores for Person 2's harness and Person 4's prompt comparison. Independent human scoring of these exact replies is still needed to complete Persona 3's human agreement and failure analysis. The existing reference-answer labels cannot be substituted.
+
+After two people independently label the actual replies, compare them with the saved scores without another model run:
+
+```powershell
+python -m judge.compare_humans --run results/judge-comparison-01/v3 --labels results/human_labels_v3.jsonl --labels-reviewed --output results/human_comparison_v3.json
+```
+
+Use the existing human-label schema, exact answer text, and `response_id=baseline_v3`. This verifies the dataset hash and label/answer identity, reports coverage, and compares each human separately. Use `--labels-reviewed` only after independent review actually happened.
 
 ## Bias experiments
 
@@ -61,6 +81,8 @@ python -m judge.run --limit 10 --verbosity-limit 10 --pairs pairs.jsonl --output
 Both answer orders are evaluated. Results are mapped back to the original answer identities, with ties allowed. Missing tests are reported as zero attempted with null percentages, never as a passed bias test. Repeated trials are useful for separating ordinary model variation from order effects.
 
 Freeze the prompt before evaluating `--dataset data/test.jsonl`. Use development data for prompt revisions; add each new version and rationale to `prompts/CHANGELOG.md` and update the client's prompt selection/version. Do not tune against the final test scores.
+
+The default is now `judge_v2`, strengthened after a real development failure where v1 missed an invented refund policy. Set `JUDGE_PROMPT_VERSION=judge_v1` to reproduce the earlier judge. Every run records the selected version and exact prompt hash. See `prompts/CHANGELOG.md` for the evidence and rationale.
 
 ## What gets saved
 
@@ -87,6 +109,8 @@ result = judge.grade(customer_message, order_context, response_text)
 
 Catch `JudgeError` and record its `kind` and message. Supported failure kinds include configuration, input, api, model_missing, network, timeout, invalid_output, incomplete and refusal. No API error body is printed, preventing accidental credential leakage. Total and score ranges are validated locally; JSON output does not guarantee grading accuracy.
 
+The total is calculated from the validated criterion scores. `declared_total` preserves the model's proposed total and `total_corrected` flags arithmetic corrections; the original output remains in `raw_response`. Invalid criterion ranges, types, missing fields and explanations are still rejected.
+
 ## Offline verification
 
 ```powershell
@@ -94,6 +118,16 @@ python -m unittest discover -s judge/tests -v
 ```
 
 Tests use mocked HTTP responses and temporary files. They exercise the real request construction, validation, input matching, and comparison calculations. They do not establish provider access or judge reliability.
+
+## Observed development limitations (2026-09-29)
+
+These are engineering reviews against the supplied context/rubric, not independent human labels or an accuracy benchmark:
+
+- P1-007 / baseline_v1: judge_v1 awarded 8/8 to an invented refund policy. The revised judge_v2 recognized the unsupported policy; its criteria sum to 3/8. It proposed 4 as the total, exposing an arithmetic error now corrected and explicitly flagged by the client.
+- P1-004 / baseline_v1: judge_v2 awarded 8/8 despite dollar symbols in the reply and no currency field in the order context. This is a grounding miss. The reference answer also supplies EUR without a currency field, so reference-answer similarity would not resolve the ambiguity; Person 1 should clarify the dataset.
+- P1-009 / baseline_v1: judge_v2 awarded 7/8 to a concise status update, citing missing possible follow-up details even though the customer only asked "Update?". This suggests an overly strict completeness judgment for ambiguous short requests.
+
+Preliminary development outputs are retained locally and excluded from the handoff. All three system versions have now been graded in `results/judge-comparison-v2-20260929`: v1 averages 7.85/8, v2 7.875/8, and v3 7.925/8, each on the same 40 development items with no request failures. V2 was completed in two stages (24 original plus 16 additional scores); the continuation is recorded in `v2/metadata.json`, with the supplementary metadata in `v2_remaining/metadata.json` and input in `v2_remaining_inputs.jsonl`. The full V2 report is `v2/reliability.json`. `comparison.json` collects all three completed versions. Bias tests have not been run. Preserve failures when interpreting high averages: stable JSON and consistent scores do not demonstrate a reliable judge.
 
 ## Final handoff checklist
 

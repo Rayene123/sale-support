@@ -2,6 +2,20 @@
 
 The judge is on branch `persona-3` under `project 1/judge/`. Merge that branch or otherwise bring its `project 1/judge/` folder into your checkout. Nothing in the Person 3 implementation changes Person 4's system code.
 
+## Completed results: no model installation needed to read them
+
+`results/judge-comparison-v2-20260929/comparison.json` contains the completed comparison of the same 40 development cases per version:
+
+| System version | Successful replies | Average quality /8 |
+| --- | ---: | ---: |
+| v1 | 40 | 7.85 |
+| v2 | 40 | 7.875 |
+| v3 | 40 | 7.925 |
+
+Each version directory contains `results.jsonl` (one record per item), `reliability.json` (coverage and score statistics), and `metadata.json` (model, prompt, hashes and settings). Read `result.scores` and `result.reason` from successful result rows. No live model is needed to consume these saved results. Only a new grading run needs Ollama or another configured provider.
+
+All versions were graded by `qwen3:14b` with `judge_v2`. V2's metadata records its continuation from 24 to 40 replies. These are model-assigned scores. Independent human agreement and position/verbosity experiments remain pending; do not report null bias percentages as zero bias. Known judge limitations are documented in the README.
+
 ## Quick start
 
 The default judge runs on local Ollama, with no API key. Install/run Ollama and install the model once if needed:
@@ -47,7 +61,7 @@ except JudgeError as exc:
            "status": "judge_error", "error_type": exc.kind, "error": str(exc)}
 ```
 
-The five criterion names/ranges and total are defined in `judge/client.py` and `judge/prompts/judge_v1.txt`. Retain one result row per attempted item, including failures. Do not include the key or `.env` in results. The existing standalone runner already implements saving, error reporting, latency/usage, metadata, and local-human comparison; use it for an initial run rather than reimplementing those pieces.
+The five criterion names/ranges and total are defined in `judge/client.py` and the default `judge/prompts/judge_v2.txt`. Totals are calculated from criterion scores; `declared_total` and `total_corrected` disclose model arithmetic errors. Retain one result row per attempted item, including failures. Do not include the key or `.env` in results. The existing standalone runner already implements saving, error reporting, latency/usage, metadata, and local-human comparison; use it for an initial run rather than reimplementing those pieces.
 
 The standalone runner accepts:
 
@@ -60,7 +74,16 @@ Existing Person 4 baseline files can be passed directly:
 ```powershell
 python -m judge.run --responses results/baseline_v1.jsonl --output results/judge-baseline-v1
 python -m judge.run --responses results/baseline_v2.jsonl --output results/judge-baseline-v2
+python -m judge.run --responses results/baseline_v3.jsonl --output results/judge-baseline-v3
 ```
+
+After the Person 4 merge, all three versions can also be compared with one local command:
+
+```powershell
+python -m judge.evaluate_versions --output results/judge-comparison-01
+```
+
+This command's final `comparison.json` includes average quality out of 8, score distributions, per-criterion averages and coverage. Each version's `results.jsonl` preserves individual scores and explanations. The command schedules ten verbosity and ten position screening cases for v3; those experiments were not performed in the completed saved handoff. See the judge README for sampling and interpretation limits.
 
 ## What is needed for final reliability results
 

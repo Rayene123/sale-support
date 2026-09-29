@@ -1,0 +1,95 @@
+{
+  "label_status": "seeded_unverified",
+  "attempted_responses": 40,
+  "successful_responses": 40,
+  "failed_responses": 0,
+  "quality": {
+    "average_total_out_of_8": 7.875,
+    "score_distribution": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 1,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 39
+    },
+    "average_by_criterion": {
+      "factual_correctness": 1.95,
+      "completeness": 1.975,
+      "no_hallucination": 1.95,
+      "relevance": 1,
+      "professional_tone": 1
+    },
+    "note": "Model-assigned scores; judge accuracy requires independent human validation. Failed calls excluded."
+  },
+  "unlabeled_responses": 40,
+  "human_agreement": {
+    "factual_correctness": {
+      "comparisons": 0,
+      "agreements": 0,
+      "disagreements": 0,
+      "agreement_percent": null,
+      "mean_absolute_difference": null
+    },
+    "completeness": {
+      "comparisons": 0,
+      "agreements": 0,
+      "disagreements": 0,
+      "agreement_percent": null,
+      "mean_absolute_difference": null
+    },
+    "no_hallucination": {
+      "comparisons": 0,
+      "agreements": 0,
+      "disagreements": 0,
+      "agreement_percent": null,
+      "mean_absolute_difference": null
+    },
+    "relevance": {
+      "comparisons": 0,
+      "agreements": 0,
+      "disagreements": 0,
+      "agreement_percent": null,
+      "mean_absolute_difference": null
+    },
+    "professional_tone": {
+      "comparisons": 0,
+      "agreements": 0,
+      "disagreements": 0,
+      "agreement_percent": null,
+      "mean_absolute_difference": null
+    },
+    "total": {
+      "comparisons": 0,
+      "agreements": 0,
+      "disagreements": 0,
+      "agreement_percent": null,
+      "mean_absolute_difference": null
+    }
+  },
+  "judge_agreement_by_evaluator": {},
+  "major_disagreement_threshold": 2,
+  "major_disagreement_count": 0,
+  "major_disagreement_percent": null,
+  "major_disagreements": [],
+  "per_response_comparisons": [],
+  "note": "Agreement excludes failed API calls; coverage is reported separately. Compare each evaluator separately; no arbitrary consensus is invented. Seeded labels do not establish human reliability.",
+  "completed_utc": "2026-09-29T22:40:59.931357+00:00",
+  "run_status": "complete_with_recorded_continuation",
+  "continuation": {
+    "original_responses": 24,
+    "additional_responses": 16,
+    "directory": "../v2_remaining"
+  },
+  "position_bias": {
+    "attempted": 0,
+    "changed_percent": null
+  },
+  "verbosity_bias": {
+    "attempted": 0,
+    "average_score_change": null
+  }
+}

@@ -68,7 +68,10 @@ class Judge:
         self.max_tokens = int(config.get("JUDGE_MAX_TOKENS", "2048"))
         if self.timeout <= 0 or self.max_tokens < 1 or not self.model.strip():
             raise JudgeError("configuration", "Model, positive timeout and positive token limit are required.")
-        self.prompt = (ROOT / "prompts/judge_v1.txt").read_text(encoding="utf-8")
+        self.prompt_version = config.get("JUDGE_PROMPT_VERSION", "judge_v2")
+        if self.prompt_version not in ("judge_v1", "judge_v2"):
+            raise JudgeError("configuration", "JUDGE_PROMPT_VERSION must be judge_v1 or judge_v2.")
+        self.prompt = (ROOT / "prompts" / f"{self.prompt_version}.txt").read_text(encoding="utf-8")
         self.prompt_hash = hashlib.sha256(self.prompt.encode()).hexdigest()
 
     def _request(self, prompt, data):
@@ -126,12 +129,19 @@ class Judge:
         result, metadata = self._request(self.prompt, {
             "customer_message": customer_message, "order_context": order_context,
             "response_text": response_text})
+        # Criteria are the model's judgments; arithmetic is deterministic.
+        # Preserve the provider's original total in metadata/raw_response.
+        if isinstance(result, dict) and all(type(result.get(k)) is int and 0 <= result[k] <= limit for k, limit in LIMITS.items()) and type(result.get("total")) is int:
+            calculated = sum(result[k] for k in LIMITS)
+            metadata["declared_total"] = result["total"]
+            metadata["total_corrected"] = result["total"] != calculated
+            result = {**result, "total": calculated}
         try:
             validate_scores(result)
         except ValueError as exc:
             raise JudgeError("invalid_output", str(exc), metadata) from None
         return {"scores": {k: result[k] for k in [*LIMITS, "total"]},
-                "reason": result["reason"], "prompt_version": "judge_v1",
+                "reason": result["reason"], "prompt_version": self.prompt_version,
                 "prompt_sha256": self.prompt_hash, **metadata}
 
     def prefer(self, item, answer_a, answer_b):
