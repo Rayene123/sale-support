@@ -1,0 +1,134 @@
+{
+  "versions": {
+    "v1": {
+      "successful_responses": 40,
+      "failed_responses": 0,
+      "unlabeled_responses": 40,
+      "quality": {
+        "average_total_out_of_8": 7.85,
+        "score_distribution": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 1,
+          "4": 0,
+          "5": 0,
+          "6": 0,
+          "7": 1,
+          "8": 38
+        },
+        "average_by_criterion": {
+          "factual_correctness": 1.95,
+          "completeness": 1.95,
+          "no_hallucination": 1.95,
+          "relevance": 1,
+          "professional_tone": 1
+        },
+        "note": "Model-assigned scores; judge accuracy requires independent human validation. Failed calls excluded."
+      },
+      "position_bias": {
+        "attempted": 0,
+        "valid_pairs": 0,
+        "failed_pairs": 0,
+        "changed_verdicts": 0,
+        "changed_percent": null,
+        "note": "Verdicts mapped to original reply identities. One swap measures observed sensitivity; repeated trials are needed to distinguish order effects from random variability."
+      },
+      "verbosity_bias": {
+        "attempted": 0,
+        "valid_pairs": 0,
+        "failed_pairs": 0,
+        "changed_scores": 0,
+        "changed_percent": null,
+        "average_score_change": null,
+        "note": "Screening test: manually check that padding preserves tone and relevance. Changes can reflect tone, relevance, or model variability, not solely length bias."
+      }
+    },
+    "v2": {
+      "successful_responses": 40,
+      "failed_responses": 0,
+      "unlabeled_responses": 40,
+      "quality": {
+        "average_total_out_of_8": 7.875,
+        "score_distribution": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 1,
+          "4": 0,
+          "5": 0,
+          "6": 0,
+          "7": 0,
+          "8": 39
+        },
+        "average_by_criterion": {
+          "factual_correctness": 1.95,
+          "completeness": 1.975,
+          "no_hallucination": 1.95,
+          "relevance": 1,
+          "professional_tone": 1
+        },
+        "note": "Model-assigned scores; judge accuracy requires independent human validation. Failed calls excluded."
+      },
+      "position_bias": {
+        "attempted": 0,
+        "changed_percent": null
+      },
+      "verbosity_bias": {
+        "attempted": 0,
+        "average_score_change": null
+      }
+    },
+    "v3": {
+      "successful_responses": 40,
+      "failed_responses": 0,
+      "unlabeled_responses": 40,
+      "quality": {
+        "average_total_out_of_8": 7.925,
+        "score_distribution": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0,
+          "5": 0,
+          "6": 1,
+          "7": 1,
+          "8": 38
+        },
+        "average_by_criterion": {
+          "factual_correctness": 2,
+          "completeness": 1.925,
+          "no_hallucination": 2,
+          "relevance": 1,
+          "professional_tone": 1
+        },
+        "note": "Model-assigned scores; judge accuracy requires independent human validation. Failed calls excluded."
+      },
+      "position_bias": {
+        "attempted": 0,
+        "valid_pairs": 0,
+        "failed_pairs": 0,
+        "changed_verdicts": 0,
+        "changed_percent": null,
+        "note": "Verdicts mapped to original reply identities. One swap measures observed sensitivity; repeated trials are needed to distinguish order effects from random variability."
+      },
+      "verbosity_bias": {
+        "attempted": 0,
+        "valid_pairs": 0,
+        "failed_pairs": 0,
+        "changed_scores": 0,
+        "changed_percent": null,
+        "average_score_change": null,
+        "note": "Screening test: manually check that padding preserves tone and relevance. Changes can reflect tone, relevance, or model variability, not solely length bias."
+      }
+    }
+  },
+  "model": "qwen3:14b",
+  "judge_prompt_version": "judge_v2",
+  "prompt_sha256": "f1d4b25e4641662eab8eb06838d2ffa6b0d52583c56252afe8f0e8e9eb9e9ec6",
+  "dataset": "Same 40 development cases for each saved system version",
+  "human_validation": "Pending: no independently reviewed human labels matching these replies",
+  "bias_tests": "Not performed; absent percentages remain null",
+  "v2_continuation": "24 original replies plus 16 additional replies, recorded in v2/metadata.json"
+}

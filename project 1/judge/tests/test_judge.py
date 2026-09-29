@@ -22,6 +22,14 @@ def http_response(value=None, finish="stop"):
 
 
 class JudgeTests(unittest.TestCase):
+    def test_prompt_version_is_explicit_and_old_prompt_is_reproducible(self):
+        self.assertEqual(Judge({}).prompt_version, "judge_v2")
+        old = Judge({"JUDGE_PROMPT_VERSION": "judge_v1"})
+        self.assertEqual(old.prompt_version, "judge_v1")
+        self.assertNotEqual(old.prompt_hash, Judge({}).prompt_hash)
+        with self.assertRaises(JudgeError):
+            Judge({"JUDGE_PROMPT_VERSION": "../other"})
+
     def test_empty_key_is_fine_for_local_but_required_for_groq(self):
         with patch("urllib.request.urlopen") as request:
             self.assertEqual(Judge({"JUDGE_PROVIDER": "ollama", "JUDGE_API_KEY": ""}).model, "qwen3:14b")
@@ -61,6 +69,15 @@ class JudgeTests(unittest.TestCase):
         for changed in ({"total": 7}, {"relevance": True}, {"completeness": 3}, {"reason": ""}):
             with self.subTest(changed=changed), self.assertRaises(ValueError):
                 validate_scores({**SCORES, "reason": "Reason", **changed})
+
+    def test_model_arithmetic_is_corrected_and_disclosed(self):
+        value = {**SCORES, "total": 7, "reason": "Correct criteria, wrong sum."}
+        with patch("urllib.request.urlopen", return_value=http_response(value)):
+            result = Judge(CONFIG).grade("Question", {}, "Reply")
+        self.assertEqual(result["scores"]["total"], 8)
+        self.assertEqual(result["declared_total"], 7)
+        self.assertTrue(result["total_corrected"])
+        self.assertEqual(json.loads(result["raw_response"]["choices"][0]["message"]["content"])["total"], 7)
 
     def test_invalid_and_truncated_outputs(self):
         for value, finish, kind in (({"total": 8}, "stop", "invalid_output"),
@@ -102,6 +119,8 @@ class JudgeTests(unittest.TestCase):
                    {"item_id": "y", "response_id": "r", "status": "error"}]
         report = summarize(records, labels)
         self.assertEqual(report["failed_responses"], 1)
+        self.assertEqual(report["quality"]["average_total_out_of_8"], 8)
+        self.assertEqual(report["quality"]["score_distribution"]["8"], 1)
         self.assertEqual(report["judge_agreement_by_evaluator"]["1"]["total"]["agreement_percent"], 0)
         self.assertEqual(report["major_disagreement_percent"], 50)
         self.assertEqual(report["label_status"], "seeded_unverified")
@@ -114,14 +133,15 @@ class JudgeTests(unittest.TestCase):
         self.assertEqual(len(labels), 160)
 
     def test_person4_utf16_runs_load_directly(self):
-        items, labels, responses = load_inputs(PROJECT / "data/dev.jsonl", PROJECT / "data/human_labels.jsonl",
-                                                PROJECT / "results/baseline_v1.jsonl")
-        self.assertEqual(len(responses), 40)
-        self.assertEqual(responses[0]["item_id"], "P1-001")
-        self.assertEqual(responses[0]["response_id"], "baseline_v1")
-        self.assertTrue(responses[0]["response_text"])
-        self.assertIn(responses[0]["item_id"], items)
-        self.assertEqual(labels.get(("P1-001", "baseline_v1")), None)
+        for version in ("v1", "v2", "v3"):
+            with self.subTest(version=version):
+                items, labels, responses = load_inputs(PROJECT / "data/dev.jsonl", PROJECT / "data/human_labels.jsonl",
+                                                        PROJECT / f"results/baseline_{version}.jsonl")
+                self.assertEqual(len(responses), 40)
+                self.assertEqual({r["item_id"] for r in responses}, set(items))
+                self.assertEqual(responses[0]["response_id"], f"baseline_{version}")
+                self.assertTrue(all(r["response_text"].strip() for r in responses))
+                self.assertTrue(all((r["item_id"], r["response_id"]) not in labels for r in responses))
 
     def test_mismatched_response_is_rejected(self):
         with tempfile.TemporaryDirectory() as temp:

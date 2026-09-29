@@ -1,0 +1,19 @@
+{
+  "started_utc": "2026-09-29T21:42:46.640444+00:00",
+  "model": "qwen3:14b",
+  "prompt_version": "judge_v2",
+  "base_url": "http://localhost:11434",
+  "temperature": 0,
+  "max_tokens": 2048,
+  "timeout_seconds": 240.0,
+  "prompt_sha256": "f1d4b25e4641662eab8eb06838d2ffa6b0d52583c56252afe8f0e8e9eb9e9ec6",
+  "pairwise_prompt_suffix": "See client.py prefer() in saved source snapshot",
+  "input_hashes": {
+    "dataset": "9ef445a37f03681fa84200d02ec55441ea3b9a4d57f19f074218049fb446775b",
+    "labels": "eeae00ac30f397015e61dca7ca807792183ba6864d5d6d86d9227afa478f4489",
+    "responses": "534a1c6a71621e1060083168691a88924244b0013de1b25ce425905c28041695"
+  },
+  "limit": null,
+  "verbosity_limit": 0,
+  "labels_reviewed": false
+}
