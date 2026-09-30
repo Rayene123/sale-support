@@ -1,7 +1,7 @@
 # Evaluation run `dev-v2-replay`
 
 - mode: `replay`
-- created: 2026-09-30T00:30:57.927446+00:00
+- created: 2026-09-30T10:02:40.405394+00:00
 - dataset: `data\dev.jsonl` (sha256 `9ef445a37f03`)
 - items: 40 | system ok: 40 | failed: 0 | judged ok: 40
 - system prompt: `v2` (sha256 `a07034fef7fc`) | model: `qwen2.5:14b`
@@ -10,12 +10,14 @@
 
 ## What this run does and does not prove
 
-- Metrics rebuilt from the saved rows of this run; no model was called.
+- System replies were replayed from a saved run: no system model was called, and latency/usage are the original run's measurements.
+- Judge grades were replayed from a saved judge run: no judge model was called.
+- The loaded labels do not cover reply set 'baseline_v2': they label reference answers, so judge-human agreement is not reported. Human labels for these exact replies are still required.
 
 ## Reproduce
 
 ```powershell
-python -m harness run --run-id dev-v2-replay --output 'results\harness\dev-v2-replay' --dataset 'data\dev.jsonl' --system-source 'results\baseline_v2.jsonl' --judge-source 'results\judge-comparison-v2-20260929\v2\results.jsonl' --labels 'C:\Users\flash\sale-support\project 1\data\human_labels.jsonl' --system-prompt v2
+python -m harness run --run-id dev-v2-replay --output 'results\harness\dev-v2-replay' --dataset 'data\dev.jsonl' --system-source 'results\baseline_v2.jsonl' --judge-source 'results\judge-comparison-v2-20260929\v2\results.jsonl' --labels 'data\human_labels.jsonl' --system-prompt v2
 ```
 
 ```text
@@ -88,8 +90,6 @@ _Only items below full marks are listed._
 ## Failures
 
 _no data_
-
-Response text warnings: {'prompt_version_mismatch': 40}
 
 ## Judge reliability
 

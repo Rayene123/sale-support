@@ -145,9 +145,7 @@
     ],
     "failed_items": [],
     "failures_by_category": {},
-    "response_warnings": {
-      "prompt_version_mismatch": 40
-    },
+    "response_warnings": {},
     "judge_total_corrections": 1
   },
   "reliability": {
@@ -235,7 +233,7 @@
       "valid_comparisons": 0,
       "changed": null,
       "changed_percent": null,
-      "note": "position experiment not run in this run"
+      "note": "not run by this harness run"
     },
     "verbosity_bias": {
       "state": "not_run",
@@ -243,7 +241,7 @@
       "valid_comparisons": 0,
       "changed": null,
       "changed_percent": null,
-      "note": "verbosity experiment not run in this run"
+      "note": "not run by this harness run"
     },
     "note": "Scores are model-assigned unless independent human review is attested; they are not a substitute for it."
   },
@@ -344,13 +342,19 @@
   },
   "run": {
     "run_id": "dev-v2-replay",
+    "mode": "replay",
     "response_id": "baseline_v2",
     "prompt_version": "v2",
     "items_without_result": [],
-    "mode": "replay",
+    "items_per_split": {
+      "dev": 40
+    },
+    "invocation_seconds": 0.2,
     "replayed_judge_wall_clock_seconds": 4206.55,
     "notes": [
-      "Metrics rebuilt from the saved rows of this run; no model was called."
+      "System replies were replayed from a saved run: no system model was called, and latency/usage are the original run's measurements.",
+      "Judge grades were replayed from a saved judge run: no judge model was called.",
+      "The loaded labels do not cover reply set 'baseline_v2': they label reference answers, so judge-human agreement is not reported. Human labels for these exact replies are still required."
     ]
   }
 }

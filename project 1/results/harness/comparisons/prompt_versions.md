@@ -1,7 +1,7 @@
 # Prompt version comparison
 
 - runs: results\harness\dev-v1-replay, results\harness\dev-v2-replay, results\harness\dev-v3-replay
-- legacy: C:\Users\flash\sale-support\project 1\results\judge-comparison-v2-20260929\comparison.json
+- legacy: D:\sale&support\project 1\results\judge-comparison-v2-20260929\comparison.json
 
 | prompt | run           | items | judged | avg /8 | delta | avg system ms | p95 system ms | system tokens | judge tokens | cost USD |
 |--------|---------------|-------|--------|--------|-------|---------------|---------------|---------------|--------------|----------|

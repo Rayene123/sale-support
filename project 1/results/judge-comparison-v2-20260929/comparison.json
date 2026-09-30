@@ -130,5 +130,5 @@
   "dataset": "Same 40 development cases for each saved system version",
   "human_validation": "Pending: no independently reviewed human labels matching these replies",
   "bias_tests": "Not performed; absent percentages remain null",
-  "v2_continuation": "24 original replies plus 16 additional replies, recorded in v2/metadata.json"
+  "v2_continuation": "24 original replies plus 16 additional replies"
 }

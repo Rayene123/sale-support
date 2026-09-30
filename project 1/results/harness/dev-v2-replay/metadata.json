@@ -1,7 +1,7 @@
 {
   "run_id": "dev-v2-replay",
   "harness_version": "1.0.0",
-  "created_utc": "2026-09-30T00:30:57.927446+00:00",
+  "created_utc": "2026-09-30T10:02:40.405394+00:00",
   "mode": "replay",
   "resumed": false,
   "configuration": {
@@ -33,7 +33,7 @@
       "local_compute_cost_per_hour": null,
       "note": "Prices are operator-supplied estimates in USD per million tokens; verify against the provider's current price list. local_compute_cost_per_hour is an assumption, not a tariff."
     },
-    "results_root": "C:\\Users\\flash\\sale-support\\project 1\\results\\harness",
+    "results_root": "D:\\sale&support\\project 1\\results\\harness",
     "env_file": null,
     "note": "API-key values are never written to results; only the variable name (system.api_key_env) is recorded."
   },
@@ -109,7 +109,7 @@
     "original_run_wall_clock_seconds": 4206.55
   },
   "labels": {
-    "file": "C:\\Users\\flash\\sale-support\\project 1\\data\\human_labels.jsonl",
+    "file": "data\\human_labels.jsonl",
     "labelled_replies": 160,
     "independently_reviewed": false
   },
@@ -120,28 +120,28 @@
     "auto_pairs_from": null
   },
   "reproduction": {
-    "command": "python -m harness run --run-id dev-v2-replay --output 'results\\harness\\dev-v2-replay' --dataset 'data\\dev.jsonl' --system-source 'results\\baseline_v2.jsonl' --judge-source 'results\\judge-comparison-v2-20260929\\v2\\results.jsonl' --labels 'C:\\Users\\flash\\sale-support\\project 1\\data\\human_labels.jsonl' --system-prompt v2"
+    "command": "python -m harness run --run-id dev-v2-replay --output 'results\\harness\\dev-v2-replay' --dataset 'data\\dev.jsonl' --system-source 'results\\baseline_v2.jsonl' --judge-source 'results\\judge-comparison-v2-20260929\\v2\\results.jsonl' --labels 'data\\human_labels.jsonl' --system-prompt v2"
   },
   "environment": {
-    "python": "3.14.3",
-    "platform": "Windows-11-10.0.26200-SP0",
-    "git_commit": "943f8de80d825ebbda10dd7a6ce7cfeeb9de17bb"
+    "python": "3.11.0",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "git_commit": "21112870cef4e7b4a6830ecea3a9fef8905d6f3a"
   },
   "code_sha256": {
-    "harness/dataset.py": "928533c8e14524181ab842199aa1e2d35595f14180a52188cffce10ddf2eae7e",
-    "harness/providers.py": "9e9bafc29358460d6be19127451180e686c5ca7123454b3a1fa708fd3e9a9dff",
-    "harness/system_runner.py": "881d8cda5bad25797c3f56b46bca8bc3df6a3144c94216ee353366b5fce50cfb",
-    "harness/judge_runner.py": "1fe2ed63d3943afd7ab04fa93d06d227c2c78444cd5d658f592496281d3809dc",
-    "harness/metrics.py": "63b6bc2d0e269acfc8a598020374a6c8abc4bf2bc5aaef1bf4ac6fe668e8faf1",
-    "harness/cost.py": "6298727a021a91ee84590fedf68721a19f93c130309533402d437376ada9b475",
-    "harness/cli.py": "a18a91e24bfc31ad17e415cb9a8330e6d1514fd7ead07cf2ba404035aabbd37e",
-    "harness/results.py": "aade946530dd0e1b9a0fd8e972d0699b2f814b98bc92a7794ff6c25902d4731d",
+    "harness/dataset.py": "896e53819a5bd2356dc7c45ed9e3a876e05cef2f97c3ad8ef745fff4c70f1ae4",
+    "harness/providers.py": "db290bd786d6d0593b38509973c13ab9c7a51a03a8cdf1bc2acbf2d9bf7a37a5",
+    "harness/system_runner.py": "e21e7fbfc31618da05976478b43c9e7e6fa6981471b2f24faba597fd5a2bc0f4",
+    "harness/judge_runner.py": "3c314835d49990c1108d600873d7aabf45930ee28cd8bd9da105e3012171350b",
+    "harness/metrics.py": "84fe4f5b639790b9856cd26f4f2f8d3017585e3fb56f0590661ad36d8df8931a",
+    "harness/cost.py": "5f4905b6ce3472436ec5d8a99af0d714c5abbc6ff1b238fb61ddfb0918b2799d",
+    "harness/cli.py": "b8c5e1d4433e81e9c2ba25b71300cf191ff683a6b4e6873678718747cc77e5e0",
+    "harness/results.py": "c84a8e35d5404ca72b2274d8bd410216adc055ba6ad0cc27fd1798b681098efc",
     "judge/client.py": "40b0a4ad2baeae6ccbc6b3a93cf7f51283b1477a90e6fd3f7d6c1cd282f955ca"
   },
-  "completed_utc": "2026-09-30T00:30:58.022705+00:00",
+  "completed_utc": "2026-09-30T10:02:40.930265+00:00",
   "status": "complete",
   "wall_clock_seconds_total": null,
-  "invocation_seconds": 0.08,
+  "invocation_seconds": 0.2,
   "item_rows": 40,
   "error_rows": 0,
   "missing_items": []

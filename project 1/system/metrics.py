@@ -44,30 +44,6 @@ def load_results(path):
             )
 
     return results
-    results = []
-
-    if not path.exists():
-        print(f"WARNING: {path} not found", file=sys.stderr)
-        return results
-
-    with path.open("r", encoding="utf-8") as f:
-        for line_number, line in enumerate(f, 1):
-            line = line.strip()
-
-            if not line:
-                continue
-
-            try:
-                results.append(json.loads(line))
-            except json.JSONDecodeError as e:
-                print(
-                    f"WARNING: invalid JSON in {path.name}, "
-                    f"line {line_number}: {e}",
-                    file=sys.stderr,
-                )
-
-    return results
-
 
 def calculate_metrics(results):
     total_cases = len(results)

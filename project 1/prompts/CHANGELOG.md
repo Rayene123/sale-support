@@ -11,6 +11,7 @@ Created the initial baseline customer-support prompt.
 Establish an intentionally simple baseline before prompt optimization.
 
 **Observed failure patterns:**
+
 - Unsupported refund policies and outcomes
 - Unsupported assumptions about order actions
 - Claims involving external systems
@@ -29,6 +30,7 @@ Baseline used for comparison with subsequent prompt versions.
 
 **Change:**
 Added explicit grounding and anti-hallucination instructions:
+
 - Use only information explicitly provided in the order context.
 - Do not infer policies, refunds, delivery dates, tracking information,
   permissions, or actions.
@@ -55,6 +57,7 @@ Strengthened the distinction between explicitly supported facts and
 inferred consequences.
 
 Added explicit rules requiring the assistant to:
+
 - answer every part of multi-part questions;
 - state information as unavailable when it cannot be determined;
 - avoid replacing unavailable requested information with related facts;
@@ -78,8 +81,9 @@ inferences and occasional incomplete answers.
 ## Experiment Notes
 
 The three versions were evaluated on the same 40 development cases, with the
-evaluation harness (`harness/`) replaying the saved replies and the saved judge
-grades. Reproduce with:
+evaluation harness (`harness/`) replaying saved replies and saved judge grades.
+These are development results, not the final held-out test evaluation.
+Reproduce with:
 
 ```powershell
 python -m harness run --system-source results/baseline_v1.jsonl --system-prompt v1 `
@@ -92,21 +96,21 @@ python -m harness compare --legacy --run results/harness/dev-v1-replay `
 
 Objective runtime/token measurements (one laptop, local Ollama):
 
-| Metric | v1 | v2 | v3 |
-|---|---:|---:|---:|
-| Cases | 40 | 40 | 40 |
-| Average latency | 3908 ms | 4570 ms | 5757 ms |
-| Average prompt tokens | 562.65 | 717.65 | 860.65 |
-| Average completion tokens | 149.00 | 165.30 | 134.93 |
-| Average total tokens | 711.65 | 882.95 | 995.58 |
-| Total tokens | 28,466 | 35,318 | 39,823 |
-| Average quality (/8) — model-assigned | 7.850 | 7.875 | 7.925 |
-| Δ vs v1 | — | +0.025 | +0.075 |
-| Factual correctness (of 2) | 1.950 | 1.950 | 2.000 |
-| Completeness (of 2) | 1.950 | 1.975 | 1.925 |
-| No hallucination (of 2) | 1.950 | 1.950 | 2.000 |
-| Relevance (of 1) | 1.000 | 1.000 | 1.000 |
-| Professional tone (of 1) | 1.000 | 1.000 | 1.000 |
+| Metric                                |      v1 |      v2 |      v3 |
+| ------------------------------------- | ------: | ------: | ------: |
+| Cases                                 |      40 |      40 |      40 |
+| Average latency                       | 3908 ms | 4570 ms | 5757 ms |
+| Average prompt tokens                 |  562.65 |  717.65 |  860.65 |
+| Average completion tokens             |  149.00 |  165.30 |  134.93 |
+| Average total tokens                  |  711.65 |  882.95 |  995.58 |
+| Total tokens                          |  28,466 |  35,318 |  39,823 |
+| Average quality (/8) — model-assigned |   7.850 |   7.875 |   7.925 |
+| Δ vs v1                               |       — |  +0.025 |  +0.075 |
+| Factual correctness (of 2)            |   1.950 |   1.950 |   2.000 |
+| Completeness (of 2)                   |   1.950 |   1.975 |   1.925 |
+| No hallucination (of 2)               |   1.950 |   1.950 |   2.000 |
+| Relevance (of 1)                      |   1.000 |   1.000 |   1.000 |
+| Professional tone (of 1)              |   1.000 |   1.000 |   1.000 |
 
 Cost per version: `null` / not configured. These runs used a local Ollama model,
 which has no API price; the harness reports `local_provider` and `null` rather
@@ -120,8 +124,6 @@ prompts were developed against. Treat the ordering as a direction, not a
 measurement, and confirm it on the untouched 120-item test split before
 publishing a claim.
 
-**Prompt version label bug.** `results/baseline_v2.jsonl` records
-`prompt_version: v1` on all 40 rows although those rows are v2 replies. The
-harness flags this as `prompt_version_mismatch` on every row of
-`results/harness/dev-v2-replay/system.jsonl` instead of silently relabelling
-them; the source file should still be corrected to `v2`.
+**Metadata correction.** The original v2 source rows were initially labelled
+`prompt_version: v1`. They were corrected to `v2` before cleanup; replay runs
+must be regenerated if a clean v2 comparison is required.

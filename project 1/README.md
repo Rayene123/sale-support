@@ -7,6 +7,18 @@
 **Team Size:** 4
 **Task:** Customer-support reply evaluation
 
+**Instructor:** Dr Abdeldjalil Labed<br>
+**Institution:** Mediterranean Institute of Technology<br>
+**Term:** Fall 2026
+
+## Submission Status
+
+The harness is the primary deliverable; the prompted support system exists only
+to be measured. The committed evidence covers development-set prompt comparison
+and judge-bias screening. A final run on the held-out test split and independent
+human labels for generated replies are still required before claiming final
+system quality or judge-human reliability.
+
 ---
 
 # 1. Project Overview
@@ -405,7 +417,6 @@ project 1/
 │
 └── results/
     ├── baseline_v1.jsonl  baseline_v2.jsonl  baseline_v3.jsonl   (Person 4)
-    ├── baseline_v1_review.jsonl                                     (Person 4)
     ├── judge-comparison-v2-20260929/       saved judge grades      (Person 3)
     └── harness/                             evaluation runs        (Person 2)
         ├── dev-v1-replay/  dev-v2-replay/  dev-v3-replay/
@@ -516,7 +527,7 @@ The final repository must work from a clean clone.
 
 Python 3.10 or newer. The evaluation harness, the judge, and the system all use
 the **standard library only** — there is nothing to `pip install`. A model
-provider is needed only to run a *live* evaluation.
+provider is needed only to run a _live_ evaluation.
 
 ```powershell
 python --version
@@ -537,12 +548,12 @@ $env:GROQ_API_KEY = "..."      # only if a hosted provider is configured
 
 ## Configuration
 
-| What | Where | Default |
-| --- | --- | --- |
-| Evaluated system provider / model / prompt | `SYSTEM_*` or `--system-*` | `ollama` / `qwen2.5:14b` / prompt `v1` |
-| Judge provider / model / prompt | `JUDGE_*` or `--judge-*` | `ollama` / `qwen3:14b` / `judge_v2` |
-| Token prices (USD per million) | `SYSTEM_*_PRICE_PER_M`, `JUDGE_*_PRICE_PER_M` | unset → cost reported as `null` |
-| Dataset | `--dataset` | `data/dev.jsonl` |
+| What                                       | Where                                         | Default                                |
+| ------------------------------------------ | --------------------------------------------- | -------------------------------------- |
+| Evaluated system provider / model / prompt | `SYSTEM_*` or `--system-*`                    | `ollama` / `qwen2.5:14b` / prompt `v1` |
+| Judge provider / model / prompt            | `JUDGE_*` or `--judge-*`                      | `ollama` / `qwen3:14b` / `judge_v2`    |
+| Token prices (USD per million)             | `SYSTEM_*_PRICE_PER_M`, `JUDGE_*_PRICE_PER_M` | unset → cost reported as `null`        |
+| Dataset                                    | `--dataset`                                   | `data/dev.jsonl`                       |
 
 Precedence: command-line option → environment variable → `harness/.env`.
 
@@ -612,11 +623,11 @@ results/harness/comparisons/prompt_versions.{json,md}
 
 Committed results:
 
-| Run | What it shows |
-| --- | --- |
+| Run                                               | What it shows                                                                                                                                                                 |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `dev-v1-replay`, `dev-v2-replay`, `dev-v3-replay` | the 40 development cases per prompt version, replayed from the saved replies and saved grades; average quality 7.850 / 7.875 / 7.925, identical to the saved judge comparison |
-| `dev-v3-live-qwen25` | one full live run: 40 items with measured latency and token counts, plus position and verbosity experiments |
-| `comparisons/prompt_versions` | prompt version, average /8, delta, latency, tokens, cost in one table |
+| `dev-v3-live-qwen25`                              | one full live run: 40 items with measured latency and token counts, plus position and verbosity experiments                                                                   |
+| `comparisons/prompt_versions`                     | prompt version, average /8, delta, latency, tokens, cost in one table                                                                                                         |
 
 Current findings, and their limits, are written up in
 `docs/PERSON_2_HARNESS_IMPLEMENTATION.md`; the open gaps for each teammate are
@@ -645,28 +656,28 @@ The final project must contain:
 - [x] Prompt changelog — `prompts/CHANGELOG.md` with the measured effect of each change
 - [x] Cost analysis — `cost.json` per run; USD figures are `null` while the local provider has no price
 - [x] Latency measurements — per-phase mean/median/p95 in every `metrics.json`
-- [ ] Final report — inputs are in `results/harness/` and `docs/PERSON_2_*`
-- [ ] Postmortem
+- [x] Final report — `report.md`
+- [x] Postmortem — `postmortem.md`
 
 ---
 
 # 18. Current Status
 
-| Component               | Status  | Notes |
-| ----------------------- | ------- | ----- |
-| Project structure       | Done    | |
-| Task definition         | Defined | |
-| Evaluation rubric       | Defined | `data/labeling_guide.md` |
-| Person 1 dataset        | Done    | 160 items, 0 invalid; dev/test split; seeded reference labels |
-| Person 2 harness        | Done    | `harness/`, 5 commands, 84 tests, results in `results/harness/` |
-| Person 3 judge          | Done    | `judge/`, rubric prompts v1/v2, saved comparison for all three versions |
-| Person 4 system         | Done    | `system/`, prompts v1–v3, baselines, failure review |
-| Human labeling          | Partial | seeded reference labels only; the evaluated replies are **not** independently labeled |
+| Component               | Status  | Notes                                                                                      |
+| ----------------------- | ------- | ------------------------------------------------------------------------------------------ |
+| Project structure       | Done    |                                                                                            |
+| Task definition         | Defined |                                                                                            |
+| Evaluation rubric       | Defined | `data/labeling_guide.md`                                                                   |
+| Person 1 dataset        | Done    | 160 items, 0 invalid; dev/test split; seeded reference labels                              |
+| Person 2 harness        | Done    | `harness/`, 5 commands, 84 tests, results in `results/harness/`                            |
+| Person 3 judge          | Done    | `judge/`, rubric prompts v1/v2, saved comparison for all three versions                    |
+| Person 4 system         | Done    | `system/`, prompts v1–v3, baselines, failure review                                        |
+| Human labeling          | Partial | seeded reference labels only; the evaluated replies are **not** independently labeled      |
 | Reliability experiments | Partial | position/verbosity screening runs exist; judge-human agreement blocked on the labels above |
-| Prompt experiments      | Done    | v1/v2/v3 compared; 7.850 / 7.875 / 7.925 (model-assigned, dev split) |
-| Cost and latency        | Done    | measured per run; USD figures `null` while the local provider has no price |
-| Final report            | To do   | the inputs are in `results/harness/` and `docs/PERSON_2_*` |
-| Postmortem              | To do   | |
+| Prompt experiments      | Done    | v1/v2/v3 compared; 7.850 / 7.875 / 7.925 (model-assigned, dev split)                       |
+| Cost and latency        | Done    | measured per run; USD figures `null` while the local provider has no price                 |
+| Final report            | Done    | `report.md`; explicitly separates development evidence from final-test gaps                |
+| Postmortem              | Done    | `postmortem.md`                                                                            |
 
 ---
 
@@ -701,6 +712,20 @@ The project is complete when:
 7. Position bias has been tested.
 8. Verbosity bias has been tested.
 9. Prompt versions have been compared.
+10. The final report and postmortem are complete; remaining evidence gaps are
+    stated explicitly rather than hidden.
+
+---
+
+# 21. Contributions
+
+| Member            | Contribution                                                                      |
+| ----------------- | --------------------------------------------------------------------------------- |
+| Rayen Zegden      | Person 1: golden dataset, split design, and labeling guide                        |
+| Selim Garrach     | Person 2: evaluation harness, result schema, metrics, and tests                   |
+| Mohamed Omar Abid | Person 3: LLM judge, structured grading, and reliability experiments              |
+| Oussama Medimagh  | Person 4: prompted customer-support system, prompt versions, and failure analysis |
+
 10. Cost and latency have been measured.
 11. Results are reproducible from a clean repository.
 12. The final report and postmortem are complete.

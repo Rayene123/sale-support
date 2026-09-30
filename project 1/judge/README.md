@@ -1,6 +1,6 @@
 # Start here
 
-Read the [saved comparison](../results/judge-comparison-v2-20260929/README.md) for readable results. The `v1/v2/v3` result folders are **system prompt versions**, all graded with the same `judge_v2`. Active Python code is in this folder; historical code is stored once under the comparison's `snapshot/`. Supplementary AI reviews are under `reviews/ai/`, and intermediate artifacts under `archive/`.
+Read the [saved comparison](../results/judge-comparison-v2-20260929/README.md) for readable results. The `v1/v2/v3` result folders are **system prompt versions**, all graded with the same `judge_v2`. Active Python code is in this folder; the comparison directory keeps only canonical outputs.
 
 Regenerate Markdown without model calls:
 
@@ -99,9 +99,8 @@ The default is now `judge_v2`, strengthened after a real development failure whe
 - `results.jsonl`: candidate replies, validated grades, explanations, raw successful responses, usage, latency, or categorized errors. Each row is flushed immediately.
 - `verbosity.jsonl` and `position.jsonl`: bias experiment details, created only when those experiments produce records.
 - `reliability.json`: per-criterion and total agreement counts/percentages, per-evaluator comparisons, coverage, mean absolute differences, disagreements of at least 2 total points, and bias summaries.
-- `metadata.json`: settings (never the key), UTC time, input hashes and snapshot references.
+- `metadata.json`: settings (never the key), UTC time, and input hashes.
 - `report.md`: readable questions, exact answers, scores, explanations and order context.
-- `snapshot/`: historical code and prompt; comparisons share one snapshot at their root.
 
 Existing run directories are refused. No silent retries or automatic resume. An interrupted run retains flushed rows but may not have a final reliability report. A run with API errors returns exit code 1. Failed requests are excluded from agreement denominators and reported separately, so check coverage before interpreting agreement. The client timeout is a socket timeout, not a strict whole-run deadline.
 
@@ -139,7 +138,13 @@ These are engineering reviews against the supplied context/rubric, not independe
 - P1-004 / baseline_v1: judge_v2 awarded 8/8 despite dollar symbols in the reply and no currency field in the order context. This is a grounding miss. The reference answer also supplies EUR without a currency field, so reference-answer similarity would not resolve the ambiguity; Person 1 should clarify the dataset.
 - P1-009 / baseline_v1: judge_v2 awarded 7/8 to a concise status update, citing missing possible follow-up details even though the customer only asked "Update?". This suggests an overly strict completeness judgment for ambiguous short requests.
 
-Preliminary development outputs are retained locally and excluded from the handoff. All three system versions have now been graded in `results/judge-comparison-v2-20260929`: v1 averages 7.85/8, v2 7.875/8, and v3 7.925/8, each on the same 40 development items with no request failures. V2 was completed in two stages (24 original plus 16 additional scores); the continuation is recorded in `v2/metadata.json`, with the supplementary metadata in `archive/v2_remaining/metadata.json` and input in `inputs/v2_remaining_inputs.jsonl`. The full V2 report is `v2/reliability.json`. `comparison.json` collects all three completed versions. Bias tests did not run in these saved comparisons; the harness has separate screening results. Preserve failures when interpreting high averages: stable JSON and consistent scores do not demonstrate a reliable judge.
+Preliminary development outputs are not part of the handoff. All three system
+versions have been graded in `results/judge-comparison-v2-20260929`: v1 averages
+7.85/8, v2 7.875/8, and v3 7.925/8, each on the same 40 development items with
+no request failures. Bias tests did not run in these saved comparisons; the
+harness has separate screening results. Preserve failures when interpreting
+high averages: stable JSON and consistent scores do not demonstrate a reliable
+judge.
 
 ## Final handoff checklist
 

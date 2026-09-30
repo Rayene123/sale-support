@@ -108,8 +108,8 @@ def replay_system(responses, items, prompt_version, prompt_sha256, sink=None, re
         })
         recorded = response.get("system_prompt_version")
         if recorded and recorded != prompt_version:
-            # Person 4's baseline_v2.jsonl is recorded as prompt_version v1; a
-            # mismatch must be visible instead of silently relabelling the run.
+            # A source mismatch must be visible instead of silently relabelling
+            # the run.
             row["warnings"] = row["warnings"] + ["prompt_version_mismatch"]
         rows.append(row)
         if sink:

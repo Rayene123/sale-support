@@ -1,6 +1,6 @@
 # Person 2 handoff: use the Person 3 judge
 
-Start with the [readable comparison](../results/judge-comparison-v2-20260929/README.md). Each system version now has `report.md` alongside the unchanged `results.jsonl`. Historical code/prompt copies are consolidated under `snapshot/`; partial runs are under `archive/`. The harness input paths are unchanged.
+Start with the [readable comparison](../results/judge-comparison-v2-20260929/README.md). Each system version has `report.md` alongside the unchanged `results.jsonl`. The comparison directory contains only canonical outputs; active judge code and prompts are in `judge/`.
 
 The judge is on branch `persona-3` under `project 1/judge/`. Merge that branch or otherwise bring its `project 1/judge/` folder into your checkout. Nothing in the Person 3 implementation changes Person 4's system code.
 

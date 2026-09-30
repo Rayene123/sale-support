@@ -1,5 +1,11 @@
 # Sale Support
 
+This repository contains several course projects. The CS496 Project 1 grader is
+in [project 1](project%201/), with its dataset, harness, judge, prompts, saved
+results, [report](project%201/report.md), and [postmortem](project%201/postmortem.md).
+Its final held-out test run and independent labels for generated replies remain
+explicitly marked as pending in that project report.
+
 This repository contains a FastAPI product-search application and a separate CS496 Project 0 sentiment benchmark. The benchmark classifies 75 short texts as `positive`, `negative`, `neutral`, or `mixed`. It does not use the product database or the earlier SQL evaluation questions.
 
 ## Setup

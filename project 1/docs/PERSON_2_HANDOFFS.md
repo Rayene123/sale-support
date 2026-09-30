@@ -1,3 +1,99 @@
+## To Person 4 — prompt experiments
+
+The v3 live row is a different kind of evidence: it generated replies with
+`qwen2.5:14b` and graded them with the same model, so it is not a re-run of the
+replay numbers. It ran the bias experiments too (position: 2 of 3 pairs
+order-sensitive, 66.7%; verbosity: 0 of 3 changed score) and measured real
+latency and usage: system mean 5.2 s / p95 8.4 s, judge mean 8.7 s / p95 9.9 s,
+wall clock 651.9 s for 40 items, 95 sequential calls, 15 extra experiment judge
+calls (20,162 tokens), 0 errors, cost `null` (local provider). Use it as
+evidence that the harness works end to end and as a performance data point, not
+as an independent third measurement of the prompt versions.
+
+### What I need back
+
+1. **A decision on the split.** All three versions were scored on the 40 dev
+  items, which is the split you iterated on. Confirm the held-out run: one
+  evaluation of the chosen prompt on `--split test` (120 items, never used for
+  tuning). I will run it as soon as you pick the prompt.
+2. **The v2 source metadata is corrected.** The 40 v2 rows now record
+  `prompt_version: v2`; replay runs should be regenerated if clean v2 evidence
+  is required.
+3. **A costed claim for the changelog.** `prompts/CHANGELOG.md` asks for cost per
+  version. Every run so far is `local_provider`, so cost is `null`. To get a real
+  number, either price a hosted run (`JUDGE_INPUT_PRICE_PER_M`,
+  `JUDGE_OUTPUT_PRICE_PER_M`) or state the local-compute assumption
+  (`HARNESS_LOCAL_COST_PER_HOUR`), which the report labels
+  `estimated_from_assumption`.
+4. **Per-failure attribution.** The harness records failed items and the judge's
+  reason for the lowest scores, and the saved baseline responses document the
+  v1 failures. Aligning your review with the
+  harness's `items.jsonl` is the cheapest way to make the failure analysis in the
+  final report verifiable.
+
+---
+## To everyone — final results and the reproducible command
+
+### The command
+
+```powershell
+cd "project 1"
+
+# 1. check the data and the configuration, spending nothing
+python -m harness validate --dataset data/dev.jsonl --check-prompts
+python -m harness run --preflight
+
+# 2. the evaluation
+python -m harness run --system-prompt v3 --run-id dev-v3 --output results/harness/dev-v3
+
+# 3. the report, the metrics, and the cost
+python -m harness report --run results/harness/dev-v3
+python -m harness cost   --run results/harness/dev-v3
+
+# 4. the version comparison
+python -m harness compare --run results/harness/dev-v1 --run results/harness/dev-v2 `
+   --run results/harness/dev-v3 --legacy --output results/harness/comparisons/prompt_versions
+```
+
+### What is already committed
+
+| Path | Contents |
+| --- | --- |
+| `results/harness/dev-v1-replay/`, `dev-v2-replay/`, `dev-v3-replay/` | 40-item runs per prompt version, replayed from the saved baselines and saved grades — identical quality figures to Person 3's comparison |
+| `results/harness/dev-v3-live-qwen25/` | one full live run: 40 items, real latency and token counts, position and verbosity experiments |
+| `results/harness/comparisons/prompt_versions.{json,md}` | the version table |
+| `harness/README.md` | install, configuration, commands, artefacts, metrics, tests |
+| `docs/PERSON_2_HARNESS_IMPLEMENTATION.md` | what was built, results, limitations |
+
+The replay runs need no model: `report`, `cost`, and `compare` all work from a
+clean clone on the committed rows alone.
+
+### The one thing still missing
+
+**Independent human labels for the evaluated replies.** Every score in this
+project is currently model-assigned. The labels on file cover
+`response_id: "reference_answer"`, so:
+
+* the measured averages (7.85 / 7.875 / 7.925) are judge-vs-judge comparisons,
+  not agreement with a human standard;
+* judge-vs-human agreement is **not reported** — the harness says so in each
+  run's notes rather than printing a number it cannot support;
+* the prompt-version deltas are differences between small numbers produced by one
+  model on the split that was tuned on.
+
+Closing that gap is labeling work, not engineering: for each evaluated reply,
+two people score it independently with `data/labeling_guide.md`, keeping the
+exact `response_text` and setting `response_id` to the run's reply set. Then:
+
+```powershell
+python -m harness run --system-prompt v3 --run-id dev-v3 --resume `
+   --labels results/human_labels_dev-v3.jsonl --labels-reviewed
+```
+
+Until then, the report should say "model-assigned, human validation pending"
+next to every score, and should not present the bias experiments as proof that
+the judge is unbiased.
+
 # Person 2 handoffs
 
 What the evaluation harness produced for the rest of the team, and what it needs
@@ -183,12 +279,9 @@ as an independent third measurement of the prompt versions.
    items, which is the split you iterated on. Confirm the held-out run: one
    evaluation of the chosen prompt on `--split test` (120 items, never used for
    tuning). I will run it as soon as you pick the prompt.
-2. **Fix the `prompt_version` label in `results/baseline_v2.jsonl`.** Those 40
-   rows record `prompt_version: v1` although they are v2. The harness detects the
-   disagreement and puts `prompt_version_mismatch` on all 40 rows of
-   `results/harness/dev-v2-replay/system.jsonl` rather than silently relabelling
-   them — but the source file should still say `v2`. (This is the issue noted in
-   `judge/HANDOFF_PERSON_2.md`.)
+2. **The v2 source metadata is corrected.** The 40 v2 rows now record
+  `prompt_version: v2`; replay runs should be regenerated if clean v2 evidence
+  is required.
 3. **A costed claim for the changelog.** `prompts/CHANGELOG.md` asks for cost per
    version. Every run so far is `local_provider`, so cost is `null`. To get a real
    number, either price a hosted run (`JUDGE_INPUT_PRICE_PER_M`,
@@ -196,8 +289,8 @@ as an independent third measurement of the prompt versions.
    (`HARNESS_LOCAL_COST_PER_HOUR`), which the report labels
    `estimated_from_assumption`.
 4. **Per-failure attribution.** The harness records failed items and the judge's
-   reason for the lowest scores, and Person 4's `results/baseline_v1_review.jsonl`
-   already contains a review of the v1 failures. Aligning your review with the
+  reason for the lowest scores, and the saved baseline responses document the
+  v1 failures. Aligning your review with the
    harness's `items.jsonl` is the cheapest way to make the failure analysis in the
    final report verifiable.
 
