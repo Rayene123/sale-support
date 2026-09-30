@@ -7,3 +7,8 @@ __pycache__/
 .tools/
 venv/
 
+# Local configuration: real API keys must never be committed. The committed
+# *.example files are templates and contain no values.
+project 1/harness/.env
+project 1/judge/.env
+*.py[cod]

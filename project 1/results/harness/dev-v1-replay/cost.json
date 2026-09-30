@@ -1,0 +1,100 @@
+{
+  "currency": "USD",
+  "prices": {
+    "currency": "USD",
+    "system_input_per_million_tokens": null,
+    "system_output_per_million_tokens": null,
+    "judge_input_per_million_tokens": null,
+    "judge_output_per_million_tokens": null,
+    "local_compute_cost_per_hour": null,
+    "note": "Prices are operator-supplied estimates in USD per million tokens; verify against the provider's current price list. local_compute_cost_per_hour is an assumption, not a tariff."
+  },
+  "basis": {
+    "items_evaluated": 40,
+    "system_tokens": {
+      "prompt": 22506,
+      "completion": 5960,
+      "total": 28466,
+      "items_with_usage": 40
+    },
+    "judge_tokens": {
+      "prompt": 44879,
+      "completion": 4584,
+      "total": 49463,
+      "items_with_usage": 40
+    },
+    "experiment_judge_calls": null,
+    "experiment_judge_tokens": {},
+    "wall_clock_seconds": null,
+    "tokens_are_provider_reported": true
+  },
+  "system": {
+    "status": "local_provider",
+    "items": 40,
+    "reason": "The evaluated system runs on a local provider; there is no API price.",
+    "tokens": {
+      "prompt": 22506,
+      "completion": 5960,
+      "total": 28466,
+      "items_with_usage": 40
+    },
+    "total_usd": null,
+    "per_item_usd": null,
+    "per_1000_requests_usd": null
+  },
+  "judge": {
+    "status": "local_provider",
+    "items": 40,
+    "reason": "The judge runs on local Ollama; there is no API price.",
+    "tokens": {
+      "prompt": 44879,
+      "completion": 4584,
+      "total": 49463,
+      "items_with_usage": 40
+    },
+    "total_usd": null,
+    "per_item_usd": null,
+    "per_1000_requests_usd": null
+  },
+  "experiments": {
+    "status": "not_run",
+    "items": 0,
+    "note": "No bias experiment ran in this run, so there were no extra judge calls to price.",
+    "total_usd": null,
+    "per_item_usd": null,
+    "per_1000_requests_usd": null
+  },
+  "combined": {
+    "status": "not_configured",
+    "note": "One full evaluation pass: the system call and the judge call per item, without the optional bias experiments.",
+    "total_usd": null,
+    "per_item_usd": null,
+    "per_1000_requests_usd": null
+  },
+  "run_total": {
+    "status": "not_configured",
+    "note": "Everything this run actually called, including bias-experiment judge calls.",
+    "total_usd": null,
+    "per_item_usd": null,
+    "per_1000_requests_usd": null
+  },
+  "local_inference": {
+    "status": "not_measured",
+    "note": "No wall-clock time recorded for this run."
+  },
+  "volume_projection": {
+    "multiplier": 100,
+    "items": 4000,
+    "system_usd": null,
+    "judge_usd": null,
+    "combined_usd": null,
+    "experiment_usd": null,
+    "note": "Linear projection at 100x the measured volume, assuming the same item mix, the same token usage, and unchanged prices. It excludes engineering time, storage, and any provider tier or caching rules."
+  },
+  "caveats": [
+    "Prices are operator estimates in USD per million tokens; verify them.",
+    "Token usage is what the provider reported; missing usage is reported, not estimated.",
+    "Replayed runs reuse the original run's latency and usage, so their cost is the cost of that original run, not of the report.",
+    "Bias experiments are optional extras; read run_total, not combined, for what a run with experiments actually cost."
+  ]
+}

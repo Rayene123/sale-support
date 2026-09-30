@@ -132,3 +132,28 @@ Preliminary development outputs are retained locally and excluded from the hando
 ## Final handoff checklist
 
 Run the local experiments with Ollama available. Review major disagreements and record concrete examples of hallucination misses, completeness mistakes and other judge failures. Share the results and interface with Person 2, failure examples with Person 4, and rubric ambiguities with Person 1. Write the final reliability discussion from observed results; the implementation alone does not complete these experimental deliverables.
+
+## Update from Person 2 (harness integration)
+
+The evaluation harness in `harness/` now calls this judge as a library and has
+consumed the saved comparison:
+
+```powershell
+python -m harness run --system-source results/baseline_v3.jsonl --system-prompt v3 `
+    --judge-source results/judge-comparison-v2-20260929/v3/results.jsonl `
+    --run-id dev-v3-replay --output results/harness/dev-v3-replay
+```
+
+- All 120 saved grades in `results/judge-comparison-v2-20260929/` match their
+  baseline replies exactly, and replaying them reproduces the 7.85 / 7.875 /
+  7.925 averages and the recorded latency and token figures.
+- Position and verbosity screening tests have now been run through the harness
+  (`--position-limit`, `--position-repeats`, `--verbosity-limit`); per-trial rows
+  are in `results/harness/*/position.jsonl` and `verbosity.jsonl`, and the sample
+  sizes must be quoted with any percentage.
+- Judge-versus-human agreement on the evaluated replies is still **not**
+  reported: the labels on file cover `response_id: "reference_answer"`, so the
+  harness records "labels do not cover this reply set" instead of a number. That
+  remains the open item above.
+
+See `harness/README.md` and `docs/PERSON_2_HANDOFFS.md`.

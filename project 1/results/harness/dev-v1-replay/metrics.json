@@ -1,0 +1,369 @@
+{
+  "system": {
+    "dataset_items": 40,
+    "system_attempted": 40,
+    "system_successful": 40,
+    "system_failed": 0,
+    "judge_attempted": 40,
+    "judge_successful": 40,
+    "judge_failed": 0,
+    "coverage_percent": 100.0,
+    "quality": {
+      "average_total_out_of_8": 7.85,
+      "average_by_criterion": {
+        "factual_correctness": 1.95,
+        "completeness": 1.95,
+        "no_hallucination": 1.95,
+        "relevance": 1.0,
+        "professional_tone": 1.0
+      },
+      "score_distribution": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 1,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 1,
+        "8": 38
+      },
+      "full_marks_items": 38,
+      "items_below_full_marks": 2,
+      "note": "Scores are model-assigned unless independent human review is attested; they are not a substitute for it."
+    },
+    "by_category": {
+      "ambiguous_edge": {
+        "items": 4,
+        "average_total_out_of_8": 7.75
+      },
+      "hallucination_trap": {
+        "items": 4,
+        "average_total_out_of_8": 8.0
+      },
+      "multi_part": {
+        "items": 4,
+        "average_total_out_of_8": 8.0
+      },
+      "order_contents": {
+        "items": 5,
+        "average_total_out_of_8": 8.0
+      },
+      "order_status": {
+        "items": 5,
+        "average_total_out_of_8": 8.0
+      },
+      "payment_shipping": {
+        "items": 4,
+        "average_total_out_of_8": 8.0
+      },
+      "prices_totals": {
+        "items": 5,
+        "average_total_out_of_8": 8.0
+      },
+      "quantities": {
+        "items": 5,
+        "average_total_out_of_8": 8.0
+      },
+      "unsupported_info": {
+        "items": 4,
+        "average_total_out_of_8": 6.75
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "items": 21,
+        "average_total_out_of_8": 7.9523809523809526
+      },
+      "hard": {
+        "items": 8,
+        "average_total_out_of_8": 8.0
+      },
+      "medium": {
+        "items": 11,
+        "average_total_out_of_8": 7.545454545454546
+      }
+    },
+    "criterion_weaknesses": {
+      "factual_correctness": {
+        "maximum": 2,
+        "average": 1.95,
+        "points_lost": 2,
+        "items_not_full_marks": 1,
+        "items": [
+          "P1-007"
+        ]
+      },
+      "completeness": {
+        "maximum": 2,
+        "average": 1.95,
+        "points_lost": 2,
+        "items_not_full_marks": 2,
+        "items": [
+          "P1-007",
+          "P1-009"
+        ]
+      },
+      "no_hallucination": {
+        "maximum": 2,
+        "average": 1.95,
+        "points_lost": 2,
+        "items_not_full_marks": 1,
+        "items": [
+          "P1-007"
+        ]
+      },
+      "relevance": {
+        "maximum": 1,
+        "average": 1.0,
+        "points_lost": 0,
+        "items_not_full_marks": 0,
+        "items": []
+      },
+      "professional_tone": {
+        "maximum": 1,
+        "average": 1.0,
+        "points_lost": 0,
+        "items_not_full_marks": 0,
+        "items": []
+      }
+    },
+    "lowest_scored_items": [
+      {
+        "item_id": "P1-007",
+        "category": "unsupported_info",
+        "total": 3,
+        "scores": {
+          "factual_correctness": 0,
+          "completeness": 1,
+          "no_hallucination": 0,
+          "relevance": 1,
+          "professional_tone": 1,
+          "total": 3
+        },
+        "reason": "The response incorrectly assumes that refunds are only issued after completion or cancellation, which is not supported by the context. The context does not provide any information about refund policies or conditions."
+      },
+      {
+        "item_id": "P1-009",
+        "category": "ambiguous_edge",
+        "total": 7,
+        "scores": {
+          "factual_correctness": 2,
+          "completeness": 1,
+          "no_hallucination": 2,
+          "relevance": 1,
+          "professional_tone": 1,
+          "total": 7
+        },
+        "reason": "The response correctly states the order status as 'shipped' based on the context. It does not make unsupported claims about tracking information, which is not provided in the context. It addresses the customer's request for an update but does not fully answer all potential follow-up questions (e.g., tracking details). The tone is professional and relevant to the request."
+      }
+    ],
+    "failed_items": [],
+    "failures_by_category": {},
+    "response_warnings": {},
+    "judge_total_corrections": 1
+  },
+  "reliability": {
+    "label_status": "seeded_unverified",
+    "human_agreement": {
+      "factual_correctness": {
+        "comparisons": 160,
+        "agreements": 160,
+        "disagreements": 0,
+        "agreement_percent": 100.0,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.0,
+        "cohens_kappa": null,
+        "cohens_kappa_linear": null
+      },
+      "completeness": {
+        "comparisons": 160,
+        "agreements": 138,
+        "disagreements": 22,
+        "agreement_percent": 86.25,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.1375,
+        "cohens_kappa": 0.0,
+        "cohens_kappa_linear": 0.0
+      },
+      "no_hallucination": {
+        "comparisons": 160,
+        "agreements": 160,
+        "disagreements": 0,
+        "agreement_percent": 100.0,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.0,
+        "cohens_kappa": null,
+        "cohens_kappa_linear": null
+      },
+      "relevance": {
+        "comparisons": 160,
+        "agreements": 160,
+        "disagreements": 0,
+        "agreement_percent": 100.0,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.0,
+        "cohens_kappa": null,
+        "cohens_kappa_linear": null
+      },
+      "professional_tone": {
+        "comparisons": 160,
+        "agreements": 160,
+        "disagreements": 0,
+        "agreement_percent": 100.0,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.0,
+        "cohens_kappa": null,
+        "cohens_kappa_linear": null
+      },
+      "total": {
+        "comparisons": 160,
+        "agreements": 138,
+        "disagreements": 22,
+        "agreement_percent": 86.25,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.1375,
+        "cohens_kappa": 0.0,
+        "cohens_kappa_linear": 0.0
+      }
+    },
+    "judge_vs_human": {
+      "by_evaluator": {},
+      "comparisons": 0,
+      "major_disagreement_threshold": 2,
+      "major_disagreement_count": 0,
+      "major_disagreement_percent": null,
+      "major_disagreements": []
+    },
+    "coverage": {
+      "graded_replies": 40,
+      "replies_with_human_labels": 0,
+      "unlabelled_replies": 40,
+      "label_status": "seeded_unverified",
+      "note": "Seeded labels are not independent human review; agreement against them is a smoke check, not a validated judge-reliability result."
+    },
+    "position_bias": {
+      "state": "not_run",
+      "attempted": 0,
+      "valid_comparisons": 0,
+      "changed": null,
+      "changed_percent": null,
+      "note": "position experiment not run in this run"
+    },
+    "verbosity_bias": {
+      "state": "not_run",
+      "attempted": 0,
+      "valid_comparisons": 0,
+      "changed": null,
+      "changed_percent": null,
+      "note": "verbosity experiment not run in this run"
+    },
+    "note": "Scores are model-assigned unless independent human review is attested; they are not a substitute for it."
+  },
+  "performance": {
+    "wall_clock_seconds": null,
+    "system_latency_ms": {
+      "count": 40,
+      "mean": 3908.32975,
+      "median": 4583.555,
+      "p95": 7628.9555,
+      "min": 288.94,
+      "max": 7717.33,
+      "stdev": 2402.373881091621
+    },
+    "judge_latency_ms": {
+      "count": 40,
+      "mean": 16619.64875,
+      "median": 16417.945,
+      "p95": 20764.9755,
+      "min": 12900.96,
+      "max": 22181.75,
+      "stdev": 2181.0516527527084
+    },
+    "system_tokens": {
+      "prompt": 22506,
+      "completion": 5960,
+      "total": 28466,
+      "items_with_usage": 40
+    },
+    "judge_tokens": {
+      "prompt": 44879,
+      "completion": 4584,
+      "total": 49463,
+      "items_with_usage": 40
+    },
+    "experiments": null,
+    "requests": {
+      "system": 40,
+      "judge": 40,
+      "experiment_judge_calls": null
+    },
+    "throughput_items_per_minute": null,
+    "sequential_model_calls": 80,
+    "note": "Latency is per request, measured with time.perf_counter(). The harness runs sequentially, so wall-clock time is the sum of request latencies plus local processing."
+  },
+  "errors": {
+    "categories": [
+      "configuration",
+      "dataset_error",
+      "missing_field",
+      "system_error",
+      "api_error",
+      "timeout",
+      "network",
+      "model_missing",
+      "incomplete_output",
+      "refusal",
+      "judge_error",
+      "invalid_judge_output",
+      "internal"
+    ],
+    "system": {
+      "counts": {
+        "configuration": 0,
+        "dataset_error": 0,
+        "missing_field": 0,
+        "system_error": 0,
+        "api_error": 0,
+        "timeout": 0,
+        "network": 0,
+        "model_missing": 0,
+        "incomplete_output": 0,
+        "refusal": 0,
+        "judge_error": 0,
+        "invalid_judge_output": 0,
+        "internal": 0
+      },
+      "examples": {}
+    },
+    "judge": {
+      "counts": {
+        "configuration": 0,
+        "dataset_error": 0,
+        "missing_field": 0,
+        "system_error": 0,
+        "api_error": 0,
+        "timeout": 0,
+        "network": 0,
+        "model_missing": 0,
+        "incomplete_output": 0,
+        "refusal": 0,
+        "judge_error": 0,
+        "invalid_judge_output": 0,
+        "internal": 0
+      },
+      "examples": {}
+    }
+  },
+  "run": {
+    "run_id": "dev-v1-replay",
+    "response_id": "baseline_v1",
+    "prompt_version": "v1",
+    "items_without_result": [],
+    "mode": "replay",
+    "replayed_judge_wall_clock_seconds": null,
+    "notes": [
+      "Metrics rebuilt from the saved rows of this run; no model was called."
+    ]
+  }
+}

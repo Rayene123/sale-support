@@ -1,0 +1,365 @@
+{
+  "system": {
+    "dataset_items": 40,
+    "system_attempted": 40,
+    "system_successful": 40,
+    "system_failed": 0,
+    "judge_attempted": 40,
+    "judge_successful": 40,
+    "judge_failed": 0,
+    "coverage_percent": 100.0,
+    "quality": {
+      "average_total_out_of_8": 7.925,
+      "average_by_criterion": {
+        "factual_correctness": 2.0,
+        "completeness": 1.925,
+        "no_hallucination": 2.0,
+        "relevance": 1.0,
+        "professional_tone": 1.0
+      },
+      "score_distribution": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 1,
+        "7": 1,
+        "8": 38
+      },
+      "full_marks_items": 38,
+      "items_below_full_marks": 2,
+      "note": "Scores are model-assigned unless independent human review is attested; they are not a substitute for it."
+    },
+    "by_category": {
+      "ambiguous_edge": {
+        "items": 4,
+        "average_total_out_of_8": 8.0
+      },
+      "hallucination_trap": {
+        "items": 4,
+        "average_total_out_of_8": 7.5
+      },
+      "multi_part": {
+        "items": 4,
+        "average_total_out_of_8": 8.0
+      },
+      "order_contents": {
+        "items": 5,
+        "average_total_out_of_8": 8.0
+      },
+      "order_status": {
+        "items": 5,
+        "average_total_out_of_8": 7.8
+      },
+      "payment_shipping": {
+        "items": 4,
+        "average_total_out_of_8": 8.0
+      },
+      "prices_totals": {
+        "items": 5,
+        "average_total_out_of_8": 8.0
+      },
+      "quantities": {
+        "items": 5,
+        "average_total_out_of_8": 8.0
+      },
+      "unsupported_info": {
+        "items": 4,
+        "average_total_out_of_8": 8.0
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "items": 21,
+        "average_total_out_of_8": 8.0
+      },
+      "hard": {
+        "items": 8,
+        "average_total_out_of_8": 7.625
+      },
+      "medium": {
+        "items": 11,
+        "average_total_out_of_8": 8.0
+      }
+    },
+    "criterion_weaknesses": {
+      "factual_correctness": {
+        "maximum": 2,
+        "average": 2.0,
+        "points_lost": 0,
+        "items_not_full_marks": 0,
+        "items": []
+      },
+      "completeness": {
+        "maximum": 2,
+        "average": 1.925,
+        "points_lost": 3,
+        "items_not_full_marks": 2,
+        "items": [
+          "P1-001",
+          "P1-026"
+        ]
+      },
+      "no_hallucination": {
+        "maximum": 2,
+        "average": 2.0,
+        "points_lost": 0,
+        "items_not_full_marks": 0,
+        "items": []
+      },
+      "relevance": {
+        "maximum": 1,
+        "average": 1.0,
+        "points_lost": 0,
+        "items_not_full_marks": 0,
+        "items": []
+      },
+      "professional_tone": {
+        "maximum": 1,
+        "average": 1.0,
+        "points_lost": 0,
+        "items_not_full_marks": 0,
+        "items": []
+      }
+    },
+    "lowest_scored_items": [
+      {
+        "item_id": "P1-026",
+        "category": "hallucination_trap",
+        "total": 6,
+        "scores": {
+          "factual_correctness": 2,
+          "completeness": 0,
+          "no_hallucination": 2,
+          "relevance": 1,
+          "professional_tone": 1,
+          "total": 6
+        },
+        "reason": "The response correctly states the discount amount from the context, but fails to address the refund question. It does not mention whether a refund is applicable or how much the customer will be refunded, which was the main request."
+      },
+      {
+        "item_id": "P1-001",
+        "category": "order_status",
+        "total": 7,
+        "scores": {
+          "factual_correctness": 2,
+          "completeness": 1,
+          "no_hallucination": 2,
+          "relevance": 1,
+          "professional_tone": 1,
+          "total": 7
+        },
+        "reason": "The response correctly states the order status and payment status based on the context. It is relevant to the customer's question but does not provide additional details such as the shipping address or expected delivery time, which could be considered a minor completeness issue."
+      }
+    ],
+    "failed_items": [],
+    "failures_by_category": {},
+    "response_warnings": {},
+    "judge_total_corrections": 0
+  },
+  "reliability": {
+    "label_status": "seeded_unverified",
+    "human_agreement": {
+      "factual_correctness": {
+        "comparisons": 160,
+        "agreements": 160,
+        "disagreements": 0,
+        "agreement_percent": 100.0,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.0,
+        "cohens_kappa": null,
+        "cohens_kappa_linear": null
+      },
+      "completeness": {
+        "comparisons": 160,
+        "agreements": 138,
+        "disagreements": 22,
+        "agreement_percent": 86.25,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.1375,
+        "cohens_kappa": 0.0,
+        "cohens_kappa_linear": 0.0
+      },
+      "no_hallucination": {
+        "comparisons": 160,
+        "agreements": 160,
+        "disagreements": 0,
+        "agreement_percent": 100.0,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.0,
+        "cohens_kappa": null,
+        "cohens_kappa_linear": null
+      },
+      "relevance": {
+        "comparisons": 160,
+        "agreements": 160,
+        "disagreements": 0,
+        "agreement_percent": 100.0,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.0,
+        "cohens_kappa": null,
+        "cohens_kappa_linear": null
+      },
+      "professional_tone": {
+        "comparisons": 160,
+        "agreements": 160,
+        "disagreements": 0,
+        "agreement_percent": 100.0,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.0,
+        "cohens_kappa": null,
+        "cohens_kappa_linear": null
+      },
+      "total": {
+        "comparisons": 160,
+        "agreements": 138,
+        "disagreements": 22,
+        "agreement_percent": 86.25,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.1375,
+        "cohens_kappa": 0.0,
+        "cohens_kappa_linear": 0.0
+      }
+    },
+    "judge_vs_human": {
+      "by_evaluator": {},
+      "comparisons": 0,
+      "major_disagreement_threshold": 2,
+      "major_disagreement_count": 0,
+      "major_disagreement_percent": null,
+      "major_disagreements": []
+    },
+    "coverage": {
+      "graded_replies": 40,
+      "replies_with_human_labels": 0,
+      "unlabelled_replies": 40,
+      "label_status": "seeded_unverified",
+      "note": "Seeded labels are not independent human review; agreement against them is a smoke check, not a validated judge-reliability result."
+    },
+    "position_bias": {
+      "state": "not_run",
+      "attempted": 0,
+      "valid_comparisons": 0,
+      "changed": null,
+      "changed_percent": null,
+      "note": "position experiment not run in this run"
+    },
+    "verbosity_bias": {
+      "state": "not_run",
+      "attempted": 0,
+      "valid_comparisons": 0,
+      "changed": null,
+      "changed_percent": null,
+      "note": "verbosity experiment not run in this run"
+    },
+    "note": "Scores are model-assigned unless independent human review is attested; they are not a substitute for it."
+  },
+  "performance": {
+    "wall_clock_seconds": null,
+    "system_latency_ms": {
+      "count": 40,
+      "mean": 5757.33875,
+      "median": 6187.365,
+      "p95": 9859.134499999987,
+      "min": 452.82,
+      "max": 16081.48,
+      "stdev": 3565.7439470486074
+    },
+    "judge_latency_ms": {
+      "count": 40,
+      "mean": 14593.5445,
+      "median": 14175.77,
+      "p95": 16550.722499999993,
+      "min": 12003.93,
+      "max": 20978.88,
+      "stdev": 1788.4775765824422
+    },
+    "system_tokens": {
+      "prompt": 34426,
+      "completion": 5397,
+      "total": 39823,
+      "items_with_usage": 40
+    },
+    "judge_tokens": {
+      "prompt": 43850,
+      "completion": 4417,
+      "total": 48267,
+      "items_with_usage": 40
+    },
+    "experiments": null,
+    "requests": {
+      "system": 40,
+      "judge": 40,
+      "experiment_judge_calls": null
+    },
+    "throughput_items_per_minute": null,
+    "sequential_model_calls": 80,
+    "note": "Latency is per request, measured with time.perf_counter(). The harness runs sequentially, so wall-clock time is the sum of request latencies plus local processing."
+  },
+  "errors": {
+    "categories": [
+      "configuration",
+      "dataset_error",
+      "missing_field",
+      "system_error",
+      "api_error",
+      "timeout",
+      "network",
+      "model_missing",
+      "incomplete_output",
+      "refusal",
+      "judge_error",
+      "invalid_judge_output",
+      "internal"
+    ],
+    "system": {
+      "counts": {
+        "configuration": 0,
+        "dataset_error": 0,
+        "missing_field": 0,
+        "system_error": 0,
+        "api_error": 0,
+        "timeout": 0,
+        "network": 0,
+        "model_missing": 0,
+        "incomplete_output": 0,
+        "refusal": 0,
+        "judge_error": 0,
+        "invalid_judge_output": 0,
+        "internal": 0
+      },
+      "examples": {}
+    },
+    "judge": {
+      "counts": {
+        "configuration": 0,
+        "dataset_error": 0,
+        "missing_field": 0,
+        "system_error": 0,
+        "api_error": 0,
+        "timeout": 0,
+        "network": 0,
+        "model_missing": 0,
+        "incomplete_output": 0,
+        "refusal": 0,
+        "judge_error": 0,
+        "invalid_judge_output": 0,
+        "internal": 0
+      },
+      "examples": {}
+    }
+  },
+  "run": {
+    "run_id": "dev-v3-replay",
+    "response_id": "baseline_v3",
+    "prompt_version": "v3",
+    "items_without_result": [],
+    "mode": "replay",
+    "replayed_judge_wall_clock_seconds": null,
+    "notes": [
+      "Metrics rebuilt from the saved rows of this run; no model was called."
+    ]
+  }
+}

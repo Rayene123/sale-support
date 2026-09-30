@@ -77,9 +77,20 @@ inferences and occasional incomplete answers.
 
 ## Experiment Notes
 
-The three versions were evaluated on the same 40 development cases.
+The three versions were evaluated on the same 40 development cases, with the
+evaluation harness (`harness/`) replaying the saved replies and the saved judge
+grades. Reproduce with:
 
-Objective runtime/token measurements:
+```powershell
+python -m harness run --system-source results/baseline_v1.jsonl --system-prompt v1 `
+    --judge-source results/judge-comparison-v2-20260929/v1/results.jsonl `
+    --run-id dev-v1-replay --output results/harness/dev-v1-replay
+python -m harness compare --legacy --run results/harness/dev-v1-replay `
+    --run results/harness/dev-v2-replay --run results/harness/dev-v3-replay `
+    --output results/harness/comparisons/prompt_versions
+```
+
+Objective runtime/token measurements (one laptop, local Ollama):
 
 | Metric | v1 | v2 | v3 |
 |---|---:|---:|---:|
@@ -89,6 +100,28 @@ Objective runtime/token measurements:
 | Average completion tokens | 149.00 | 165.30 | 134.93 |
 | Average total tokens | 711.65 | 882.95 | 995.58 |
 | Total tokens | 28,466 | 35,318 | 39,823 |
-| Average quality (/8) | TBD | TBD | TBD |
+| Average quality (/8) — model-assigned | 7.850 | 7.875 | 7.925 |
+| Δ vs v1 | — | +0.025 | +0.075 |
+| Factual correctness (of 2) | 1.950 | 1.950 | 2.000 |
+| Completeness (of 2) | 1.950 | 1.975 | 1.925 |
+| No hallucination (of 2) | 1.950 | 1.950 | 2.000 |
+| Relevance (of 1) | 1.000 | 1.000 | 1.000 |
+| Professional tone (of 1) | 1.000 | 1.000 | 1.000 |
 
-Quality scores will be added from the evaluation/judge results.
+Cost per version: `null` / not configured. These runs used a local Ollama model,
+which has no API price; the harness reports `local_provider` and `null` rather
+than a zero cost. See `docs/PERSON_2_HARNESS_IMPLEMENTATION.md`.
+
+**Caveats on the quality column.** The scores are assigned by the LLM judge, not
+by independent humans: the human labels on file cover the reference answers, not
+these replies, so judge-versus-human agreement is still pending. The v1→v3 gap
+is 0.075 points out of 8 across 40 items, and the dev split is the split these
+prompts were developed against. Treat the ordering as a direction, not a
+measurement, and confirm it on the untouched 120-item test split before
+publishing a claim.
+
+**Prompt version label bug.** `results/baseline_v2.jsonl` records
+`prompt_version: v1` on all 40 rows although those rows are v2 replies. The
+harness flags this as `prompt_version_mismatch` on every row of
+`results/harness/dev-v2-replay/system.jsonl` instead of silently relabelling
+them; the source file should still be corrected to `v2`.

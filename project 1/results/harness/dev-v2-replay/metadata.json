@@ -1,0 +1,148 @@
+{
+  "run_id": "dev-v2-replay",
+  "harness_version": "1.0.0",
+  "created_utc": "2026-09-30T00:30:57.927446+00:00",
+  "mode": "replay",
+  "resumed": false,
+  "configuration": {
+    "system": {
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "base_url": "http://localhost:11434",
+      "api_key_env": null,
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "timeout_seconds": 300.0,
+      "prompt_version": "v2"
+    },
+    "judge": {
+      "provider": "ollama",
+      "model": "qwen3:14b",
+      "base_url": "http://localhost:11434",
+      "api_key_configured": false,
+      "timeout_seconds": 300.0,
+      "max_tokens": 2048,
+      "prompt_version": "judge_v2"
+    },
+    "pricing": {
+      "currency": "USD",
+      "system_input_per_million_tokens": null,
+      "system_output_per_million_tokens": null,
+      "judge_input_per_million_tokens": null,
+      "judge_output_per_million_tokens": null,
+      "local_compute_cost_per_hour": null,
+      "note": "Prices are operator-supplied estimates in USD per million tokens; verify against the provider's current price list. local_compute_cost_per_hour is an assumption, not a tariff."
+    },
+    "results_root": "C:\\Users\\flash\\sale-support\\project 1\\results\\harness",
+    "env_file": null,
+    "note": "API-key values are never written to results; only the variable name (system.api_key_env) is recorded."
+  },
+  "limits": {
+    "limit": null,
+    "item_ids": null,
+    "categories": null,
+    "judge_limit": null,
+    "verbosity_limit": 0,
+    "position_limit": null,
+    "position_repeats": 1
+  },
+  "dataset": {
+    "source": "data\\dev.jsonl",
+    "sha256": "9ef445a37f03681fa84200d02ec55441ea3b9a4d57f19f074218049fb446775b",
+    "encoding": "utf-8-sig",
+    "items_selected": 40,
+    "statistics": {
+      "items": 40,
+      "id_range": [
+        "P1-001",
+        "P1-040"
+      ],
+      "by_split": {
+        "dev": 40
+      },
+      "by_category": {
+        "ambiguous_edge": 4,
+        "hallucination_trap": 4,
+        "multi_part": 4,
+        "order_contents": 5,
+        "order_status": 5,
+        "payment_shipping": 4,
+        "prices_totals": 5,
+        "quantities": 5,
+        "unsupported_info": 4
+      },
+      "by_difficulty": {
+        "easy": 21,
+        "hard": 8,
+        "medium": 11
+      },
+      "with_reference_answer": 40,
+      "order_context_lines": 91,
+      "distinct_orders": 40,
+      "mean_context_items": 2.275,
+      "sha256": "9ef445a37f03681fa84200d02ec55441ea3b9a4d57f19f074218049fb446775b",
+      "source": "data\\dev.jsonl",
+      "invalid_records": 0
+    },
+    "invalid_records": 0
+  },
+  "prompts": [
+    {
+      "name": "prompts/system_v2.txt",
+      "sha256": "a07034fef7fceae3bc6559a4c8aa9a93387daf4f3ef1a7542d45f21e34b93f53",
+      "version": "v2",
+      "source": "prompts\\system_v2.txt"
+    }
+  ],
+  "judge": {
+    "model": "qwen3:14b",
+    "prompt_version": "judge_v2",
+    "prompt_sha256": "f1d4b25e4641662eab8eb06838d2ffa6b0d52583c56252afe8f0e8e9eb9e9ec6",
+    "replayed_from": "results\\judge-comparison-v2-20260929\\v2\\results.jsonl",
+    "original_run": {
+      "model": "qwen3:14b",
+      "prompt_version": "judge_v2",
+      "prompt_sha256": "f1d4b25e4641662eab8eb06838d2ffa6b0d52583c56252afe8f0e8e9eb9e9ec6",
+      "started_utc": "2026-09-29T21:30:53.380740+00:00",
+      "completed_utc": "2026-09-29T22:40:59.931357+00:00"
+    },
+    "original_run_wall_clock_seconds": 4206.55
+  },
+  "labels": {
+    "file": "C:\\Users\\flash\\sale-support\\project 1\\data\\human_labels.jsonl",
+    "labelled_replies": 160,
+    "independently_reviewed": false
+  },
+  "input_sources": {
+    "system_responses": "results\\baseline_v2.jsonl",
+    "judge_results": "results\\judge-comparison-v2-20260929\\v2\\results.jsonl",
+    "position_pairs": null,
+    "auto_pairs_from": null
+  },
+  "reproduction": {
+    "command": "python -m harness run --run-id dev-v2-replay --output 'results\\harness\\dev-v2-replay' --dataset 'data\\dev.jsonl' --system-source 'results\\baseline_v2.jsonl' --judge-source 'results\\judge-comparison-v2-20260929\\v2\\results.jsonl' --labels 'C:\\Users\\flash\\sale-support\\project 1\\data\\human_labels.jsonl' --system-prompt v2"
+  },
+  "environment": {
+    "python": "3.14.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "git_commit": "943f8de80d825ebbda10dd7a6ce7cfeeb9de17bb"
+  },
+  "code_sha256": {
+    "harness/dataset.py": "928533c8e14524181ab842199aa1e2d35595f14180a52188cffce10ddf2eae7e",
+    "harness/providers.py": "9e9bafc29358460d6be19127451180e686c5ca7123454b3a1fa708fd3e9a9dff",
+    "harness/system_runner.py": "881d8cda5bad25797c3f56b46bca8bc3df6a3144c94216ee353366b5fce50cfb",
+    "harness/judge_runner.py": "1fe2ed63d3943afd7ab04fa93d06d227c2c78444cd5d658f592496281d3809dc",
+    "harness/metrics.py": "63b6bc2d0e269acfc8a598020374a6c8abc4bf2bc5aaef1bf4ac6fe668e8faf1",
+    "harness/cost.py": "6298727a021a91ee84590fedf68721a19f93c130309533402d437376ada9b475",
+    "harness/cli.py": "a18a91e24bfc31ad17e415cb9a8330e6d1514fd7ead07cf2ba404035aabbd37e",
+    "harness/results.py": "aade946530dd0e1b9a0fd8e972d0699b2f814b98bc92a7794ff6c25902d4731d",
+    "judge/client.py": "40b0a4ad2baeae6ccbc6b3a93cf7f51283b1477a90e6fd3f7d6c1cd282f955ca"
+  },
+  "completed_utc": "2026-09-30T00:30:58.022705+00:00",
+  "status": "complete",
+  "wall_clock_seconds_total": null,
+  "invocation_seconds": 0.08,
+  "item_rows": 40,
+  "error_rows": 0,
+  "missing_items": []
+}

@@ -1,0 +1,372 @@
+{
+  "system": {
+    "dataset_items": 40,
+    "system_attempted": 40,
+    "system_successful": 40,
+    "system_failed": 0,
+    "judge_attempted": 40,
+    "judge_successful": 40,
+    "judge_failed": 0,
+    "coverage_percent": 100.0,
+    "quality": {
+      "average_total_out_of_8": 7.95,
+      "average_by_criterion": {
+        "factual_correctness": 1.975,
+        "completeness": 1.975,
+        "no_hallucination": 2.0,
+        "relevance": 1.0,
+        "professional_tone": 1.0
+      },
+      "score_distribution": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 1,
+        "7": 0,
+        "8": 39
+      },
+      "full_marks_items": 39,
+      "items_below_full_marks": 1,
+      "note": "Scores are model-assigned unless independent human review is attested; they are not a substitute for it."
+    },
+    "by_category": {
+      "ambiguous_edge": {
+        "items": 4,
+        "average_total_out_of_8": 8.0
+      },
+      "hallucination_trap": {
+        "items": 4,
+        "average_total_out_of_8": 8.0
+      },
+      "multi_part": {
+        "items": 4,
+        "average_total_out_of_8": 8.0
+      },
+      "order_contents": {
+        "items": 5,
+        "average_total_out_of_8": 8.0
+      },
+      "order_status": {
+        "items": 5,
+        "average_total_out_of_8": 8.0
+      },
+      "payment_shipping": {
+        "items": 4,
+        "average_total_out_of_8": 8.0
+      },
+      "prices_totals": {
+        "items": 5,
+        "average_total_out_of_8": 7.6
+      },
+      "quantities": {
+        "items": 5,
+        "average_total_out_of_8": 8.0
+      },
+      "unsupported_info": {
+        "items": 4,
+        "average_total_out_of_8": 8.0
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "items": 21,
+        "average_total_out_of_8": 8.0
+      },
+      "hard": {
+        "items": 8,
+        "average_total_out_of_8": 7.75
+      },
+      "medium": {
+        "items": 11,
+        "average_total_out_of_8": 8.0
+      }
+    },
+    "criterion_weaknesses": {
+      "factual_correctness": {
+        "maximum": 2,
+        "average": 1.975,
+        "points_lost": 1,
+        "items_not_full_marks": 1,
+        "items": [
+          "P1-031"
+        ]
+      },
+      "completeness": {
+        "maximum": 2,
+        "average": 1.975,
+        "points_lost": 1,
+        "items_not_full_marks": 1,
+        "items": [
+          "P1-031"
+        ]
+      },
+      "no_hallucination": {
+        "maximum": 2,
+        "average": 2.0,
+        "points_lost": 0,
+        "items_not_full_marks": 0,
+        "items": []
+      },
+      "relevance": {
+        "maximum": 1,
+        "average": 1.0,
+        "points_lost": 0,
+        "items_not_full_marks": 0,
+        "items": []
+      },
+      "professional_tone": {
+        "maximum": 1,
+        "average": 1.0,
+        "points_lost": 0,
+        "items_not_full_marks": 0,
+        "items": []
+      }
+    },
+    "lowest_scored_items": [
+      {
+        "item_id": "P1-031",
+        "category": "prices_totals",
+        "total": 6,
+        "scores": {
+          "factual_correctness": 1,
+          "completeness": 1,
+          "no_hallucination": 2,
+          "relevance": 1,
+          "professional_tone": 1,
+          "total": 6
+        },
+        "reason": "The reply correctly states the line total for the Levi's 501 Original Jeans but does not account for the total payment including other items and discounts. The context does not support the claim that this is the total paid for the jeans alone."
+      }
+    ],
+    "failed_items": [],
+    "failures_by_category": {},
+    "response_warnings": {},
+    "judge_total_corrections": 4
+  },
+  "reliability": {
+    "label_status": "seeded_unverified",
+    "human_agreement": {
+      "factual_correctness": {
+        "comparisons": 160,
+        "agreements": 160,
+        "disagreements": 0,
+        "agreement_percent": 100.0,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.0,
+        "cohens_kappa": null,
+        "cohens_kappa_linear": null
+      },
+      "completeness": {
+        "comparisons": 160,
+        "agreements": 138,
+        "disagreements": 22,
+        "agreement_percent": 86.25,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.1375,
+        "cohens_kappa": 0.0,
+        "cohens_kappa_linear": 0.0
+      },
+      "no_hallucination": {
+        "comparisons": 160,
+        "agreements": 160,
+        "disagreements": 0,
+        "agreement_percent": 100.0,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.0,
+        "cohens_kappa": null,
+        "cohens_kappa_linear": null
+      },
+      "relevance": {
+        "comparisons": 160,
+        "agreements": 160,
+        "disagreements": 0,
+        "agreement_percent": 100.0,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.0,
+        "cohens_kappa": null,
+        "cohens_kappa_linear": null
+      },
+      "professional_tone": {
+        "comparisons": 160,
+        "agreements": 160,
+        "disagreements": 0,
+        "agreement_percent": 100.0,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.0,
+        "cohens_kappa": null,
+        "cohens_kappa_linear": null
+      },
+      "total": {
+        "comparisons": 160,
+        "agreements": 138,
+        "disagreements": 22,
+        "agreement_percent": 86.25,
+        "within_one_percent": 100.0,
+        "mean_absolute_difference": 0.1375,
+        "cohens_kappa": 0.0,
+        "cohens_kappa_linear": 0.0
+      }
+    },
+    "judge_vs_human": {
+      "by_evaluator": {},
+      "comparisons": 0,
+      "major_disagreement_threshold": 2,
+      "major_disagreement_count": 0,
+      "major_disagreement_percent": null,
+      "major_disagreements": []
+    },
+    "coverage": {
+      "graded_replies": 40,
+      "replies_with_human_labels": 0,
+      "unlabelled_replies": 40,
+      "label_status": "seeded_unverified",
+      "note": "Seeded labels are not independent human review; agreement against them is a smoke check, not a validated judge-reliability result."
+    },
+    "position_bias": {
+      "state": "measured",
+      "attempted": 3,
+      "valid_comparisons": 3,
+      "changed": 2,
+      "changed_percent": 66.66666666666667,
+      "judge_calls": 12
+    },
+    "verbosity_bias": {
+      "state": "measured",
+      "attempted": 3,
+      "valid_comparisons": 3,
+      "changed": 0,
+      "changed_percent": 0.0,
+      "average_score_change": 0.0,
+      "max_score_change": 0,
+      "judge_calls": null
+    },
+    "note": "Scores are model-assigned unless independent human review is attested; they are not a substitute for it."
+  },
+  "performance": {
+    "wall_clock_seconds": 651.85,
+    "system_latency_ms": {
+      "count": 40,
+      "mean": 5213.29925,
+      "median": 4492.264999999999,
+      "p95": 8365.524499999996,
+      "min": 2921.66,
+      "max": 12810.48,
+      "stdev": 1965.5422744977745
+    },
+    "judge_latency_ms": {
+      "count": 40,
+      "mean": 8712.656500000001,
+      "median": 8489.145,
+      "p95": 9863.891999999996,
+      "min": 7628.56,
+      "max": 11277.36,
+      "stdev": 837.6693601695857
+    },
+    "system_tokens": {
+      "prompt": 33761,
+      "completion": 1245,
+      "total": 35006,
+      "items_with_usage": 40
+    },
+    "judge_tokens": {
+      "prompt": 42480,
+      "completion": 2965,
+      "total": 45445,
+      "items_with_usage": 40
+    },
+    "experiments": {
+      "judge_calls": 15,
+      "judge_tokens": {
+        "prompt": 19486,
+        "completion": 676,
+        "total": 20162,
+        "items_with_usage": 15
+      },
+      "judge_latency_ms": {
+        "count": 15,
+        "mean": 6041.439173347317,
+        "median": 5515.181800001301,
+        "p95": 8533.744599984493,
+        "min": 4851.938299951144,
+        "max": 8577.003900078125,
+        "stdev": 1322.5975370171548
+      },
+      "note": "Extra judge calls made only by the bias experiments. The system and judge phases above do not include them, so add these figures to the run total."
+    },
+    "requests": {
+      "system": 40,
+      "judge": 40,
+      "experiment_judge_calls": 15
+    },
+    "throughput_items_per_minute": 3.6818286415586408,
+    "sequential_model_calls": 95,
+    "note": "Latency is per request, measured with time.perf_counter(). The harness runs sequentially, so wall-clock time is the sum of request latencies plus local processing."
+  },
+  "errors": {
+    "categories": [
+      "configuration",
+      "dataset_error",
+      "missing_field",
+      "system_error",
+      "api_error",
+      "timeout",
+      "network",
+      "model_missing",
+      "incomplete_output",
+      "refusal",
+      "judge_error",
+      "invalid_judge_output",
+      "internal"
+    ],
+    "system": {
+      "counts": {
+        "configuration": 0,
+        "dataset_error": 0,
+        "missing_field": 0,
+        "system_error": 0,
+        "api_error": 0,
+        "timeout": 0,
+        "network": 0,
+        "model_missing": 0,
+        "incomplete_output": 0,
+        "refusal": 0,
+        "judge_error": 0,
+        "invalid_judge_output": 0,
+        "internal": 0
+      },
+      "examples": {}
+    },
+    "judge": {
+      "counts": {
+        "configuration": 0,
+        "dataset_error": 0,
+        "missing_field": 0,
+        "system_error": 0,
+        "api_error": 0,
+        "timeout": 0,
+        "network": 0,
+        "model_missing": 0,
+        "incomplete_output": 0,
+        "refusal": 0,
+        "judge_error": 0,
+        "invalid_judge_output": 0,
+        "internal": 0
+      },
+      "examples": {}
+    }
+  },
+  "run": {
+    "run_id": "dev-v3-live-qwen25",
+    "response_id": "dev-v3-live-qwen25",
+    "prompt_version": "v3",
+    "items_without_result": [],
+    "mode": "live",
+    "replayed_judge_wall_clock_seconds": null,
+    "notes": [
+      "Metrics rebuilt from the saved rows of this run; no model was called."
+    ]
+  }
+}

@@ -359,44 +359,58 @@ Person 2 can begin designing the harness before the other components are finishe
 # 11. Repository Structure
 
 ```text
-project1-grader/
+project 1/
 │
 ├── README.md
 │
 ├── docs/
 │   ├── PERSON_1_DATASET.md
-│   ├── PERSON_2_HARNESS.md
+│   ├── PERSON_2_HARNESS.md            the requirement list
+│   ├── PERSON_2_HARNESS_IMPLEMENTATION.md  what was built, results, limits
+│   ├── PERSON_2_HANDOFFS.md           what each teammate gets and owes
 │   ├── PERSON_3_LLM_JUDGE.md
-│   └── PERSON_4_SYSTEM.md
+│   ├── PERSON_4_SYSTEM.md
+│   └── PERSON_4_FAILURE_ANALYSIS.md
 │
 ├── data/
-│   ├── golden.jsonl
-│   ├── dev.jsonl
-│   ├── test.jsonl
-│   ├── human_labels.jsonl
-│   └── labeling_guide.md
+│   ├── golden.jsonl           160 items: 40 dev + 120 test
+│   ├── dev.jsonl               40 development items
+│   ├── test.jsonl             120 held-out items
+│   ├── human_labels.jsonl     two seeded labels per reference answer
+│   ├── labeling_guide.md      the rubric humans and the judge share
+│   └── dataset_notes.md
 │
-├── harness/
-│   └── ...
+├── harness/                    the evaluation harness (Person 2)
+│   ├── README.md               install, configure, run, artefact reference
+│   ├── cli.py  config.py  dataset.py  prompts.py  providers.py
+│   ├── system_runner.py  judge_runner.py  metrics.py  cost.py
+│   ├── report.py  compare.py  results.py  errors.py
+│   ├── .env.example            local configuration template, never a real key
+│   └── tests/                  84 offline tests
 │
-├── system/
-│   └── ...
+├── judge/                      the LLM judge (Person 3)
+│   ├── client.py               grade() and prefer(), standard library only
+│   ├── run.py  evaluate_versions.py  compare_humans.py
+│   ├── prompts/judge_v1.txt  judge_v2.txt  CHANGELOG.md
+│   ├── HANDOFF_PERSON_2.md     the contract the harness integrates against
+│   ├── README.md
+│   └── tests/                  18 offline tests
 │
-├── prompts/
-│   ├── system_v1.txt
-│   ├── system_v2.txt
-│   ├── judge_v1.txt
-│   └── CHANGELOG.md
+├── system/                     the customer-support AI (Person 4)
+│   ├── run.py  metrics.py
 │
-├── results/
-│   ├── baseline.json
-│   ├── prompt_v2.json
-│   ├── prompt_v3.json
-│   └── ...
+├── prompts/                    the evaluated system's prompts (Person 4)
+│   ├── system_v1.txt  system_v2.txt  system_v3.txt
+│   └── CHANGELOG.md            what changed, why, and the measured effect
 │
-└── report/
-    ├── report.pdf
-    └── postmortem.md
+└── results/
+    ├── baseline_v1.jsonl  baseline_v2.jsonl  baseline_v3.jsonl   (Person 4)
+    ├── baseline_v1_review.jsonl                                     (Person 4)
+    ├── judge-comparison-v2-20260929/       saved judge grades      (Person 3)
+    └── harness/                             evaluation runs        (Person 2)
+        ├── dev-v1-replay/  dev-v2-replay/  dev-v3-replay/
+        ├── dev-v3-live-qwen25/
+        └── comparisons/prompt_versions.{json,md}
 ```
 
 ---
@@ -498,27 +512,118 @@ should be ignored by Git.
 
 The final repository must work from a clean clone.
 
-The README will eventually contain:
+## Installation
 
-### Installation
+Python 3.10 or newer. The evaluation harness, the judge, and the system all use
+the **standard library only** — there is nothing to `pip install`. A model
+provider is needed only to run a *live* evaluation.
 
-```text
-TODO
+```powershell
+python --version
+
+# local provider (no API key, no network egress)
+ollama pull qwen2.5:14b
+
+# optional: copy the local configuration once
+Copy-Item harness/.env.example harness/.env
 ```
 
-### Run Evaluation
+`harness/.env` is local and git-ignored. Keys are read from the environment
+only and are never written to a file:
 
-```text
-TODO
+```powershell
+$env:GROQ_API_KEY = "..."      # only if a hosted provider is configured
 ```
 
-### Results
+## Configuration
+
+| What | Where | Default |
+| --- | --- | --- |
+| Evaluated system provider / model / prompt | `SYSTEM_*` or `--system-*` | `ollama` / `qwen2.5:14b` / prompt `v1` |
+| Judge provider / model / prompt | `JUDGE_*` or `--judge-*` | `ollama` / `qwen3:14b` / `judge_v2` |
+| Token prices (USD per million) | `SYSTEM_*_PRICE_PER_M`, `JUDGE_*_PRICE_PER_M` | unset → cost reported as `null` |
+| Dataset | `--dataset` | `data/dev.jsonl` |
+
+Precedence: command-line option → environment variable → `harness/.env`.
+
+## Dataset location
 
 ```text
-TODO
+data/golden.jsonl      160 items (40 dev + 120 test), the full set
+data/dev.jsonl          40 items, the development split
+data/test.jsonl        120 items, the held-out split
+data/human_labels.jsonl 320 label rows (160 reference answers x 2 evaluators)
+data/labeling_guide.md the rubric both humans and the judge follow
 ```
 
-The final version of this README must replace these placeholders with the actual commands.
+## Evaluation command
+
+```powershell
+cd "project 1"
+
+# check the data and the configuration, spending nothing
+python -m harness validate --dataset data/dev.jsonl --check-prompts
+python -m harness run --preflight
+
+# the evaluation: dataset -> system -> judge -> metrics -> cost -> report
+python -m harness run --system-prompt v3 --run-id dev-v3 --output results/harness/dev-v3
+
+# with the reliability experiments (extra judge calls, costed separately)
+python -m harness run --system-prompt v3 --run-id dev-v3-bias --output results/harness/dev-v3-bias `
+    --verbosity-limit 20 --auto-pairs-from results/baseline_v1.jsonl `
+    --position-limit 20 --position-repeats 2
+
+# rebuild the report, print the cost, compare prompt versions
+python -m harness report --run results/harness/dev-v3
+python -m harness cost   --run results/harness/dev-v3
+python -m harness compare --run results/harness/dev-v1 --run results/harness/dev-v2 `
+    --run results/harness/dev-v3 --legacy --output results/harness/comparisons/prompt_versions
+```
+
+No model is needed to rebuild a report, a cost analysis, or the version
+comparison from saved rows:
+
+```powershell
+python -m harness report --run results/harness/dev-v3-replay
+```
+
+Exit codes: `0` success, `1` the run recorded item failures, `2` a configuration
+or dataset problem (nothing ran). An interrupted run keeps its completed rows:
+re-run the same command with `--resume`.
+
+## Results
+
+```text
+results/harness/<run_id>/
+    metadata.json    configuration, dataset and prompt hashes, reproduction command
+    system.jsonl     one row per item: reply, latency, tokens, warnings, error
+    judge.jsonl      one row per graded reply: scores, reason, latency, usage
+    items.jsonl      system + judge joined, exactly one row per evaluation item
+    errors.jsonl     every categorised failure
+    metrics.json     system, reliability, and performance metrics
+    cost.json        per item, per 1,000 requests, run total, 100x projection
+    report.md        human-readable summary
+    prompts/         the exact prompt texts the run used
+    position.jsonl   position-bias trials      (if that experiment ran)
+    verbosity.jsonl  verbosity-bias deltas     (if that experiment ran)
+
+results/harness/comparisons/prompt_versions.{json,md}
+```
+
+Committed results:
+
+| Run | What it shows |
+| --- | --- |
+| `dev-v1-replay`, `dev-v2-replay`, `dev-v3-replay` | the 40 development cases per prompt version, replayed from the saved replies and saved grades; average quality 7.850 / 7.875 / 7.925, identical to the saved judge comparison |
+| `dev-v3-live-qwen25` | one full live run: 40 items with measured latency and token counts, plus position and verbosity experiments |
+| `comparisons/prompt_versions` | prompt version, average /8, delta, latency, tokens, cost in one table |
+
+Current findings, and their limits, are written up in
+`docs/PERSON_2_HARNESS_IMPLEMENTATION.md`; the open gaps for each teammate are
+in `docs/PERSON_2_HANDOFFS.md`. In short: the harness is complete and
+reproducible, every score is currently model-assigned, and independent human
+labels for the evaluated replies are still needed before judge-human agreement
+can be reported.
 
 ---
 
@@ -526,40 +631,42 @@ The final version of this README must replace these placeholders with the actual
 
 The final project must contain:
 
-- [ ] 150+ golden dataset items
-- [ ] Labeling guide
-- [ ] Human labels
-- [ ] Human agreement measurement
-- [ ] Working evaluation harness
-- [ ] Structured evaluation results
-- [ ] LLM judge
-- [ ] Judge reliability measurement
-- [ ] Position-bias experiment
-- [ ] Verbosity-bias experiment
-- [ ] Prompt versions
-- [ ] Prompt changelog
-- [ ] Cost analysis
-- [ ] Latency measurements
-- [ ] Final report
+- [x] 150+ golden dataset items — 160 in `data/golden.jsonl`, 0 invalid records
+- [x] Labeling guide — `data/labeling_guide.md`
+- [ ] Human labels — seeded for the 160 reference answers; the **evaluated replies still need independent review**
+- [x] Human agreement measurement — 86.25% exact, 100% within one point (seeded labels)
+- [x] Working evaluation harness - `harness/`, one command, 84 offline tests
+- [x] Structured evaluation results — `results/harness/*/items.jsonl`, one row per item
+- [x] LLM judge — `judge/`, rubric prompts v1 and v2
+- [ ] Judge reliability measurement — human-vs-human done; **judge-vs-human blocked on the labels above**
+- [x] Position-bias experiment — `python -m harness run --auto-pairs-from ... --position-repeats 2`
+- [x] Verbosity-bias experiment — `python -m harness run --verbosity-limit N`
+- [x] Prompt versions — `prompts/system_v1..v3.txt`
+- [x] Prompt changelog — `prompts/CHANGELOG.md` with the measured effect of each change
+- [x] Cost analysis — `cost.json` per run; USD figures are `null` while the local provider has no price
+- [x] Latency measurements — per-phase mean/median/p95 in every `metrics.json`
+- [ ] Final report — inputs are in `results/harness/` and `docs/PERSON_2_*`
 - [ ] Postmortem
 
 ---
 
 # 18. Current Status
 
-| Component               | Status  |
-| ----------------------- | ------- |
-| Project structure       | Done    |
-| Task definition         | Defined |
-| Evaluation rubric       | Defined |
-| Person 1 dataset        | To do   |
-| Person 2 harness        | To do   |
-| Person 3 judge          | To do   |
-| Person 4 system         | To do   |
-| Human labeling          | To do   |
-| Reliability experiments | To do   |
-| Prompt experiments      | To do   |
-| Final report            | To do   |
+| Component               | Status  | Notes |
+| ----------------------- | ------- | ----- |
+| Project structure       | Done    | |
+| Task definition         | Defined | |
+| Evaluation rubric       | Defined | `data/labeling_guide.md` |
+| Person 1 dataset        | Done    | 160 items, 0 invalid; dev/test split; seeded reference labels |
+| Person 2 harness        | Done    | `harness/`, 5 commands, 84 tests, results in `results/harness/` |
+| Person 3 judge          | Done    | `judge/`, rubric prompts v1/v2, saved comparison for all three versions |
+| Person 4 system         | Done    | `system/`, prompts v1–v3, baselines, failure review |
+| Human labeling          | Partial | seeded reference labels only; the evaluated replies are **not** independently labeled |
+| Reliability experiments | Partial | position/verbosity screening runs exist; judge-human agreement blocked on the labels above |
+| Prompt experiments      | Done    | v1/v2/v3 compared; 7.850 / 7.875 / 7.925 (model-assigned, dev split) |
+| Cost and latency        | Done    | measured per run; USD figures `null` while the local provider has no price |
+| Final report            | To do   | the inputs are in `results/harness/` and `docs/PERSON_2_*` |
+| Postmortem              | To do   | |
 
 ---
 
