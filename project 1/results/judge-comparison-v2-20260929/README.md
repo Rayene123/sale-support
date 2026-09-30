@@ -2,11 +2,11 @@
 
 **v1, v2 and v3 are system prompt versions, not judge versions.**
 
-| System prompt | Judge / prompt | Answers | Average /8 | Read full answers |
-| --- | --- | ---: | ---: | --- |
-| v1 | qwen3:14b / judge_v2 | 40 | 7.850 | [Report](v1/report.md) |
-| v2 | qwen3:14b / judge_v2 | 40 | 7.875 | [Report](v2/report.md) |
-| v3 | qwen3:14b / judge_v2 | 40 | 7.925 | [Report](v3/report.md) |
+| System prompt | Judge / prompt       | Answers | Average /8 | Read full answers      |
+| ------------- | -------------------- | ------: | ---------: | ---------------------- |
+| v1            | qwen3:14b / judge_v2 |      40 |      7.850 | [Report](v1/report.md) |
+| v2            | qwen3:14b / judge_v2 |      40 |      7.875 | [Report](v2/report.md) |
+| v3            | qwen3:14b / judge_v2 |      40 |      7.925 | [Report](v3/report.md) |
 
 ## Interpretation
 

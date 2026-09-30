@@ -60,20 +60,20 @@ Supported wire formats are Ollama chat, OpenAI Chat Completions and OpenAI Respo
 
 ## Configuration
 
-| Option | Meaning / default |
-| --- | --- |
-| `--provider` | `ollama`, `groq`, `openai`, `compatible`; repeat to run several presets sequentially |
-| `--model` | Model ID; required for OpenAI/compatible unless supplied in the environment |
-| `--base-url` | Override the preset endpoint |
-| `--api-format` | `ollama`, `chat`, or `responses` |
-| `--api-key-env` | Environment variable name holding the key; local compatible servers need no key by default |
-| `--temperature` | `0`; use `omit` only when needed and document the difference |
-| `--max-tokens` | `256`; mapped to the appropriate API output-limit field |
-| `--token-parameter` | Chat API only: `max_tokens` or `max_completion_tokens` |
-| `--reasoning-effort` | Optional; passed only when explicitly configured for chat/responses |
-| `--timeout` | `120` seconds for the HTTP connection/socket operations; not a strict total wall-clock deadline |
-| `--items` | Defaults to `benchmark/Data/items.jsonl`; accepts JSONL or a JSON array |
-| `--results-dir` | Defaults to `benchmark/results`; prefer a named subdirectory for new runs |
+| Option               | Meaning / default                                                                               |
+| -------------------- | ----------------------------------------------------------------------------------------------- |
+| `--provider`         | `ollama`, `groq`, `openai`, `compatible`; repeat to run several presets sequentially            |
+| `--model`            | Model ID; required for OpenAI/compatible unless supplied in the environment                     |
+| `--base-url`         | Override the preset endpoint                                                                    |
+| `--api-format`       | `ollama`, `chat`, or `responses`                                                                |
+| `--api-key-env`      | Environment variable name holding the key; local compatible servers need no key by default      |
+| `--temperature`      | `0`; use `omit` only when needed and document the difference                                    |
+| `--max-tokens`       | `256`; mapped to the appropriate API output-limit field                                         |
+| `--token-parameter`  | Chat API only: `max_tokens` or `max_completion_tokens`                                          |
+| `--reasoning-effort` | Optional; passed only when explicitly configured for chat/responses                             |
+| `--timeout`          | `120` seconds for the HTTP connection/socket operations; not a strict total wall-clock deadline |
+| `--items`            | Defaults to `benchmark/Data/items.jsonl`; accepts JSONL or a JSON array                         |
+| `--results-dir`      | Defaults to `benchmark/results`; prefer a named subdirectory for new runs                       |
 
 Without `--provider`, `PROVIDERS` is read from the environment (default `ollama`). Per-provider settings use `OLLAMA_MODEL`, `GROQ_MODEL`, `OPENAI_MODEL`, or `COMPATIBLE_MODEL`, plus the corresponding `_BASE_URL` and `_API_FORMAT` variables. `OLLAMA_URL` is also supported. Explicit CLI settings win. Shared CLI model/endpoint/key overrides require a single provider; use separate invocations for different model-specific settings.
 
@@ -102,12 +102,12 @@ The import JSON must contain an `answers` object mapping every dataset ID to an 
 
 ## Recorded results
 
-| Model | Correct | Accuracy | p50 / p95 (ms) | Evidence |
-| --- | --- | --- | --- | --- |
-| Qwen2.5 14B / Ollama | 72/75 | 96.00% | 943.8 / 1066.5 | Recorded model run |
-| GPT-OSS 20B / Groq | 69/75 | 92.00% | 2401.9 / 2659.2 | Recorded API run |
-| TinyLlama 1.1B / Ollama | 0/75 | 0.00% | 557.7 / 1586.5 | All 75 outputs invalid under the exact-label rule |
-| GPT-6 Astra / chat | 73/75 | 97.33% | N/A | Non-blind supplementary answers; labels were visible |
+| Model                   | Correct | Accuracy | p50 / p95 (ms)  | Evidence                                             |
+| ----------------------- | ------- | -------- | --------------- | ---------------------------------------------------- |
+| Qwen2.5 14B / Ollama    | 72/75   | 96.00%   | 943.8 / 1066.5  | Recorded model run                                   |
+| GPT-OSS 20B / Groq      | 69/75   | 92.00%   | 2401.9 / 2659.2 | Recorded API run                                     |
+| TinyLlama 1.1B / Ollama | 0/75    | 0.00%    | 557.7 / 1586.5  | All 75 outputs invalid under the exact-label rule    |
+| GPT-6 Astra / chat      | 73/75   | 97.33%   | N/A             | Non-blind supplementary answers; labels were visible |
 
 These describe the current repository snapshot, not automatic measurements of every future run. The report's Astra result is not a controlled ranking against the measured models. Hardware, historical run dates, independent dual label review and a blind flagship API run remain missing from the recorded evidence.
 
@@ -137,11 +137,11 @@ Open `http://127.0.0.1:8000/docs` for the FastAPI request schemas. The applicati
 
 The team must confirm names and individual responsibilities before submission. Repository contributors observed on GitHub are listed below; no unverified work attribution is assigned.
 
-| Contributor | Contribution record |
-| --- | --- |
-| Rayene123 | Setup enviroment and tested the tiny llama model assisted in documentation|
-| notSelimm | Tested the qwen 14b model and created the dataset assisted in documentation|
-| oussama44444 | Tested the groq model and assisted in creating the dataset assisted in documentation|
-| OmarAbid1 | Rupdate runner/scorer and assisted in documentation|
+| Contributor  | Contribution record                                                                  |
+| ------------ | ------------------------------------------------------------------------------------ |
+| Rayene123    | Setup enviroment and tested the tiny llama model assisted in documentation           |
+| notSelimm    | Tested the qwen 14b model and created the dataset assisted in documentation          |
+| oussama44444 | Tested the groq model and assisted in creating the dataset assisted in documentation |
+| OmarAbid1    | Rupdate runner/scorer and assisted in documentation                                  |
 
 AI assistance was used for the runner/scorer adaptation, verification tests, report assembly and supplementary chat answers. Team members remain responsible for reviewing the implementation and explaining their submitted work.

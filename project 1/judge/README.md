@@ -43,7 +43,11 @@ By default this grades the replies in `human_labels.jsonl` associated with the d
 The judge accepts Person 4's `results/baseline_v1.jsonl`, `results/baseline_v2.jsonl`, and merged `results/baseline_v3.jsonl` directly. UTF-16 and UTF-8 are supported. The files use fields named `id` and `response`; the judge converts them while reading and uses the filename as the response set ID. It also accepts a UTF-8 JSONL file with one object per line using either schema:
 
 ```json
-{"item_id":"P1-001","response_id":"baseline-v1","response_text":"Your order is pending."}
+{
+  "item_id": "P1-001",
+  "response_id": "baseline-v1",
+  "response_text": "Your order is pending."
+}
 ```
 
 ```powershell
@@ -79,7 +83,11 @@ For a verbosity screening test, add `--verbosity-limit 10`. This appends fixed p
 For position bias create a JSONL file of manually reviewed, distinct answer pairs:
 
 ```json
-{"item_id":"P1-001","answer_a":"Your order is pending.","answer_b":"Your order has been delivered."}
+{
+  "item_id": "P1-001",
+  "answer_a": "Your order is pending.",
+  "answer_b": "Your order has been delivered."
+}
 ```
 
 This example is based on the existing pending-order development item. Prepare around 10 varied pairs for an initial experiment; the sample size is a starting choice, not an assignment requirement.

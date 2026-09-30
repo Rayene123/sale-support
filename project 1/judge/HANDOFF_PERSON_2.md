@@ -9,10 +9,10 @@ The judge is on branch `persona-3` under `project 1/judge/`. Merge that branch o
 `results/judge-comparison-v2-20260929/comparison.json` contains the completed comparison of the same 40 development cases per version:
 
 | System version | Successful replies | Average quality /8 |
-| --- | ---: | ---: |
-| v1 | 40 | 7.85 |
-| v2 | 40 | 7.875 |
-| v3 | 40 | 7.925 |
+| -------------- | -----------------: | -----------------: |
+| v1             |                 40 |               7.85 |
+| v2             |                 40 |              7.875 |
+| v3             |                 40 |              7.925 |
 
 Each version directory contains `results.jsonl` (one record per item), `reliability.json` (coverage and score statistics), and `metadata.json` (model, prompt, hashes and settings). Read `result.scores` and `result.reason` from successful result rows. No live model is needed to consume these saved results. Only a new grading run needs Ollama or another configured provider.
 
@@ -68,7 +68,11 @@ The five criterion names/ranges and total are defined in `judge/client.py` and t
 The standalone runner accepts:
 
 ```json
-{"item_id":"P1-001","response_id":"baseline_v1","response_text":"Your order is pending."}
+{
+  "item_id": "P1-001",
+  "response_id": "baseline_v1",
+  "response_text": "Your order is pending."
+}
 ```
 
 Existing Person 4 baseline files can be passed directly:

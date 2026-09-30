@@ -13,25 +13,26 @@ as an independent third measurement of the prompt versions.
 ### What I need back
 
 1. **A decision on the split.** All three versions were scored on the 40 dev
-  items, which is the split you iterated on. Confirm the held-out run: one
-  evaluation of the chosen prompt on `--split test` (120 items, never used for
-  tuning). I will run it as soon as you pick the prompt.
+   items, which is the split you iterated on. Confirm the held-out run: one
+   evaluation of the chosen prompt on `--split test` (120 items, never used for
+   tuning). I will run it as soon as you pick the prompt.
 2. **The v2 source metadata is corrected.** The 40 v2 rows now record
-  `prompt_version: v2`; replay runs should be regenerated if clean v2 evidence
-  is required.
+   `prompt_version: v2`; replay runs should be regenerated if clean v2 evidence
+   is required.
 3. **A costed claim for the changelog.** `prompts/CHANGELOG.md` asks for cost per
-  version. Every run so far is `local_provider`, so cost is `null`. To get a real
-  number, either price a hosted run (`JUDGE_INPUT_PRICE_PER_M`,
-  `JUDGE_OUTPUT_PRICE_PER_M`) or state the local-compute assumption
-  (`HARNESS_LOCAL_COST_PER_HOUR`), which the report labels
-  `estimated_from_assumption`.
+   version. Every run so far is `local_provider`, so cost is `null`. To get a real
+   number, either price a hosted run (`JUDGE_INPUT_PRICE_PER_M`,
+   `JUDGE_OUTPUT_PRICE_PER_M`) or state the local-compute assumption
+   (`HARNESS_LOCAL_COST_PER_HOUR`), which the report labels
+   `estimated_from_assumption`.
 4. **Per-failure attribution.** The harness records failed items and the judge's
-  reason for the lowest scores, and the saved baseline responses document the
-  v1 failures. Aligning your review with the
-  harness's `items.jsonl` is the cheapest way to make the failure analysis in the
-  final report verifiable.
+   reason for the lowest scores, and the saved baseline responses document the
+   v1 failures. Aligning your review with the
+   harness's `items.jsonl` is the cheapest way to make the failure analysis in the
+   final report verifiable.
 
 ---
+
 ## To everyone — final results and the reproducible command
 
 ### The command
@@ -57,13 +58,13 @@ python -m harness compare --run results/harness/dev-v1 --run results/harness/dev
 
 ### What is already committed
 
-| Path | Contents |
-| --- | --- |
+| Path                                                                 | Contents                                                                                                                                 |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `results/harness/dev-v1-replay/`, `dev-v2-replay/`, `dev-v3-replay/` | 40-item runs per prompt version, replayed from the saved baselines and saved grades — identical quality figures to Person 3's comparison |
-| `results/harness/dev-v3-live-qwen25/` | one full live run: 40 items, real latency and token counts, position and verbosity experiments |
-| `results/harness/comparisons/prompt_versions.{json,md}` | the version table |
-| `harness/README.md` | install, configuration, commands, artefacts, metrics, tests |
-| `docs/PERSON_2_HARNESS_IMPLEMENTATION.md` | what was built, results, limitations |
+| `results/harness/dev-v3-live-qwen25/`                                | one full live run: 40 items, real latency and token counts, position and verbosity experiments                                           |
+| `results/harness/comparisons/prompt_versions.{json,md}`              | the version table                                                                                                                        |
+| `harness/README.md`                                                  | install, configuration, commands, artefacts, metrics, tests                                                                              |
+| `docs/PERSON_2_HARNESS_IMPLEMENTATION.md`                            | what was built, results, limitations                                                                                                     |
 
 The replay runs need no model: `report`, `cost`, and `compare` all work from a
 clean clone on the committed rows alone.
@@ -74,11 +75,11 @@ clean clone on the committed rows alone.
 project is currently model-assigned. The labels on file cover
 `response_id: "reference_answer"`, so:
 
-* the measured averages (7.85 / 7.875 / 7.925) are judge-vs-judge comparisons,
+- the measured averages (7.85 / 7.875 / 7.925) are judge-vs-judge comparisons,
   not agreement with a human standard;
-* judge-vs-human agreement is **not reported** — the harness says so in each
+- judge-vs-human agreement is **not reported** — the harness says so in each
   run's notes rather than printing a number it cannot support;
-* the prompt-version deltas are differences between small numbers produced by one
+- the prompt-version deltas are differences between small numbers produced by one
   model on the split that was tuned on.
 
 Closing that gap is labeling work, not engineering: for each evaluated reply,
@@ -106,24 +107,24 @@ back. Code: `harness/`. Usage: `harness/README.md`. Numbers:
 
 ### What you get
 
-* `python -m harness validate --dataset data/golden.jsonl --check-prompts` loads
+- `python -m harness validate --dataset data/golden.jsonl --check-prompts` loads
   every file, validates each record, and prints statistics. It never silently
   drops a record: each rejected record is reported as `file:line: item id —
-  problem`, and by default any invalid record **stops the run** (exit code 2) so
+problem`, and by default any invalid record **stops the run** (exit code 2) so
   a broken file can never be half-evaluated. `--allow-invalid` keeps going and
   lists them.
-* The same statistics land in every run's `metadata.json.dataset.statistics` and
+- The same statistics land in every run's `metadata.json.dataset.statistics` and
   in `metrics.json` under `run`, so the report can quote them without re-running
   anything.
 
 ### Current state of the repository data
 
-| File | Items | Splits | Invalid records |
-| --- | ---: | --- | ---: |
-| `data/golden.jsonl` | 160 | dev 40, test 120 | 0 |
-| `data/dev.jsonl` | 40 | dev 40 | 0 |
-| `data/test.jsonl` | 120 | test 120 | 0 |
-| `data/human_labels.jsonl` | 320 label rows (160 replies × 2) | — | 0 |
+| File                      |                            Items | Splits           | Invalid records |
+| ------------------------- | -------------------------------: | ---------------- | --------------: |
+| `data/golden.jsonl`       |                              160 | dev 40, test 120 |               0 |
+| `data/dev.jsonl`          |                               40 | dev 40           |               0 |
+| `data/test.jsonl`         |                              120 | test 120         |               0 |
+| `data/human_labels.jsonl` | 320 label rows (160 replies × 2) | —                |               0 |
 
 All 160 items validate: `id`, `customer_message`, `order_context` with
 `order_number`/`status`/`items`, and every line item with
@@ -144,16 +145,28 @@ splits, so the held-out half is
    JSONL row per evaluator per reply:
 
    ```json
-   {"item_id": "DEV-001", "response_id": "dev-v3-live", "response_text": "the exact graded text",
-    "evaluator_id": "1", "scores": {"factual_correctness": 2, "completeness": 2,
-    "no_hallucination": 2, "relevance": 1, "professional_tone": 1, "total": 8},
-    "explanation": "..."}
+   {
+     "item_id": "DEV-001",
+     "response_id": "dev-v3-live",
+     "response_text": "the exact graded text",
+     "evaluator_id": "1",
+     "scores": {
+       "factual_correctness": 2,
+       "completeness": 2,
+       "no_hallucination": 2,
+       "relevance": 1,
+       "professional_tone": 1,
+       "total": 8
+     },
+     "explanation": "..."
+   }
    ```
 
    `response_id` must equal the run's reply set id, and `response_text` must be
    the graded text. When the labels are genuinely independent, pass
    `--labels-reviewed` so the run states that in `metadata.json` instead of
    marking the agreement as a smoke check.
+
 3. **A note on the seeded reference labels.** The 160 reference-answer labels
    agree 86.25% exactly (100% within one point, mean |diff| 0.1375) — but
    Cohen's kappa is `0.0`, because evaluator 1 gave 8/8 to all 160 items, so
@@ -168,19 +181,19 @@ splits, so the held-out half is
 
 ### What you get
 
-* The harness calls your `judge.Judge` as a library and stores, per graded
+- The harness calls your `judge.Judge` as a library and stores, per graded
   reply: the five criterion scores, the total, the reason, the judge model, the
   judge prompt version **and its SHA-256**, latency, token usage, and
   `declared_total` / `total_corrected` so your judge's own arithmetic slips stay
   visible. `judge.jsonl` in every run directory.
-* `metrics.json → reliability` for each run: human-vs-human agreement per
+- `metrics.json → reliability` for each run: human-vs-human agreement per
   criterion, judge-vs-human agreement **per evaluator** (never averaged away),
   major disagreements of ≥ 2 total points listed item by item with both reasons,
   labelled coverage, and the two bias experiments with their sample sizes.
-* `position.jsonl` and `verbosity.jsonl` in the run directory: every trial, the
+- `position.jsonl` and `verbosity.jsonl` in the run directory: every trial, the
   mapped verdict per order, the recorded extra-call usage, and the stored reply
   texts, so a screening result can be re-read rather than taken on trust.
-* Verification of your saved results: replaying
+- Verification of your saved results: replaying
   `results/judge-comparison-v2-20260929/{v1,v2,v3}/results.jsonl` through the
   harness reproduces your quality figures exactly (7.850 / 7.875 / 7.925) and
   your latency and token figures, and all 120 stored `response_text` values match
@@ -215,14 +228,14 @@ is never hidden inside the per-item cost.
    results at the sample sizes I could afford: a position pair costs 2 judge
    calls per repeat, and 20 pairs × 2 repeats is 80 extra calls. Whatever sample
    you use, state it next to the percentage, and remember that a pair which
-   disagrees on *any* repeat is counted as order-sensitive — that also captures
+   disagrees on _any_ repeat is counted as order-sensitive — that also captures
    ordinary model variation at temperature 0, so a low percentage is "no
    disagreement was observed in these pairs", not "the judge is unbiased".
-    First screening results from the live run (`dev-v3-live-qwen25`, judge
-    `qwen2.5:14b`, `judge_v2` prompt): **position 2 of 3 pairs order-sensitive
-    (66.7%), verbosity 0 of 3 replies changed score**. The position signal is
-    worth the larger run; the verbosity one is consistent with the earlier
-    tests but too small to lean on.
+   First screening results from the live run (`dev-v3-live-qwen25`, judge
+   `qwen2.5:14b`, `judge_v2` prompt): **position 2 of 3 pairs order-sensitive
+   (66.7%), verbosity 0 of 3 replies changed score**. The position signal is
+   worth the larger run; the verbosity one is consistent with the earlier
+   tests but too small to lean on.
 3. **Read the padded texts before quoting a verbosity delta.** Padding changes
    tone and can change relevance; the stored `padded_text` is in
    `verbosity.jsonl` for exactly this reason.
@@ -233,7 +246,7 @@ is never hidden inside the per-item cost.
 
 ### What you get
 
-* One command per prompt version, and a comparison table that answers "did the
+- One command per prompt version, and a comparison table that answers "did the
   change help?":
 
   ```powershell
@@ -242,22 +255,22 @@ is never hidden inside the per-item cost.
       --run results/harness/dev-v3 --legacy --output results/harness/comparisons/prompt_versions
   ```
 
-* Per prompt version: average /8, delta against the baseline, full score
+- Per prompt version: average /8, delta against the baseline, full score
   distribution, per-criterion averages, mean and p95 system latency, system and
   judge token counts, and cost — plus per-item rows, every failed item with its
   category and message, and the lowest-scored items with the judge's reason.
-* The same figures are re-derivable from the saved rows with
+- The same figures are re-derivable from the saved rows with
   `python -m harness report --run <dir>`; no model call is needed to rebuild a
   report.
 
 ### What the committed runs show
 
-| Prompt | Average /8 | Δ | Factual | Complete | No halluc. | Mean system ms | System tokens |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| v1 | 7.850 | — | 1.950 | 1.950 | 1.950 | 3,908.3 | 28,466 |
-| v2 | 7.875 | +0.025 | 1.950 | 1.975 | 1.950 | 4,570.2 | 35,318 |
-| v3 | 7.925 | +0.075 | 2.000 | 1.925 | 2.000 | 5,757.3 | 39,823 |
-| v3 live (qwen2.5:14b) | 7.950 | — | 1.975 | 1.975 | 2.000 | 5,213.3 | 35,006 |
+| Prompt                | Average /8 |      Δ | Factual | Complete | No halluc. | Mean system ms | System tokens |
+| --------------------- | ---------: | -----: | ------: | -------: | ---------: | -------------: | ------------: |
+| v1                    |      7.850 |      — |   1.950 |    1.950 |      1.950 |        3,908.3 |        28,466 |
+| v2                    |      7.875 | +0.025 |   1.950 |    1.975 |      1.950 |        4,570.2 |        35,318 |
+| v3                    |      7.925 | +0.075 |   2.000 |    1.925 |      2.000 |        5,757.3 |        39,823 |
+| v3 live (qwen2.5:14b) |      7.950 |      — |   1.975 |    1.975 |      2.000 |        5,213.3 |        35,006 |
 
 v3 is the best mean and the most expensive: +47% system latency and +40% system
 tokens against v1 for +0.075/8. Say that trade-off explicitly in the changelog
@@ -280,8 +293,8 @@ as an independent third measurement of the prompt versions.
    evaluation of the chosen prompt on `--split test` (120 items, never used for
    tuning). I will run it as soon as you pick the prompt.
 2. **The v2 source metadata is corrected.** The 40 v2 rows now record
-  `prompt_version: v2`; replay runs should be regenerated if clean v2 evidence
-  is required.
+   `prompt_version: v2`; replay runs should be regenerated if clean v2 evidence
+   is required.
 3. **A costed claim for the changelog.** `prompts/CHANGELOG.md` asks for cost per
    version. Every run so far is `local_provider`, so cost is `null`. To get a real
    number, either price a hosted run (`JUDGE_INPUT_PRICE_PER_M`,
@@ -289,8 +302,8 @@ as an independent third measurement of the prompt versions.
    (`HARNESS_LOCAL_COST_PER_HOUR`), which the report labels
    `estimated_from_assumption`.
 4. **Per-failure attribution.** The harness records failed items and the judge's
-  reason for the lowest scores, and the saved baseline responses document the
-  v1 failures. Aligning your review with the
+   reason for the lowest scores, and the saved baseline responses document the
+   v1 failures. Aligning your review with the
    harness's `items.jsonl` is the cheapest way to make the failure analysis in the
    final report verifiable.
 
@@ -321,13 +334,13 @@ python -m harness compare --run results/harness/dev-v1 --run results/harness/dev
 
 ### What is already committed
 
-| Path | Contents |
-| --- | --- |
+| Path                                                                 | Contents                                                                                                                                 |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `results/harness/dev-v1-replay/`, `dev-v2-replay/`, `dev-v3-replay/` | 40-item runs per prompt version, replayed from the saved baselines and saved grades — identical quality figures to Person 3's comparison |
-| `results/harness/dev-v3-live-qwen25/` | one full live run: 40 items, real latency and token counts, position and verbosity experiments |
-| `results/harness/comparisons/prompt_versions.{json,md}` | the version table |
-| `harness/README.md` | install, configuration, commands, artefacts, metrics, tests |
-| `docs/PERSON_2_HARNESS_IMPLEMENTATION.md` | what was built, results, limitations |
+| `results/harness/dev-v3-live-qwen25/`                                | one full live run: 40 items, real latency and token counts, position and verbosity experiments                                           |
+| `results/harness/comparisons/prompt_versions.{json,md}`              | the version table                                                                                                                        |
+| `harness/README.md`                                                  | install, configuration, commands, artefacts, metrics, tests                                                                              |
+| `docs/PERSON_2_HARNESS_IMPLEMENTATION.md`                            | what was built, results, limitations                                                                                                     |
 
 The replay runs need no model: `report`, `cost`, and `compare` all work from a
 clean clone on the committed rows alone.
@@ -338,11 +351,11 @@ clean clone on the committed rows alone.
 project is currently model-assigned. The labels on file cover
 `response_id: "reference_answer"`, so:
 
-* the measured averages (7.85 / 7.875 / 7.925) are judge-vs-judge comparisons,
+- the measured averages (7.85 / 7.875 / 7.925) are judge-vs-judge comparisons,
   not agreement with a human standard;
-* judge-vs-human agreement is **not reported** — the harness says so in each
+- judge-vs-human agreement is **not reported** — the harness says so in each
   run's notes rather than printing a number it cannot support;
-* the prompt-version deltas are differences between small numbers produced by one
+- the prompt-version deltas are differences between small numbers produced by one
   model on the split that was tuned on.
 
 Closing that gap is labeling work, not engineering: for each evaluated reply,
