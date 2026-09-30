@@ -32,7 +32,7 @@ class VersionTests(unittest.TestCase):
                 self.assertEqual(len(calls), 3)
                 self.assertNotIn("--pairs", calls[0])
                 self.assertIn("--pairs", calls[2])
-                pairs = [json.loads(line) for line in (output / "position_pairs.jsonl").read_text(encoding="utf-8").splitlines()]
+                pairs = [json.loads(line) for line in (output / "inputs" / "position_pairs.jsonl").read_text(encoding="utf-8").splitlines()]
                 self.assertEqual(len(pairs), 10)
                 self.assertTrue(all(p["answer_a"] != p["answer_b"] for p in pairs))
                 self.assertEqual(len({p["item_id"] for p in pairs}), 10)

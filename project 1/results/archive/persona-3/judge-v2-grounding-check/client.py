@@ -129,13 +129,6 @@ class Judge:
         result, metadata = self._request(self.prompt, {
             "customer_message": customer_message, "order_context": order_context,
             "response_text": response_text})
-        # Criteria are the model's judgments; arithmetic is deterministic.
-        # Preserve the provider's original total in metadata/raw_response.
-        if isinstance(result, dict) and all(type(result.get(k)) is int and 0 <= result[k] <= limit for k, limit in LIMITS.items()) and type(result.get("total")) is int:
-            calculated = sum(result[k] for k in LIMITS)
-            metadata["declared_total"] = result["total"]
-            metadata["total_corrected"] = result["total"] != calculated
-            result = {**result, "total": calculated}
         try:
             validate_scores(result)
         except ValueError as exc:

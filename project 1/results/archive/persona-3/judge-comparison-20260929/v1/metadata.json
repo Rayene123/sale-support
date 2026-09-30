@@ -1,17 +1,16 @@
 {
-  "started_utc": "2026-09-29T22:35:21.768039+00:00",
+  "started_utc": "2026-09-29T21:08:53.553038+00:00",
   "model": "qwen3:14b",
-  "prompt_version": "judge_v2",
   "base_url": "http://localhost:11434",
   "temperature": 0,
   "max_tokens": 2048,
-  "timeout_seconds": 240.0,
-  "prompt_sha256": "f1d4b25e4641662eab8eb06838d2ffa6b0d52583c56252afe8f0e8e9eb9e9ec6",
+  "timeout_seconds": 120.0,
+  "prompt_sha256": "9cb3404b811dce56799606b88ac69b911cee4d225f881de92006ed14bc27783a",
   "pairwise_prompt_suffix": "See client.py prefer() in saved source snapshot",
   "input_hashes": {
     "dataset": "9ef445a37f03681fa84200d02ec55441ea3b9a4d57f19f074218049fb446775b",
     "labels": "eeae00ac30f397015e61dca7ca807792183ba6864d5d6d86d9227afa478f4489",
-    "responses": "68e1100d18033c281d70e449edbc57726410f75bb4a2f5ea41501fdab6fbac22"
+    "responses": "15bab5536b93d96ac511b2a7a5f38c15b72f46d7a64defcaa7ed10f24b6d1fad"
   },
   "limit": null,
   "verbosity_limit": 0,

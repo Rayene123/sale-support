@@ -173,6 +173,7 @@ def main(argv=None):
     parser.add_argument("--verbosity-limit", type=int, default=0)
     parser.add_argument("--labels-reviewed", action="store_true", help="Assert that labels were independently human reviewed")
     parser.add_argument("--output", type=Path, required=True, help="New run directory; existing paths are refused")
+    parser.add_argument("--snapshot-dir", type=Path, help="Shared historical snapshot directory")
     args = parser.parse_args(argv)
     if (args.limit is not None and args.limit < 1) or args.verbosity_limit < 0:
         parser.error("Limits must be positive (--verbosity-limit may be zero)")
@@ -192,21 +193,18 @@ def main(argv=None):
         parser.error(str(exc))
     paths = {"dataset": args.dataset, "labels": args.labels,
              "responses": args.responses, "pairs": args.pairs}
+    from .snapshots import save_snapshot
+    snapshot = save_snapshot(args.output, args.snapshot_dir, judge.prompt)
     write_json(args.output / "metadata.json", {
         "started_utc": datetime.now(timezone.utc).isoformat(), "model": judge.model,
         "prompt_version": judge.prompt_version,
         "base_url": judge.base, "temperature": 0, "max_tokens": judge.max_tokens,
         "timeout_seconds": judge.timeout, "prompt_sha256": judge.prompt_hash,
-        "pairwise_prompt_suffix": "See client.py prefer() in saved source snapshot",
+        "pairwise_prompt_suffix": "See source_snapshot client.py prefer()",
+        "source_snapshot": snapshot,
         "input_hashes": {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in paths.items() if path},
         "limit": args.limit, "verbosity_limit": args.verbosity_limit,
         "labels_reviewed": args.labels_reviewed})
-    # Save exact prompt/code for later reproduction, never save .env or keys.
-    for name in ("client.py", "run.py"):
-        with (args.output / name).open("x", encoding="utf-8") as stream:
-            stream.write((Path(__file__).parent / name).read_text(encoding="utf-8"))
-    with (args.output / "judge_prompt.txt").open("x", encoding="utf-8") as stream:
-        stream.write(judge.prompt)
     records, verbosity, positions = [], [], []
     with (args.output / "results.jsonl").open("x", encoding="utf-8") as stream:
         for response in responses[:args.limit]:
@@ -253,7 +251,13 @@ def main(argv=None):
         "note": "Verdicts mapped to original reply identities. One swap measures observed sensitivity; repeated trials are needed to distinguish order effects from random variability."}
     report["completed_utc"] = datetime.now(timezone.utc).isoformat()
     write_json(args.output / "reliability.json", report)
-    print(f"Saved results in {args.output}")
+    for name in ("position.jsonl", "verbosity.jsonl"):
+        path = args.output / name
+        if path.exists() and path.stat().st_size == 0:
+            path.unlink()
+    from .readable import render_run
+    render_run(args.output, items)
+    print(f"Saved results in {args.output}; open report.md to read them")
     return 1 if report["failed_responses"] or any(r["delta"] is None for r in verbosity) or any(r["changed"] is None for r in positions) else 0
 
 

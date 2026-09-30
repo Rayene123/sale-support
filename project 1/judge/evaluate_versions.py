@@ -42,7 +42,9 @@ def main(argv=None):
             selected.append(key)
             categories.add(category)
     selected = (selected + [k for k in candidates if k not in selected])[:10]
-    pairs = args.output / "position_pairs.jsonl"
+    (args.output / "inputs").mkdir()
+    (args.output / "archive").mkdir()
+    pairs = args.output / "inputs" / "position_pairs.jsonl"
     with pairs.open("x", encoding="utf-8") as stream:
         for key in selected:
             stream.write(json.dumps({"item_id": key, "answer_a": versions["v1"][1][key]["response_text"],
@@ -50,7 +52,8 @@ def main(argv=None):
     comparison, failed = {}, False
     for version, (path, _) in versions.items():
         output = args.output / version
-        options = ["--responses", str(path), "--output", str(output)]
+        options = ["--responses", str(path), "--output", str(output),
+                   "--snapshot-dir", str(args.output / "snapshot")]
         if version == "v3":
             options += ["--verbosity-limit", "10"]
             if selected:
@@ -58,12 +61,16 @@ def main(argv=None):
         failed |= bool(run_judge(options))
         report = json.loads((output / "reliability.json").read_text(encoding="utf-8"))
         comparison[version] = {k: report[k] for k in ("successful_responses", "failed_responses", "unlabeled_responses", "quality", "position_bias", "verbosity_bias")}
-        write_json(args.output / f"comparison_{version}.json", comparison[version])
+        write_json(args.output / "archive" / f"comparison_{version}.json", comparison[version])
     write_json(args.output / "comparison.json", {
         "versions": comparison,
         "human_validation": "Pending: existing seeded labels cover reference answers, not these system replies.",
         "bias_sample": "First ten distinct v1/v3 pairs, covering categories first; screening only. Padding requires review.",
         "dataset": "40 development items; no final test-set evaluation performed."})
+    from .readable import main as write_readable
+    # Test doubles and interrupted runs may not have full evidence files.
+    if all((args.output / v / "results.jsonl").exists() for v in versions):
+        write_readable(["--run", str(args.output)])
     return int(failed)
 
 

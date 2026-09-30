@@ -194,7 +194,6 @@ def main(argv=None):
              "responses": args.responses, "pairs": args.pairs}
     write_json(args.output / "metadata.json", {
         "started_utc": datetime.now(timezone.utc).isoformat(), "model": judge.model,
-        "prompt_version": judge.prompt_version,
         "base_url": judge.base, "temperature": 0, "max_tokens": judge.max_tokens,
         "timeout_seconds": judge.timeout, "prompt_sha256": judge.prompt_hash,
         "pairwise_prompt_suffix": "See client.py prefer() in saved source snapshot",
