@@ -12,3 +12,7 @@ venv/
 project 1/harness/.env
 project 1/judge/.env
 *.py[cod]
+
+# Project 2: raw source PDFs are downloaded by the build and hash-verified, so
+# they are not committed. The processed corpus is committed instead.
+project 2/data/raw/*.pdf

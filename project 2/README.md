@@ -46,6 +46,7 @@ project 2/
 ├── tests/
 └── docs/
     ├── PERSON_1_CORPUS.md
+    ├── CORPUS_SCHEMA.md
     ├── PERSON_2_RETRIEVAL.md
     ├── PERSON_3_SERVICE.md
     └── PERSON_4_EVALUATION.md
