@@ -28,6 +28,7 @@ from .sources import (
     PENDING_TEXTS,
     REJECTED_SOURCES,
     SOURCES,
+    SUPERSEDED_SOURCES,
     DocumentSpec,
     source_by_id,
 )
@@ -40,7 +41,7 @@ from .structure import (
     parse_region,
 )
 
-CORPUS_VERSION = "1.0.0"
+CORPUS_VERSION = "2.0.0"
 
 # Ranges as printed in the table of contents: "14 à 188", "191 et 192",
 # "189 bis à 240".
@@ -50,30 +51,40 @@ TOC_RANGE_RE = re.compile(
 ABROGATED_RE = re.compile(r"abrog", re.I)
 
 KNOWN_LIMITATIONS: tuple[str, ...] = (
-    "Version horizon: the source consolidates amendments up to loi n° 2010-39 "
-    "du 26 juillet 2010 (IORT edition dated 2014-02-15). Amendments adopted "
-    "after that date are absent. The official JORT archive at "
-    "https://www.jort.tn/ is where they would be verified; that reconciliation "
-    "is not part of v1.",
-    "Repealed articles are absent from the published consolidated text (the "
-    "table of contents marks them '(abrogés)'). The corpus therefore does not "
-    "contain the repealed wording either.",
+    "Version horizon: the source is the IORT edition revised 15 February 2024. "
+    "It consolidates the Code de commerce as amended up to at least loi n° 2019-47 "
+    "du 29 mai 2019 (the latest amendment the text cites). Amendments adopted after "
+    "that date are absent. The official JORT archive at https://www.jort.tn/ is "
+    "where they would be verified; that reconciliation is not part of this corpus.",
+    "Local-only source: the 2024 edition is not served by the publisher's public "
+    "URL (that URL still returns the 2014 edition), so the pipeline cannot download "
+    "it. The raw PDF must be present in data/raw/ and is verified against the "
+    "recorded SHA-256. Because the raw PDF is gitignored, a fresh clone can only "
+    "rebuild the corpus if the file is supplied again.",
+    "Repealed articles are absent from the published consolidated text (the table "
+    "of contents marks them '(abrogés)', and the printed notice lists the range). "
+    "The corpus therefore does not contain the repealed wording either.",
+    "Article 465 prints its header and an amendment note in the 2024 edition but no "
+    "article text, while the table of contents marks it '(article 465 abrogé)'. It "
+    "is recorded with status 'repealed' and empty text, keeping the printed note. "
+    "The source is internally inconsistent here; this is not resolved against the "
+    "JORT.",
     "Amendment provenance is what the edition prints inline, for example "
-    "'(Modifié par la loi n° 96-28 du 3 avril 1996)'. It is reproduced "
-    "faithfully but not independently verified against the JORT.",
-    "Footnotes (rectificatifs and editorial notes printed at page bottoms) are "
-    "kept in annotations.jsonl, not merged into article text, because they are "
-    "not part of the enacted article.",
+    "'(Modifié par la loi n° 96-28 du 3 avril 1996)'. It is reproduced faithfully "
+    "but not independently verified against the JORT.",
+    "Footnotes (rectificatifs and editorial notes printed at page bottoms) are kept "
+    "in annotations.jsonl, not merged into article text, because they are not part "
+    "of the enacted article.",
     "The Arabic version of the same code is not machine-readable: its PDF has a "
     "broken ToUnicode map and extracts as glyph names, not Arabic text. See "
     "excluded_sources in manifest.json.",
     "Article text is re-flowed for readability: hard line breaks are joined, "
-    "hyphenated word wraps are repaired, and enumerated items keep their own "
-    "line. Wording, punctuation and article numbering are unchanged, but the "
-    "line breaks do not match the printed page.",
-    "Heading titles are reproduced as published, including upper-case "
-    "typography, and renumbered words: the published 'LIVRE PREMIER' is "
-    "recorded as 'Livre I' so book labels sort consistently.",
+    "hyphenated word wraps are repaired, and enumerated items keep their own line. "
+    "Wording, punctuation and article numbering are unchanged, but the line breaks "
+    "do not match the printed page.",
+    "Heading titles are reproduced as published, including upper-case typography, "
+    "and renumbered words: the published 'LIVRE PREMIER' is recorded as 'Livre I' "
+    "so book labels sort consistently.",
 )
 
 
@@ -331,11 +342,27 @@ def build_corpus(
             }
         )
 
-    all_records.sort(key=lambda record: record.sort_key)
-    _validate_all(all_records, warnings)
-
     toc_numbers = set(toc_inventory.get("numbers_covered", []))
     abrogated_numbers = set(toc_inventory.get("numbers_abrogated", []))
+
+    # The table of contents is a reconciliation aid, never a source of records.
+    # An article whose printed header carries only a note (article 465 in the
+    # 2024 edition) is corroborated as repealed by the table's "(abrogé)" marker:
+    # the record already exists from the printed header, only its status is set.
+    reconciled_articles: list[str] = []
+    for record in all_records:
+        if record.status == "repealed" or record.text.strip():
+            continue
+        if record.article_number in abrogated_numbers:
+            record.status = "repealed"
+            reconciled_articles.append(record.record_id)
+            warnings.append(
+                f"{record.record_id} prints no text but the table of contents marks "
+                "it abrogated; recorded as status 'repealed' (see known limitations)."
+            )
+
+    all_records.sort(key=lambda record: record.sort_key)
+    _validate_all(all_records, warnings)
 
     coverage = []
     for entry in documents_manifest:
@@ -383,8 +410,27 @@ def build_corpus(
                 "permission_note": source.permission_note,
                 "sha256": source.sha256,
                 "bytes": source.expected_bytes,
+                "status": source.status,
+                "downloadable": source.downloadable,
+                "provenance": source.provenance,
             }
             for source in SOURCES
+        ],
+        "superseded_sources": [
+            {
+                "source_id": source.source_id,
+                "url": source.url,
+                "title": source.title,
+                "language": source.language,
+                "edition": source.edition,
+                "edition_date": source.edition_date,
+                "amendment_horizon": source.amendment_horizon,
+                "sha256": source.sha256,
+                "bytes": source.expected_bytes,
+                "status": source.status,
+                "provenance": source.provenance,
+            }
+            for source in SUPERSEDED_SOURCES
         ],
         "excluded_sources": [
             {
@@ -406,6 +452,7 @@ def build_corpus(
             "ranges": len(toc_inventory.get("ranges", [])),
             "abrogated_ranges": toc_inventory.get("abrogated_ranges", []),
         },
+        "reconciled_articles": sorted(reconciled_articles),
         "known_limitations": list(KNOWN_LIMITATIONS),
         "warnings": sorted(warnings),
         "outputs": {
@@ -535,6 +582,17 @@ def render_limitations(manifest: dict) -> str:
     if manifest["warnings"]:
         for warning in manifest["warnings"]:
             lines.append(f"- {warning}")
+    else:
+        lines.append("None.")
+
+    lines += ["", "## Superseded sources", ""]
+    superseded = manifest.get("superseded_sources", [])
+    if superseded:
+        for item in superseded:
+            lines.append(
+                f"- **{item['title']}** ({item['edition_date']}, "
+                f"sha256 ...{item['sha256'][-12:]}): {item['provenance']}"
+            )
     else:
         lines.append("None.")
 

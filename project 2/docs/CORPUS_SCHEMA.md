@@ -71,7 +71,7 @@ Because the promulgating law and the code print identically numbered articles
 
 ### `status`: published vs repealed
 
-The 2014 IORT consolidation does not reprint repealed articles. Where the code
+The IORT consolidation does not reprint repealed articles. Where the code
 used to print one, the edition prints only a repeal note, for example
 `Article 6 (Abrogé par la loi n° 2010-39 du 26 juillet 2010).`
 
@@ -84,6 +84,12 @@ This is why a repealed record is allowed to have empty text while every other
 record must have at least 10 characters. Consumers should treat a repealed
 record as a citation anchor ("article 6 is repealed") and never as
 retrievable body text.
+
+One article, 465, is a source inconsistency: the 2024 edition prints its header
+and a "Modifié" note but no text, while the table of contents marks it
+`(article 465 abrogé)`. The build records it with `status: "repealed"` and empty
+text (its id also appears in `manifest.json → reconciled_articles`) rather than
+guessing. See `LIMITATIONS.md`.
 
 Missing article numbers inside a repealed range are not emitted as records at
 all; there is no body to point at. The ranges themselves are recorded in

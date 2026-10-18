@@ -4,18 +4,28 @@ This file documents the final corpus, chunking experiments, index choice,
 retrieval and reranking design, generation constraints, citation format, and
 known failure cases.
 
-## Corpus (v1) — decided
+## Corpus (v2) — decided
 
 ### Source and permission
 
-- Source of record: `CommerceFr.pdf`, published by the Tunisian Ministry of
-  Justice (IORT), `https://www.justice.gov.tn/fileadmin/medias/references_juridiques/codes_juridiques/CommerceFr.pdf`.
-- Edition: "Edition revue et corrigée le 15 février 2014", conforme à la
-  dernière révision prévue par la loi n° 2010-39 du 26 juillet 2010.
+- Source of record: the 2024 IORT edition of the Code de commerce
+  (`code-commerce-fr-iort-2024`), 193 pages, revised 15 February 2024,
+  published by the Imprimerie Officielle de la République Tunisienne.
+- Edition horizon: consolidates the code as amended up to at least loi
+  n° 2019-47 du 29 mai 2019 (the latest amendment the text cites). The
+  publisher landing page is `https://www.justice.gov.tn/index.php?id=289`.
 - Permission: official published text, reproduced verbatim for non-commercial
   educational research. The registry records this per source
-  (`src/ingestion/sources.py`) and refuses to ingest a file whose SHA-256 does
-  not match the recorded `fd205f84…b6f98a2`.
+  (`src/ingestion/sources.py`) and refuses to read a file whose SHA-256 does not
+  match the recorded
+  `353bca554ab5deaf229648485a271bc6fb65fa514b9785511d38f4e47393e7aa`.
+- The earlier **2014** edition is the same legal text with an older horizon; it
+  is the same legal text, so ingesting both would duplicate article numbers. It
+  is retired to `SUPERSEDED_SOURCES` and shown in `manifest.json →
+  superseded_sources`.
+- The 2024 bytes are not downloadable: the publisher's URL still serves the
+  2014 file. The source is therefore marked `downloadable=False` and the raw PDF
+  must be supplied by hand — see the local-only limitation in `LIMITATIONS.md`.
 
 ### Scope
 
@@ -61,8 +71,9 @@ known failure cases.
 
 - The build reconciles the parsed articles against the table of contents. It
   explains every gap as repeal or reports it as a warning; the current build has
-  **0 unexplained gaps and 0 warnings** (547 code + 5 law records, 207 gaps all
-  inside the repealed ranges 14–188 and 413–444).
+  **0 unexplained gaps and 1 warning** (579 code + 5 law records, 175 gaps all
+  inside the repealed ranges 14–188 and 461–465; the single warning is the
+  article-465 source inconsistency).
 - The table of contents is a reconciliation aid only; it never generates a
   record.
 
@@ -79,7 +90,7 @@ known failure cases.
 
 - The record format is defined in `docs/CORPUS_SCHEMA.md` and enforced in
   `src/ingestion/schema.py`; a validation failure aborts the build.
-- 101 unit and integration tests cover heading detection, article splitting,
+- 111 unit and integration tests cover heading detection, article splitting,
   suffix/amendment parsing, normalisation, that schema, and the real end-to-end
   build.
 

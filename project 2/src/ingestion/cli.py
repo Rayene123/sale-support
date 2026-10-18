@@ -6,9 +6,13 @@ Run from ``project 2/``::
     python -m src.ingestion build --no-download
     python -m src.ingestion verify --corpus data/processed/corpus.jsonl
 
-``build`` downloads what is missing, verifies every source hash, parses the
-documents and writes ``data/processed/``. ``verify`` re-checks an already built
-corpus without touching the network.
+``build`` resolves every source (downloading the ones that are downloadable),
+verifies each hash, parses the documents and writes ``data/processed/``.
+``verify`` re-checks an already built corpus without touching the network.
+
+Note: the current source of record is a supplied local file (the 2024 edition is
+not served by the publisher's public URL). ``build`` therefore never touches the
+network for it; the file must already be present in ``data/raw/``.
 """
 from __future__ import annotations
 

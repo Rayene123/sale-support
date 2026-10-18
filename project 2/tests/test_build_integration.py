@@ -22,13 +22,18 @@ from ingestion.structure import StructureError
 SOURCE = SOURCES[0]
 SOURCE_PDF = _paths.RAW_DIR / f"{SOURCE.source_id}.pdf"
 
-# The 2014 consolidated edition: 746 numbered articles of which 207 were
-# repealed at that date, plus 8 lettered variants (bis/ter/septies) and the
-# 5 articles of the promulgating law.
-EXPECTED_CODE_RECORDS = 547
+# The 2024 IORT edition (the v2 source of record): 746 numbered articles of
+# which 175 were repealed at that date (the whole of Titre III "Des sociétés",
+# articles 14-188), 8 lettered variants (bis/ter/septies/...), and the 5
+# articles of the promulgating law.
+EXPECTED_CODE_RECORDS = 579
 EXPECTED_LAW_RECORDS = 5
-EXPECTED_MISSING_AS_REPEALED = 207
-EXPECTED_REPEALED_RANGES = [{"start": 14, "end": 188}, {"start": 413, "end": 444}]
+EXPECTED_MISSING_AS_REPEALED = 175
+EXPECTED_REPEALED_RANGES = [{"start": 14, "end": 188}, {"start": 461, "end": 465}]
+EXPECTED_ARTICLE_465_WARNING = (
+    "code-commerce-tn:article-465 prints no text but the table of contents marks "
+    "it abrogated; recorded as status 'repealed' (see known limitations)."
+)
 
 
 @unittest.skipUnless(SOURCE_PDF.is_file(), f"source PDF not present at {SOURCE_PDF}")
@@ -72,8 +77,8 @@ class RealCorpusTests(unittest.TestCase):
             self.result.toc_inventory["abrogated_ranges"], EXPECTED_REPEALED_RANGES
         )
 
-    def test_build_reports_no_warnings(self):
-        self.assertEqual(self.result.warnings, [])
+    def test_only_warning_is_the_known_article_465_inconsistency(self):
+        self.assertEqual(self.result.warnings, [EXPECTED_ARTICLE_465_WARNING])
 
     # -- known articles ----------------------------------------------------
     def test_first_article_of_the_code(self):
@@ -92,6 +97,15 @@ class RealCorpusTests(unittest.TestCase):
         self.assertEqual(article.status, "repealed")
         self.assertEqual(article.text, "")
         self.assertEqual(article.amendment_laws, ["2010-39"])
+
+    def test_article_465_prints_no_text_and_is_reconciled_as_repealed(self):
+        article = self.by_id["code-commerce-tn:article-465"]
+        self.assertEqual(article.status, "repealed")
+        self.assertEqual(article.text, "")
+        # The printed note says "Modifié", but the body is absent and the table
+        # of contents marks the article abrogated. The note is kept verbatim.
+        self.assertEqual(article.amendment_laws, ["2016-71"])
+        self.assertEqual(self.result.manifest["reconciled_articles"], [article.record_id])
 
     def test_lettered_article_variants_exist(self):
         for record_id in (
@@ -211,6 +225,22 @@ class RealCorpusTests(unittest.TestCase):
 
 @unittest.skipUnless(SOURCE_PDF.is_file(), f"source PDF not present at {SOURCE_PDF}")
 class SourceIntegrityTests(unittest.TestCase):
+    def test_the_source_of_record_is_the_2024_local_edition(self):
+        self.assertEqual(SOURCE.source_id, "code-commerce-fr-iort-2024")
+        self.assertEqual(SOURCE.status, "active")
+        # The 2024 edition is not served by the publisher's public URL, so the
+        # pipeline must never try to download it.
+        self.assertFalse(SOURCE.downloadable)
+
+    def test_the_superseded_2014_edition_is_recorded(self):
+        from ingestion.sources import SUPERSEDED_SOURCES
+
+        self.assertEqual(
+            [source.source_id for source in SUPERSEDED_SOURCES],
+            ["code-commerce-fr-iort-2014"],
+        )
+        self.assertEqual(SUPERSEDED_SOURCES[0].status, "superseded")
+
     def test_the_rejected_arabic_source_is_documented_with_evidence(self):
         arabic = REJECTED_SOURCES[0]
         self.assertEqual(arabic.language, "ar")
@@ -223,7 +253,7 @@ class SourceIntegrityTests(unittest.TestCase):
 
     def test_page_numbers_printed_match_the_pdf_position(self):
         pages = extract_pages(SOURCE_PDF)
-        self.assertEqual(len(pages), 219)
+        self.assertEqual(len(pages), 193)
         self.assertEqual(pages[6].printed_number_seen, 7)
 
     def test_no_region_marker_is_missing(self):

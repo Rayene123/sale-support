@@ -56,24 +56,64 @@ class HeadingTests(unittest.TestCase):
 
     def test_body_text_is_not_a_heading(self):
         self.assertIsNone(match_heading("Toute personne capable de s'obliger peut exercer le"))
-        self.assertIsNone(match_heading("Section 5 du registre du commerce"))
+        # A body reference that merely begins with the same word is lower case.
+        self.assertIsNone(
+            match_heading(
+                "sous-section première de la quatrième section du présent chapitre, et à"
+            )
+        )
+
+    def test_arabic_and_feminine_section_numerals_are_recognised(self):
+        self.assertEqual(match_heading("Section 2"), ("section", "2", ""))
+        self.assertEqual(match_heading("Section première"), ("section", "première", ""))
+        self.assertEqual(match_heading("Sous-section 2"), ("sous_section", "2", ""))
 
 
 class ArticleHeaderTests(unittest.TestCase):
     def test_plain_article(self):
-        self.assertEqual(parse_article_header("Article 277"), (277, None, None))
+        self.assertEqual(parse_article_header("Article 277"), (277, None, None, ""))
 
     def test_premier_maps_to_one(self):
-        self.assertEqual(parse_article_header("Article premier"), (1, None, None))
+        self.assertEqual(parse_article_header("Article premier"), (1, None, None, ""))
 
     def test_suffix(self):
-        self.assertEqual(parse_article_header("Article 189 bis"), (189, "bis", None))
+        self.assertEqual(parse_article_header("Article 189 bis"), (189, "bis", None, ""))
 
-    def test_trailing_period(self):
-        self.assertEqual(parse_article_header("Article 372. (Paragraphe 2 modifié)"), (372, None, "(Paragraphe 2 modifié)"))
+    def test_trailing_period_before_a_note(self):
+        self.assertEqual(
+            parse_article_header("Article 372. (Paragraphe 2 modifié)"),
+            (372, None, "(Paragraphe 2 modifié)", ""),
+        )
+
+    def test_body_on_the_header_line(self):
+        # The 2024 edition prints the article body inline, after ".-".
+        self.assertEqual(
+            parse_article_header("Article premier.- Le présent code s'applique."),
+            (1, None, None, "Le présent code s'applique."),
+        )
+        self.assertEqual(
+            parse_article_header("Article 2.- Est commerçant, quiconque."),
+            (2, None, None, "Est commerçant, quiconque."),
+        )
+
+    def test_inline_note_and_body(self):
+        self.assertEqual(
+            parse_article_header(
+                "Article 12 (Modifié par la loi n° 2016-36 du 29 avril 2016) .- Les livres"
+            ),
+            (12, None, "(Modifié par la loi n° 2016-36 du 29 avril 2016)", "Les livres"),
+        )
+
+    def test_wrapped_note_returns_an_incomplete_note(self):
+        number, suffix, note, body = parse_article_header(
+            "Article 6 (Abrogé par l'article 7 de la loi n°2010-39 du 26"
+        )
+        self.assertEqual((number, suffix, body), (6, None, ""))
+        self.assertFalse(note_is_complete(note))
 
     def test_article_references_in_body_text_are_not_headers(self):
         self.assertIsNone(parse_article_header("Article 411 et suivants du présent code."))
+        self.assertIsNone(parse_article_header("Article 2 (alinéa 3) du présent code."))
         self.assertIsNone(parse_article_header("conformément aux articles 411 et suivants"))
         self.assertIsNone(parse_article_header("Est commerçant, quiconque, à titre professionnel"))
 
@@ -102,9 +142,18 @@ class ContinuationTests(unittest.TestCase):
     def test_sentence_after_a_title_does_not_continue_it(self):
         self.assertFalse(
             is_continuation_candidate(
-                "titre", "Les dispositions du titre III du livre premier (les articles"
+                "titre",
+                "Les dispositions du titre III du livre premier (les articles 14 à 188) "
+                "sont abrogées par l'article 2 de la loi n° 2000-93 du 9 août 2000",
             )
         )
+
+    def test_sentence_case_titre_title_is_accepted(self):
+        # The 2024 edition's new Livre IV prints some titles in sentence case.
+        self.assertTrue(
+            is_continuation_candidate("titre", "Du redressement des entreprises éprouvant")
+        )
+        self.assertTrue(is_continuation_candidate("titre", "Les voies de recours"))
 
     def test_parenthetical_notice_never_continues_a_heading(self):
         self.assertFalse(is_continuation_candidate("titre", "(Les Articles 413 à 444 sont abrogés"))
@@ -118,6 +167,16 @@ class ContinuationTests(unittest.TestCase):
 
     def test_chapter_wrap_in_lower_case_is_accepted(self):
         self.assertTrue(is_continuation_candidate("chapitre", "et au nantissement du fonds de commerce"))
+
+    def test_section_title_on_the_next_line_is_accepted(self):
+        # The 2024 edition breaks some section titles onto the next line.
+        self.assertTrue(is_continuation_candidate("section", "Du transport de choses"))
+        self.assertTrue(is_continuation_candidate("sous_section", "De la cession de l'entreprise"))
+
+    def test_lettered_sub_item_never_continues_a_heading(self):
+        self.assertFalse(
+            is_continuation_candidate("section", "A. - Du contrat de transport de choses")
+        )
 
     def test_headings_and_articles_stop_the_title(self):
         self.assertFalse(is_continuation_candidate("chapitre", "CHAPITRE III"))

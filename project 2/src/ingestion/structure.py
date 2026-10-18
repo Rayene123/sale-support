@@ -10,7 +10,10 @@ asserted rather than assumed:
    Sous-section``. Headings print in upper case and their titles wrap onto the
    following line(s).
 3. An article starts with ``Article <n> [suffix] [(amendment note)]``. The
-   amendment note may wrap onto the next line.
+   amendment note may wrap onto the next line, and the 2024 edition prints the
+   article body on the same line after a ``.-`` separator
+   (``Article premier.- Le présent code ...``). The parser handles both the
+   header-only (2014) and inline-body (2024) forms.
 
 If a marker is missing the parser raises instead of guessing, because a
 silently mis-split document is worse than a failed build.
@@ -31,7 +34,13 @@ from .sources import DocumentSpec, Source
 _ROMAN_ALTERNATIVES = (
     "XIV|XIII|XII|XI|IX|VIII|VII|VI|IV|III|II|X|V|I"
 )
-_NUMERAL = rf"(?:PREMIER|1ER|{_ROMAN_ALTERNATIVES})"
+# Word numerals are printed masculine ("premier") and feminine ("première") and
+# abbreviated ("1er", "1re", "1ère").
+_WORD_NUMERAL = r"PREMI(?:ER|ERE|\u00c8RE)|1(?:ER|RE|ERE|\u00c8RE)"
+_NUMERAL = rf"(?:{_WORD_NUMERAL}|{_ROMAN_ALTERNATIVES})"
+# Sections and sub-sections are also numbered in Arabic in the 2024 edition
+# ("Section 2", "Sous-section 2").
+_SECTION_NUMERAL = rf"(?:{_WORD_NUMERAL}|{_ROMAN_ALTERNATIVES}|[0-9]{{1,2}})"
 
 LIVRE_RE = re.compile(
     rf"^(?P<label>LIVRE\s+(?P<num>{_NUMERAL}))\b[\s:.\u2013\u2014-]*(?P<title>.*)$", re.I
@@ -43,11 +52,11 @@ CHAPITRE_RE = re.compile(
     rf"^(?P<label>CHAPITRE\s+(?P<num>{_NUMERAL}))\b[\s:.\u2013\u2014-]*(?P<title>.*)$", re.I
 )
 SECTION_RE = re.compile(
-    rf"^(?P<label>SECTION\s+(?P<num>{_ROMAN_ALTERNATIVES}))\b[\s:.\u2013\u2014-]*(?P<title>.*)$",
+    rf"^(?P<label>SECTION\s+(?P<num>{_SECTION_NUMERAL}))\b[\s:.\u2013\u2014-]*(?P<title>.*)$",
     re.I,
 )
 SUBSECTION_RE = re.compile(
-    rf"^(?P<label>SOUS-?\s?SECTION\s+(?P<num>{_ROMAN_ALTERNATIVES}))\b[\s:.\u2013\u2014-]*(?P<title>.*)$",
+    rf"^(?P<label>SOUS-?\s?SECTION\s+(?P<num>{_SECTION_NUMERAL}))\b[\s:.\u2013\u2014-]*(?P<title>.*)$",
     re.I,
 )
 
@@ -69,10 +78,16 @@ LEVEL_TITLES = {
 
 ARTICLE_RE = re.compile(
     r"^Article\s+(?P<num>premier|1er|[0-9]{1,4})\s*"
-    r"(?P<suffix>" + "|".join(ARTICLE_SUFFIXES) + r")?\b\.?\s*"
-    r"(?P<note>\(.*)?$",
+    r"(?P<suffix>" + "|".join(ARTICLE_SUFFIXES) + r")?"
+    r"(?P<tail>.*)$",
     re.I,
 )
+
+# Both editions separate the article header (and any amendment note) from the
+# body with a period, optionally followed by a hyphen: ``Article premier.-``.
+# The 2014 edition sometimes wrote ``Article 372. (note)`` where the period
+# precedes the note, so the separator is stripped before looking for a note.
+HEADER_SEPARATOR_RE = re.compile(r"^[.\u2013\u2014-]+\s*")
 
 LAW_START_RE = re.compile(r"^Loi\s+n\s*[°ºo]?\s*59-129\b", re.I)
 TOC_START_RE = re.compile(r"^TABLE\s+DES\s+MATI", re.I)
@@ -87,7 +102,15 @@ TRAILING_JUNK_RE = re.compile(r"[\s:.\u2013\u2014-]+$")
 MAX_TITLE_CONTINUATIONS = 3
 MAX_NOTE_CONTINUATIONS = 5
 
-NUMERAL_WORDS = {"premier": "I", "1er": "I"}
+NUMERAL_WORDS = {
+    "premier": "I",
+    "1er": "I",
+    "premiere": "I",
+    "premi\u00e8re": "I",
+    "1re": "I",
+    "1ere": "I",
+    "1\u00e8re": "I",
+}
 
 
 class StructureError(RuntimeError):
@@ -206,12 +229,12 @@ def is_title_like(text: str) -> bool:
     title headings, so case alone cannot identify them. They are short and are
     not terminated like a sentence.
     """
-    if len(text) > 110 or len(text.split()) > 12:
+    if len(text) > 140 or len(text.split()) > 18:
         return False
     return not text.endswith((".", ":", ";"))
 
 
-def is_continuation_candidate(level: str, text: str) -> bool:
+def is_continuation_candidate(level: str, text: str, title_so_far: str = "") -> bool:
     """Can ``text`` be the wrapped remainder (or body) of a heading title?"""
     candidate = text.strip()
     if not candidate:
@@ -222,13 +245,25 @@ def is_continuation_candidate(level: str, text: str) -> bool:
     # Parenthetical notices, bullets and new enumerations are not titles.
     if first in "(-\u2013\u2014" or first.isdigit():
         return False
+    # Lettered sub-items ("A. - Du contrat ...") are a level this parser does not
+    # model; they are not the wrapped title of the heading above them.
+    if re.match(r"^[A-Za-z]\s*[.)]\s", candidate):
+        return False
     if level in ("book", "titre"):
-        # Printed in upper case; a sentence of body text is not.
-        return uppercase_ratio(candidate) >= 0.8
-    # Chapters, sections and sub-sections are printed in sentence case.
-    if first.islower():
-        return True
-    return level == "chapitre" and is_title_like(candidate)
+        # The older books print their titles in upper case; the 2024 edition's
+        # new Livre IV prints some in sentence case. Upper-case lines always
+        # continue, and a sentence-case line continues only while the title has
+        # not started yet (its first line) or when it wraps in lower case -- a
+        # capitalised sentence after a title has started is body text, such as
+        # the repeal notice printed after "TITRE III / DES SOCIETES".
+        if uppercase_ratio(candidate) >= 0.8:
+            return True
+        if not is_title_like(candidate):
+            return False
+        return first.islower() or not title_so_far.strip()
+    # Chapters, sections and sub-sections are printed in sentence case, but the
+    # first word can still be capitalised ("De la vente ...").
+    return is_title_like(candidate)
 
 
 def uppercase_ratio(text: str) -> float:
@@ -242,6 +277,11 @@ def match_heading(text: str) -> tuple[str, str, str] | None:
     """Return ``(level, numeral, title)`` when ``text`` is a heading line."""
     stripped = FOOTNOTE_MARKER_RE.sub(" ", text)
     stripped = re.sub(r"\s+", " ", stripped).strip()
+    # Headings are printed capitalised. This rejects body references that merely
+    # begin with the same word, e.g. "sous-section première de la quatrième
+    # section du présent chapitre, ...".
+    if stripped[:1].islower():
+        return None
     for level, pattern in LEVEL_PATTERNS:
         match = pattern.match(stripped)
         if match:
@@ -249,16 +289,92 @@ def match_heading(text: str) -> tuple[str, str, str] | None:
     return None
 
 
-def parse_article_header(text: str) -> tuple[int, str | None, str | None] | None:
-    """Return ``(number, suffix, note)`` when ``text`` starts an article."""
+def tail_can_start_article(tail: str) -> bool:
+    """Is ``tail`` (the text after ``Article <n>``) shaped like a header?
+
+    A real header continues with nothing, with an amendment note ``(`` or with
+    the separator before the body (``.`` / ``-``). A cross-reference such as
+    ``Article 411 et suivants du présent code`` continues with prose, so it is
+    not a header even though it matches :data:`ARTICLE_RE`.
+    """
+    stripped = tail.strip()
+    if not stripped:
+        return True
+    return stripped[0] == "(" or stripped[0] in ".\u2013\u2014-"
+
+
+def split_note_body(tail: str) -> tuple[str | None, str] | None:
+    """Split a header tail into ``(amendment note, inline body)``.
+
+    Returns ``None`` when the tail is not a valid header continuation (a
+    cross-reference parading as an article start). When the note is not closed
+    yet, the whole tail is returned as the note so the caller can join the
+    following line(s) and call again.
+    """
+    rest = tail.strip()
+    if rest and rest[0] not in "(\u2013\u2014-.":
+        return None
+    if not rest.startswith("("):
+        rest = HEADER_SEPARATOR_RE.sub("", rest)
+
+    note = None
+    if rest.startswith("("):
+        depth = 0
+        end = None
+        for position, char in enumerate(rest):
+            if char == "(":
+                depth += 1
+            elif char == ")":
+                depth -= 1
+                if depth == 0:
+                    end = position
+                    break
+        if end is None:
+            return rest, ""  # note continues on the next line(s)
+        note = rest[: end + 1]
+        rest = rest[end + 1:].strip()
+        if rest and rest[0] not in ".\u2013\u2014-":
+            return None
+        rest = HEADER_SEPARATOR_RE.sub("", rest)
+
+    return note, rest.strip()
+
+
+def parse_article_start(text: str) -> tuple[int, str | None, str, str] | None:
+    """Return ``(number, suffix, label, tail)`` when ``text`` starts an article.
+
+    ``tail`` is everything after ``Article <n> [suffix]`` and still carries the
+    separator and any inline body, because the 2024 edition prints the body on
+    the header line (``Article premier.- Le présent code ...``).
+    """
     match = ARTICLE_RE.match(text.strip())
-    if not match:
+    if not match or not tail_can_start_article(match.group("tail")):
         return None
     raw_number = match.group("num").lower()
     number = 1 if raw_number in ("premier", "1er") else int(raw_number)
     suffix = match.group("suffix")
-    note = match.group("note")
-    return number, (suffix.lower() if suffix else None), note
+    suffix = suffix.lower() if suffix else None
+    label = f"Article {match.group('num').strip()}"
+    if suffix:
+        label = f"{label} {suffix}"
+    return number, suffix, label, match.group("tail")
+
+
+def parse_article_header(text: str) -> tuple[int, str | None, str | None, str] | None:
+    """Return ``(number, suffix, note, inline_body)`` for a one-line header.
+
+    A note that wraps onto the next line is returned as an incomplete note with
+    an empty body; :func:`parse_region` joins the lines and re-splits.
+    """
+    start = parse_article_start(text)
+    if start is None:
+        return None
+    number, suffix, _label, tail = start
+    split = split_note_body(tail)
+    if split is None:
+        return None
+    note, body = split
+    return number, suffix, note, body
 
 
 def extract_law_references(note: str) -> list[str]:
@@ -383,7 +499,7 @@ def parse_region(
                 lookahead += 1
                 if not candidate:
                     continue
-                if not is_continuation_candidate(level, candidate):
+                if not is_continuation_candidate(level, candidate, title):
                     break
                 part = clean_heading_title(candidate)
                 if not part:
@@ -398,31 +514,36 @@ def parse_region(
                 headings[deeper] = None
             continue
 
-        header = parse_article_header(text)
-        if header is not None:
+        start = parse_article_start(text)
+        if start is not None:
+            number, suffix, label, tail = start
+            # The header line carries the body in the 2024 edition and may carry
+            # a note that wraps onto the next line; join until the note closes.
+            combined = tail
+            consumed = index
+            note, inline_body = split_note_body(combined) or (None, "")
+            while (
+                note is not None
+                and not note_is_complete(note)
+                and consumed < len(lines) - 1
+            ):
+                if consumed - index >= MAX_NOTE_CONTINUATIONS:
+                    warnings.append(
+                        f"article {number} on page {line.pdf_page}: amendment note "
+                        "did not close; keeping what was read"
+                    )
+                    break
+                consumed += 1
+                combined = f"{combined} {lines[consumed].text.strip()}".strip()
+                note, inline_body = split_note_body(combined) or (note, "")
             finalize()
             seen_article = True
-            number, suffix, note = header
-            label = text if not note else text[: text.find("(")].strip()
-            note_text = note
-            # The note often wraps onto the next line.
-            consumed = index
-            if note_text is not None:
-                while not note_is_complete(note_text) and consumed < len(lines) - 1:
-                    if consumed - index >= MAX_NOTE_CONTINUATIONS:
-                        warnings.append(
-                            f"article {number} on page {line.pdf_page}: amendment note "
-                            "did not close; keeping what was read"
-                        )
-                        break
-                    consumed += 1
-                    note_text = f"{note_text} {lines[consumed].text.strip()}".strip()
             open_article = {
                 "number": number,
                 "suffix": suffix,
                 "label": re.sub(r"\s+", " ", label).strip(),
-                "note": re.sub(r"\s+", " ", (note_text or "")).strip() or None,
-                "body": [],
+                "note": re.sub(r"\s+", " ", (note or "")).strip() or None,
+                "body": [inline_body] if inline_body else [],
                 "pdf_page": line.pdf_page,
             }
             index = consumed + 1

@@ -54,6 +54,46 @@ def verify_source(source: Source, path: Path) -> None:
         )
 
 
+def resolve_source(
+    source: Source,
+    raw_dir: Path,
+    *,
+    allow_download: bool = True,
+    force: bool = False,
+    timeout: int = 60,
+) -> Path:
+    """Return a verified local path for ``source``.
+
+    A ``downloadable=False`` source (a supplied file the pipeline cannot fetch)
+    is only ever verified on disk; the network is never touched for it.
+    """
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    target = raw_dir / f"{source.source_id}.pdf"
+
+    if not source.downloadable:
+        if force:
+            raise SourceError(
+                f"{source.source_id} is a supplied file and cannot be re-downloaded; "
+                "remove --force."
+            )
+        if not target.is_file():
+            raise SourceError(
+                f"{source.source_id} is a supplied file and is not downloadable.\n"
+                f"  expected at : {target}\n"
+                f"  bytes       : {source.expected_bytes}\n"
+                f"  sha256      : {source.sha256}\n"
+                "The 2024 edition is not served by the publisher's public URL, so it must "
+                "be placed in data/raw/ by hand before the build can run."
+            )
+        verify_source(source, target)
+        return target
+
+    if not allow_download:
+        verify_source(source, target)
+        return target
+    return download_source(source, raw_dir, force=force, timeout=timeout)
+
+
 def download_source(
     source: Source,
     raw_dir: Path,
@@ -109,10 +149,11 @@ def ensure_sources(
     """Resolve every source to a verified local file."""
     resolved: dict[str, Path] = {}
     for source in sources:
-        if allow_download:
-            resolved[source.source_id] = download_source(source, raw_dir, force=force, timeout=timeout)
-            continue
-        target = raw_dir / f"{source.source_id}.pdf"
-        verify_source(source, target)
-        resolved[source.source_id] = target
+        resolved[source.source_id] = resolve_source(
+            source,
+            raw_dir,
+            allow_download=allow_download,
+            force=force,
+            timeout=timeout,
+        )
     return resolved
