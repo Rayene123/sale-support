@@ -94,13 +94,67 @@ known failure cases.
   suffix/amendment parsing, normalisation, that schema, and the real end-to-end
   build.
 
-## Decisions still to record
+## Retrieval decisions
 
-- Chunk size and overlap, or article-aware chunking
-- BM25 implementation
-- Vector store and embedding model
-- Hybrid fusion method
-- Reranker and cutoff
-- Metadata filters
-- Abstention rule
-- Citation validation strategy
+- **Chunking** — article-level chunks are the legal-safe baseline; 220-word
+  windows with 40-word overlap are available for long-article comparison.
+- **Keyword index** — dependency-free Okapi BM25 over normalized article chunks.
+- **Semantic index** — local Sentence Transformers
+  `paraphrase-multilingual-MiniLM-L12-v2`, with normalized vectors and cosine
+  similarity. The model is local and requires no API key.
+- **Persistence** — embeddings are stored as NumPy arrays with a stable chunk
+  ID sidecar; the processed corpus remains the source of truth.
+- **Hybrid fusion** — Reciprocal Rank Fusion combines BM25 and semantic
+  rankings without assuming their scores share a scale.
+- **Reranker** — deterministic exact-term coverage, phrase match, and article
+  number match are the initial reproducible baseline; a cross-encoder can be
+  measured as an optimization.
+- **Metadata filters** — exact filters for document, language, article,
+  hierarchy, and PDF page are applied before retrieval.
+- **Abstention** — the generation layer must abstain when retrieval returns no
+  candidates or all candidates fall below its configured evidence threshold.
+- **Citation validation** — every generated citation must refer to a returned
+  chunk ID and its attached article/page metadata.
+
+## Person 2 measurement handoff
+
+The reproducible index command is:
+
+```powershell
+python "project 2/scripts/build_indexes.py"
+```
+
+It saves chunk metadata and normalized semantic embeddings under
+`data/indexes/`. BM25 is rebuilt from the same chunks in memory; the processed
+corpus remains authoritative.
+
+The development evaluation command is:
+
+```powershell
+python "project 2/eval/retrieval.py"
+```
+
+It reports recall@1/3/5/10 and p50/p95 retrieval latency. The final ablation
+must use Person 4's labeled set and compare BM25, semantic vector, hybrid, and
+hybrid plus reranker on the same questions.
+
+### Current smoke measurements
+
+The 8-question development smoke run produced:
+
+| Method | Recall@1 | Recall@3 | Recall@5 | Recall@10 | p50 (ms) | p95 (ms) |
+|---|---:|---:|---:|---:|---:|---:|
+| BM25 | 25.0% | 37.5% | 50.0% | 75.0% | 2.63 | 3.29 |
+| Semantic vector | 25.0% | 37.5% | 50.0% | 75.0% | 23.22 | 23.48 |
+| Hybrid | **37.5%** | **50.0%** | 50.0% | 75.0% | 26.87 | 30.74 |
+| Hybrid + reranker | 37.5% | 37.5% | 37.5% | 75.0% | 29.81 | 31.66 |
+
+These are development measurements, not final project metrics: the sample has
+only 8 questions. The hybrid retriever caches document indexes and embeds only
+the query at request time; the earlier approximately 16-second median was
+caused by rebuilding document embeddings for every query.
+
+Known failure cases are: missing terminology in the French corpus, post-2019
+amendments, repealed wording, long cross-references, ambiguous questions, and
+reranking heuristics that are not yet shown to improve quality on a sufficiently
+large labeled set.

@@ -16,3 +16,5 @@ project 1/judge/.env
 # Project 2: raw source PDFs are downloaded by the build and hash-verified, so
 # they are not committed. The processed corpus is committed instead.
 project 2/data/raw/*.pdf
+project 2/data/indexes/
+project 2/data/eval/retrieval_results.json
