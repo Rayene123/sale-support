@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>The Librarian · Code de commerce tunisien</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;background:#f4f5f0;color:#18312d;font:17px/1.6 system-ui,sans-serif}
+  main{max-width:820px;margin:8vh auto;padding:0 24px}header{margin-bottom:35px}.label{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#5c7067}
+  h1{font:600 clamp(38px,7vw,58px)/1.1 Georgia,serif;margin:12px 0}p{margin:12px 0}.muted{color:#5c7067;font-size:14px}
+  label{display:block;font-weight:600;margin-bottom:10px}textarea{width:100%;min-height:120px;padding:16px;border:1px solid #9baaa2;border-radius:10px;background:#fff;font:inherit;resize:vertical}
+  textarea:focus,button:focus-visible{outline:3px solid #b5cfbf;outline-offset:3px}button{margin-top:14px;border:0;border-radius:8px;background:#244d40;color:#fff;padding:12px 24px;font:600 16px system-ui;cursor:pointer}button:disabled{opacity:.6;cursor:wait}
+  #status{min-height:26px}#result{background:#fff;padding:24px;border:1px solid #d5ddd5;border-radius:12px;margin:24px 0}#answer{white-space:pre-wrap}
+  h2{font-size:22px;margin-top:0}h3{font-size:16px}ol{padding-left:24px}li{padding:8px 0}blockquote{margin:6px 0;padding-left:14px;border-left:3px solid #b5cfbf;font-size:15px;color:#42584e}a{color:#245940;overflow-wrap:anywhere}
+</style>
+<main>
+  <header><span class="label">Recherche documentaire · en français</span><h1>The Librarian</h1><p>Interrogez le Code de commerce tunisien et retrouvez les passages cités.</p><p class="muted">Outil pédagogique local · corpus français, édition 2024. Les sources disponibles ne garantissent pas le droit actuel.</p></header>
+  <form id="form"><label for="question">Votre question</label><textarea id="question" maxlength="2000" required placeholder="Combien de temps faut-il conserver les livres de commerce ?"></textarea><button id="submit">Rechercher une réponse</button></form>
+  <p id="status" role="status" aria-live="polite"></p>
+  <section id="result" hidden><h2 id="heading">Réponse</h2><p id="answer"></p><div id="sources"><h3>Sources citées</h3><ol id="citations"></ol></div><p id="timing" class="muted"></p></section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+$('form').addEventListener('submit',async event=>{
+  event.preventDefault();const question=$('question').value.trim();if(!question){$('question').focus();return;}
+  $('submit').disabled=true;$('result').hidden=true;$('status').textContent='Recherche en cours… Le premier chargement du modèle peut prendre un peu plus de temps.';
+  try{
+    const response=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question})});
+    const data=await response.json();if(!response.ok)throw new Error(typeof data.detail==='string'?data.detail:'La question ne peut pas être traitée. Vérifiez sa longueur.');
+    $('heading').textContent=data.reason==='invalid_output'?'Réponse non validée':data.abstain?'Informations insuffisantes':'Réponse';$('answer').textContent=data.answer_fr;$('citations').replaceChildren();
+    for(const citation of data.citations){const item=document.createElement('li'),link=document.createElement('a'),quote=document.createElement('blockquote');
+      link.textContent=`${citation.article} · page PDF ${citation.pdf_page}`;link.href=citation.source_url;link.target='_blank';link.rel='noopener noreferrer';
+      quote.textContent=citation.quote;item.append(link,quote);$('citations').append(item);}
+    $('sources').hidden=!data.citations.length;$('timing').textContent=`Réponse en ${(data.timings_ms.total/1000).toFixed(1)} s`;
+    $('result').hidden=false;$('status').textContent='';
+  }catch(error){$('status').textContent=error instanceof TypeError?'Le service local est inaccessible. Vérifiez qu’il est démarré.':error.message;}
+  finally{$('submit').disabled=false;}
+});
+</script>
+</html>
