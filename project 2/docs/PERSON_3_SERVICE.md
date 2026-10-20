@@ -34,3 +34,65 @@ Provide:
 - Citation-validation behavior
 - Abstention behavior
 - API and citation tests
+
+## Local implementation
+
+From the repository root (Python 3.11+, Ollama running):
+
+```powershell
+python -m pip install -r "project 2/requirements.txt"
+ollama pull qwen3.5:9b
+python -m uvicorn api.app:app --app-dir "project 2/src" --host 127.0.0.1 --port 8002
+```
+
+Open `http://127.0.0.1:8002` for the French interface, or `/docs` for the API.
+`POST /ask` accepts `{"question":"Combien de temps conserver les livres de commerce ?"}`.
+It returns `answer_fr`, `abstain`, `citations`, `reason`, `model`, `timings_ms`
+and `usage`. Each answer point is numbered `[1]`, `[2]`, etc., corresponding to
+its citation, which includes the point text, chunk/record IDs, article, exact
+quote, PDF page and publisher URL. URLs come from the corpus; a publisher
+landing page is not a direct link to the locally supplied 2024 PDF.
+
+Example response, abbreviated to the answer and one citation:
+
+```json
+{"answer_fr":"Les livres de commerce doivent être conservés pendant dix ans. [1]",
+ "abstain":false,"citations":[{"chunk_id":"code-commerce-tn:article-10:chunk-0",
+ "article":"Article 10","pdf_page":9,"quote":"Ils seront conservés pendant dix ans."}]}
+```
+
+The application loads Person 1's committed corpus and Person 2's article-level
+BM25 retriever once at startup. No raw PDF, embedding rebuild, cloud service or
+API key is needed. BM25 is the dependency-light starting point; retrieval
+optimization belongs to Person 4's evaluation. `/health` reports application
+liveness and the configured model; it does not check Ollama readiness.
+
+The default is `qwen3.5:9b`, thinking disabled, temperature 0, seed 101,
+8192-token context and 640-token output limit. `OLLAMA_MODEL` and `OLLAMA_URL`
+can be set before startup; the default Ollama address is `http://127.0.0.1:11434`.
+Up to ten retrieved passages are sent, limited to 6000 characters per
+passage and 12000 total. Citation checks use the actual supplied text, including
+any clipping. Quotes allow whitespace differences only; words, accents and case
+are not repaired. Article/page metadata is supplied by the server, never the model.
+
+Missing evidence or invalid/truncated generation produces an abstention with
+no citations. An absent model/Ollama gives HTTP 503; timeout (90 seconds) gives
+504; unreadable provider JSON gives 502. One question runs at a time; a concurrent
+request receives 429 with `Retry-After`. The interface displays these errors and
+allows retry. Run a single server worker for this local GPU baseline.
+
+The server logs timings, model, token counts and outcome without question text.
+`timings_ms.total` measures retrieval through validation inside the server;
+network/browser latency is not included. Generation time includes cold model
+loading when applicable. Citation identity and quotation checks do not prove
+semantic support: choosing the correct legal procedure still requires evaluation.
+The ten-result baseline includes article 10 for the short books-retention
+question where the five-result keyword baseline missed it; a regression test
+checks this retrieval-to-generation handoff.
+
+Tests run without Ollama or downloading models:
+
+```powershell
+python -m pip install -r "project 2/requirements-dev.txt"
+python -m unittest discover -s "project 2/tests" -p "test_*.py"
+```

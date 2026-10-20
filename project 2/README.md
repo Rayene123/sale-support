@@ -24,6 +24,10 @@ replaced without changing the rest of the pipeline.
 
 ## Planned structure
 
+Person 3's local French question interface and API are implemented. See
+[local run instructions](docs/PERSON_3_SERVICE.md#local-implementation) for
+Qwen3.5-9B setup, response format and tests.
+
 ```text
 project 2/
 ├── README.md
