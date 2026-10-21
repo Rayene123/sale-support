@@ -48,7 +48,7 @@ def adapt_record(raw: Any, line_number: int) -> dict[str, Any]:
 
     if canonical:
         answerability = raw.get("answerability")
-        if answerability not in {"answerable", "unanswerable"}:
+        if not isinstance(answerability, str) or answerability not in {"answerable", "unanswerable"}:
             raise DatasetError(f"line {line_number}: invalid answerability")
         review = raw.get("review")
         if not isinstance(review, dict) or not isinstance(review.get("status"), str):

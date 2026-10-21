@@ -7,10 +7,13 @@ the cited quotation occurs in the canonical corpus text.
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
+from hashlib import sha256
 import json
 import math
 import re
 import statistics
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -18,8 +21,10 @@ from pathlib import Path
 from typing import Any
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
-class DatasetError(ValueError):
-    """Invalid canonical generation-evaluation dataset."""
+if str(PROJECT_DIR) not in sys.path:
+    sys.path.insert(0, str(PROJECT_DIR))
+
+from eval.retrieval import DatasetError, adapt_record
 
 
 def load_canonical_questions(path: str | Path) -> tuple[list[dict[str, Any]], dict[str, int]]:
@@ -34,17 +39,17 @@ def load_canonical_questions(path: str | Path) -> tuple[list[dict[str, Any]], di
             row = json.loads(line)
         except json.JSONDecodeError as exc:
             raise DatasetError(f"line {line_no}: invalid JSON") from exc
-        if not isinstance(row, dict) or not isinstance(row.get("question_id"), str):
-            raise DatasetError(f"line {line_no}: missing question_id")
-        if row["question_id"] in seen:
+        normalized = adapt_record(row, line_no)
+        if normalized["source_format"] != "canonical":
+            raise DatasetError(f"line {line_no}: canonical gold_evidence is required")
+        qid = normalized["question_id"]
+        if qid in seen:
             raise DatasetError(f"line {line_no}: duplicate question_id")
-        seen.add(row["question_id"])
-        status = (row.get("review") or {}).get("status", "missing_review_status")
+        seen.add(qid)
+        status = normalized["review_status"]
         counts[status] = counts.get(status, 0) + 1
         if status == "approved":
-            if row.get("answerability") not in {"answerable", "unanswerable"} or not isinstance(row.get("question"), str):
-                raise DatasetError(f"line {line_no}: malformed approved question")
-            rows.append(row)
+            rows.append(dict(row, question_id=qid, question=normalized["question"]))
     return rows, counts
 
 
@@ -105,11 +110,13 @@ def score_response(question: dict[str, Any], response: dict[str, Any], corpus: d
         if not isinstance(citation, dict):
             quote_checks.append(False)
             continue
-        record = corpus.get(citation.get("record_id"))
+        record_id = citation.get("record_id")
+        record = corpus.get(record_id) if isinstance(record_id, str) else None
         quote = citation.get("quote")
         quote_checks.append(bool(
             record and record.get("status") == "published" and isinstance(record.get("text"), str)
-            and isinstance(quote, str) and " ".join(quote.split()) in " ".join(record["text"].split())
+            and isinstance(quote, str) and quote.strip()
+            and " ".join(quote.split()) in " ".join(record["text"].split())
         ))
     abstain = response.get("abstain")
     if not isinstance(abstain, bool):
@@ -117,6 +124,8 @@ def score_response(question: dict[str, Any], response: dict[str, Any], corpus: d
     answerable = question["answerability"] == "answerable"
     reference = question.get("expected_answer")
     prediction = response.get("answer_fr")
+    if not isinstance(prediction, str) or not prediction.strip():
+        raise ValueError("API response answer_fr must be a nonempty string")
     return {
         "question_id": question["question_id"],
         "answerability": question["answerability"],
@@ -177,17 +186,36 @@ def run(api_url: str, questions: list[dict[str, Any]], corpus: dict[str, dict[st
     for question in questions:
         req = urllib.request.Request(api_url.rstrip("/") + "/ask", data=json.dumps({"question": question["question"]}, ensure_ascii=False).encode(), headers={"Content-Type": "application/json"}, method="POST")
         start = time.perf_counter()
+        payload = None
         try:
             with urllib.request.urlopen(req, timeout=timeout) as response:
                 payload = json.loads(response.read().decode("utf-8"))
             if not isinstance(payload, dict):
                 raise ValueError("API response must be an object")
             scored = score_response(question, payload, corpus)
+            scored["response"] = payload
             scored["client_wall_ms"] = (time.perf_counter() - start) * 1000
             rows.append(scored)
         except (OSError, TimeoutError, urllib.error.URLError, json.JSONDecodeError, ValueError) as exc:
-            rows.append({"question_id": question["question_id"], "answerability": question["answerability"], "error": type(exc).__name__, "client_wall_ms": (time.perf_counter()-start)*1000})
+            failed = {"question_id": question["question_id"], "answerability": question["answerability"], "error": type(exc).__name__, "client_wall_ms": (time.perf_counter()-start)*1000}
+            if isinstance(exc, urllib.error.HTTPError):
+                failed["http_status"] = exc.code
+            if payload is not None:
+                failed["response"] = payload
+            rows.append(failed)
     return rows
+
+
+def run_metadata(questions_path: str | Path, corpus_path: str | Path, api_url: str) -> dict[str, Any]:
+    sources = [Path(__file__), PROJECT_DIR / "eval/retrieval.py", *sorted((PROJECT_DIR / "src").rglob("*.py"))]
+    return {
+        "started_at_utc": datetime.now(timezone.utc).isoformat(),
+        "api_url": api_url,
+        "questions_sha256": sha256(Path(questions_path).read_bytes()).hexdigest(),
+        "corpus_sha256": sha256(Path(corpus_path).read_bytes()).hexdigest(),
+        "source_sha256": {str(p.relative_to(PROJECT_DIR)).replace("\\", "/"): sha256(p.read_bytes()).hexdigest() for p in sources},
+        "configuration_note": "Source hashes describe this checkout, not necessarily the running API. Generation/retrieval settings are not reported by /ask; retain server configuration separately.",
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -213,8 +241,10 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, DatasetError, ValueError) as exc:
         parser.error(str(exc))
     excluded = review_counts.get("excluded_duplicate", 0)
+    provenance = run_metadata(args.questions, args.corpus, args.api_url)
     rows = run(args.api_url, approved, corpus, args.timeout)
-    result = {"evaluation_mode": "approved_canonical_generation", "review_status_counts": review_counts, "metrics": summarize(rows, len(approved), excluded, args.prompt_usd_per_million_tokens, args.completion_usd_per_million_tokens), "per_question": rows}
+    provenance["observed_models"] = sorted({r["model"] for r in rows if isinstance(r.get("model"), str)})
+    result = {"evaluation_mode": "approved_canonical_generation", "review_status_counts": review_counts, "provenance": provenance, "metrics": summarize(rows, len(approved), excluded, args.prompt_usd_per_million_tokens, args.completion_usd_per_million_tokens), "per_question": rows}
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"output": str(output), "metrics": result["metrics"]}, ensure_ascii=False, indent=2))
