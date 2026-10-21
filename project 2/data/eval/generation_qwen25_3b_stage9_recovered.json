@@ -1,0 +1,2777 @@
+{
+  "evaluation_mode": "approved_canonical_generation",
+  "review_status_counts": {
+    "approved": 109,
+    "excluded_duplicate": 1
+  },
+  "metrics": {
+    "official_status": "approved_questions_scored; semantic_and_legal_correctness_not_established",
+    "question_counts": {
+      "approved": 109,
+      "completed": 109,
+      "failed": 0,
+      "answerable_completed": 89,
+      "unanswerable_completed": 20,
+      "excluded_duplicates": 1
+    },
+    "answer_lexical_f1_proxy": {
+      "mean": 0.30691391942413176,
+      "denominator": 89,
+      "definition": "Mean token-overlap F1 against reference answer; not semantic correctness."
+    },
+    "citation_accuracy": {
+      "answerable_precision_mean": 0.3408239700374532,
+      "precision_denominator_answerable": 89,
+      "answerable_gold_recall_mean": 0.449438202247191,
+      "answerable_recall_denominator": 89,
+      "unanswerable_cited_any_rate": 0.35,
+      "unanswerable_denominator": 20,
+      "exact_quote_match_rate": 1.0,
+      "quote_denominator": 133
+    },
+    "abstention": {
+      "true_abstain_unanswerable": 13,
+      "unanswerable_denominator": 20,
+      "answered_unanswerable": 7,
+      "abstained_answerable": 31,
+      "answerable_denominator": 89,
+      "abstention_precision": 0.29545454545454547,
+      "abstention_recall": 0.65,
+      "abstention_f1": 0.40625,
+      "answer_rate_on_answerable": 0.651685393258427
+    },
+    "latency_ms": {
+      "server_total_denominator": 109,
+      "server_total_p50": 28254.34,
+      "server_total_p95": 37814.54,
+      "client_wall_denominator": 109,
+      "client_wall_p50": 28259.874800001853,
+      "client_wall_p95": 37830.388700000185,
+      "retrieval_p50": 3.18,
+      "generation_p50": 28248.03,
+      "note": "API client wall time includes network; server timings exclude client/network overhead."
+    },
+    "token_usage": {
+      "prompt_tokens": 448824,
+      "completion_tokens": 30283,
+      "usage_complete_count": 109,
+      "denominator_completed": 109
+    },
+    "estimated_cost": {
+      "amount": null,
+      "currency": "USD",
+      "prompt_usd_per_million_tokens": null,
+      "completion_usd_per_million_tokens": null,
+      "note": "Null until both rates and complete usage counts are supplied; local Ollama electricity/hardware cost is not included."
+    },
+    "faithfulness": {
+      "score": null,
+      "reason": "Requires human assessment that each claim is entailed by its cited evidence; exact quote match is not entailment."
+    },
+    "definitions": {
+      "approved_only": "Only review.status=approved rows are sent to /ask; excluded duplicates are never scored.",
+      "answer_lexical_f1_proxy": "Token overlap only; never interpret as legal or semantic correctness.",
+      "citation_precision": "For answerable questions, returned distinct cited record IDs that are required gold IDs / returned distinct cited record IDs; question-level value is zero when no citation is returned.",
+      "citation_recall": "Required gold record IDs returned / required gold record IDs, answerable rows only.",
+      "unanswerable_cited_any_rate": "Unanswerable questions with one or more citations / completed unanswerable questions.",
+      "quote_match": "Whitespace-normalized citation quote occurs in normalized text of a published corpus record; does not establish support."
+    }
+  },
+  "per_question": [
+    {
+      "question_id": "fr-single-001",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.0,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 3.42,
+        "generation": 38737.64,
+        "total": 38741.06
+      },
+      "usage": {
+        "prompt_tokens": 4964,
+        "completion_tokens": 355
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 38988.26719999852
+    },
+    {
+      "question_id": "fr-single-002",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.6133333333333333,
+      "citation_record_ids": [
+        "code-commerce-tn:article-601",
+        "code-commerce-tn:article-2"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.61,
+        "generation": 24286.89,
+        "total": 24289.5
+      },
+      "usage": {
+        "prompt_tokens": 3384,
+        "completion_tokens": 261
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 24303.093099999387
+    },
+    {
+      "question_id": "fr-single-003",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.39215686274509803,
+      "citation_record_ids": [
+        "code-commerce-tn:article-3",
+        "code-commerce-tn:article-723"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 6.22,
+        "generation": 25504.79,
+        "total": 25511.01
+      },
+      "usage": {
+        "prompt_tokens": 3511,
+        "completion_tokens": 273
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 25539.597199996933
+    },
+    {
+      "question_id": "fr-single-004",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.5660377358490567,
+      "citation_record_ids": [
+        "code-commerce-tn:article-4"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 3.63,
+        "generation": 23247.7,
+        "total": 23251.33
+      },
+      "usage": {
+        "prompt_tokens": 3416,
+        "completion_tokens": 213
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 23264.1446000016
+    },
+    {
+      "question_id": "fr-single-005",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.9523809523809523,
+      "citation_record_ids": [
+        "code-commerce-tn:article-5"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 1,
+      "quote_checks_total": 1,
+      "timings_ms": {
+        "retrieval": 2.2,
+        "generation": 17978.69,
+        "total": 17980.89
+      },
+      "usage": {
+        "prompt_tokens": 3137,
+        "completion_tokens": 86
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 17983.908799997153
+    },
+    {
+      "question_id": "fr-single-006",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.1568627450980392,
+      "citation_record_ids": [
+        "code-commerce-tn:article-219"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 4.82,
+        "generation": 25703.98,
+        "total": 25708.8
+      },
+      "usage": {
+        "prompt_tokens": 3790,
+        "completion_tokens": 220
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 25728.399100000388
+    },
+    {
+      "question_id": "fr-single-007",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.045454545454545456,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.34,
+        "generation": 34697.59,
+        "total": 34699.93
+      },
+      "usage": {
+        "prompt_tokens": 3544,
+        "completion_tokens": 597
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 34702.8078000003
+    },
+    {
+      "question_id": "fr-single-008",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.225,
+      "citation_record_ids": [
+        "code-commerce-tn:article-349",
+        "code-commerce-tn:article-712"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.06,
+        "generation": 35972.79,
+        "total": 35974.85
+      },
+      "usage": {
+        "prompt_tokens": 4753,
+        "completion_tokens": 343
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 35977.963699999236
+    },
+    {
+      "question_id": "fr-single-009",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.44827586206896547,
+      "citation_record_ids": [
+        "code-commerce-tn:article-10",
+        "code-commerce-tn:article-11"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 3,
+      "quote_checks_total": 3,
+      "timings_ms": {
+        "retrieval": 6.72,
+        "generation": 24081.86,
+        "total": 24088.58
+      },
+      "usage": {
+        "prompt_tokens": 3086,
+        "completion_tokens": 321
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 24109.170599997015
+    },
+    {
+      "question_id": "fr-single-010",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.05405405405405405,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.59,
+        "generation": 22938.32,
+        "total": 22940.91
+      },
+      "usage": {
+        "prompt_tokens": 3485,
+        "completion_tokens": 188
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 22956.603400001768
+    },
+    {
+      "question_id": "fr-single-011",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.1818181818181818,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 3.32,
+        "generation": 27535.46,
+        "total": 27538.78
+      },
+      "usage": {
+        "prompt_tokens": 3877,
+        "completion_tokens": 252
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 27562.05630000113
+    },
+    {
+      "question_id": "fr-single-012",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.3076923076923077,
+      "citation_record_ids": [
+        "code-commerce-tn:article-13",
+        "code-commerce-tn:article-11"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 3.76,
+        "generation": 26964.21,
+        "total": 26967.97
+      },
+      "usage": {
+        "prompt_tokens": 3724,
+        "completion_tokens": 274
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 26971.0636000018
+    },
+    {
+      "question_id": "fr-single-013",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.1081081081081081,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 8.54,
+        "generation": 34861.16,
+        "total": 34869.69
+      },
+      "usage": {
+        "prompt_tokens": 4877,
+        "completion_tokens": 261
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 34892.49850000124
+    },
+    {
+      "question_id": "fr-single-014",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.22535211267605634,
+      "citation_record_ids": [
+        "code-commerce-tn:article-189-bis",
+        "code-commerce-tn:article-216"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 3.23,
+        "generation": 32735.68,
+        "total": 32738.91
+      },
+      "usage": {
+        "prompt_tokens": 4257,
+        "completion_tokens": 352
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 32754.732800000056
+    },
+    {
+      "question_id": "fr-single-015",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.25,
+      "citation_record_ids": [
+        "code-commerce-tn:article-190",
+        "code-commerce-tn:article-542"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.84,
+        "generation": 31061.16,
+        "total": 31064.0
+      },
+      "usage": {
+        "prompt_tokens": 4335,
+        "completion_tokens": 274
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 31067.297500001587
+    },
+    {
+      "question_id": "fr-single-016",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.588235294117647,
+      "citation_record_ids": [
+        "code-commerce-tn:article-191"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 3.04,
+        "generation": 29775.87,
+        "total": 29778.91
+      },
+      "usage": {
+        "prompt_tokens": 4014,
+        "completion_tokens": 302
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 29782.373300000472
+    },
+    {
+      "question_id": "fr-single-017",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.20118343195266272,
+      "citation_record_ids": [
+        "code-commerce-tn:article-225",
+        "code-commerce-tn:article-202",
+        "code-commerce-tn:article-228-bis"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 3,
+      "quote_checks_total": 3,
+      "timings_ms": {
+        "retrieval": 3.94,
+        "generation": 34990.85,
+        "total": 34994.79
+      },
+      "usage": {
+        "prompt_tokens": 3974,
+        "completion_tokens": 509
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 34997.95819999781
+    },
+    {
+      "question_id": "fr-single-018",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.046511627906976744,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 3.66,
+        "generation": 32946.61,
+        "total": 32950.28
+      },
+      "usage": {
+        "prompt_tokens": 4584,
+        "completion_tokens": 275
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 32954.43659999728
+    },
+    {
+      "question_id": "fr-single-019",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.44036697247706424,
+      "citation_record_ids": [
+        "code-commerce-tn:article-194",
+        "code-commerce-tn:article-253"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 5.54,
+        "generation": 28821.88,
+        "total": 28827.42
+      },
+      "usage": {
+        "prompt_tokens": 3661,
+        "completion_tokens": 352
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 28850.495200000296
+    },
+    {
+      "question_id": "fr-single-020",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.12765957446808507,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 4.82,
+        "generation": 31737.7,
+        "total": 31742.52
+      },
+      "usage": {
+        "prompt_tokens": 4520,
+        "completion_tokens": 246
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 31747.6886000004
+    },
+    {
+      "question_id": "fr-single-021",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.45454545454545453,
+      "citation_record_ids": [
+        "code-commerce-tn:article-196",
+        "code-commerce-tn:article-198"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 4.44,
+        "generation": 23160.79,
+        "total": 23165.23
+      },
+      "usage": {
+        "prompt_tokens": 2964,
+        "completion_tokens": 313
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 23188.086199999816
+    },
+    {
+      "question_id": "fr-single-022",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.03846153846153846,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 5.91,
+        "generation": 28671.28,
+        "total": 28677.2
+      },
+      "usage": {
+        "prompt_tokens": 3956,
+        "completion_tokens": 280
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 28683.27959999806
+    },
+    {
+      "question_id": "fr-single-023",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.36923076923076925,
+      "citation_record_ids": [
+        "code-commerce-tn:article-198",
+        "code-commerce-tn:article-249"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 5.6,
+        "generation": 23637.46,
+        "total": 23643.07
+      },
+      "usage": {
+        "prompt_tokens": 3062,
+        "completion_tokens": 308
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 23647.982300000876
+    },
+    {
+      "question_id": "fr-single-024",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.09090909090909091,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 5.99,
+        "generation": 34030.96,
+        "total": 34036.95
+      },
+      "usage": {
+        "prompt_tokens": 4810,
+        "completion_tokens": 258
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 34042.12270000062
+    },
+    {
+      "question_id": "fr-single-025",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.25641025641025644,
+      "citation_record_ids": [
+        "code-commerce-tn:article-561"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 5.77,
+        "generation": 33067.98,
+        "total": 33073.75
+      },
+      "usage": {
+        "prompt_tokens": 4664,
+        "completion_tokens": 254
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 33079.634600002464
+    },
+    {
+      "question_id": "fr-single-026",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.8571428571428571,
+      "citation_record_ids": [
+        "code-commerce-tn:article-269"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 1,
+      "quote_checks_total": 1,
+      "timings_ms": {
+        "retrieval": 7.75,
+        "generation": 24909.6,
+        "total": 24917.35
+      },
+      "usage": {
+        "prompt_tokens": 4156,
+        "completion_tokens": 91
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 24922.33899999701
+    },
+    {
+      "question_id": "fr-single-027",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.19672131147540983,
+      "citation_record_ids": [
+        "code-commerce-tn:article-290",
+        "code-commerce-tn:article-334"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 4.97,
+        "generation": 27100.32,
+        "total": 27105.29
+      },
+      "usage": {
+        "prompt_tokens": 3902,
+        "completion_tokens": 235
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 27111.036899998
+    },
+    {
+      "question_id": "fr-single-028",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.6590909090909091,
+      "citation_record_ids": [
+        "code-commerce-tn:article-271",
+        "code-commerce-tn:article-291"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 6.31,
+        "generation": 28248.03,
+        "total": 28254.34
+      },
+      "usage": {
+        "prompt_tokens": 4058,
+        "completion_tokens": 235
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 28259.874800001853
+    },
+    {
+      "question_id": "fr-single-029",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.0,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 7.94,
+        "generation": 32288.05,
+        "total": 32295.99
+      },
+      "usage": {
+        "prompt_tokens": 4291,
+        "completion_tokens": 322
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 32301.547300001403
+    },
+    {
+      "question_id": "fr-single-030",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.0816326530612245,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 6.38,
+        "generation": 29358.98,
+        "total": 29365.36
+      },
+      "usage": {
+        "prompt_tokens": 3988,
+        "completion_tokens": 293
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 29370.68459999864
+    },
+    {
+      "question_id": "fr-single-031",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.0,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 3.25,
+        "generation": 23625.25,
+        "total": 23628.51
+      },
+      "usage": {
+        "prompt_tokens": 3335,
+        "completion_tokens": 239
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 23633.65110000086
+    },
+    {
+      "question_id": "fr-single-032",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.5714285714285714,
+      "citation_record_ids": [
+        "code-commerce-tn:article-275"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 6.46,
+        "generation": 32574.52,
+        "total": 32580.98
+      },
+      "usage": {
+        "prompt_tokens": 4340,
+        "completion_tokens": 317
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 32591.409399999975
+    },
+    {
+      "question_id": "fr-single-033",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.32142857142857145,
+      "citation_record_ids": [
+        "code-commerce-tn:article-277",
+        "code-commerce-tn:article-279"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 10.21,
+        "generation": 30213.93,
+        "total": 30224.14
+      },
+      "usage": {
+        "prompt_tokens": 4351,
+        "completion_tokens": 222
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 30236.720299999433
+    },
+    {
+      "question_id": "fr-single-034",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.07407407407407407,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 11.45,
+        "generation": 31393.0,
+        "total": 31404.46
+      },
+      "usage": {
+        "prompt_tokens": 3917,
+        "completion_tokens": 373
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 31410.73210000104
+    },
+    {
+      "question_id": "fr-single-035",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.6956521739130435,
+      "citation_record_ids": [
+        "code-commerce-tn:article-364"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 1,
+      "quote_checks_total": 1,
+      "timings_ms": {
+        "retrieval": 4.33,
+        "generation": 22484.09,
+        "total": 22488.42
+      },
+      "usage": {
+        "prompt_tokens": 3777,
+        "completion_tokens": 96
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 22495.154500000353
+    },
+    {
+      "question_id": "fr-single-036",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.767123287671233,
+      "citation_record_ids": [
+        "code-commerce-tn:article-365"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 6.68,
+        "generation": 24110.76,
+        "total": 24117.44
+      },
+      "usage": {
+        "prompt_tokens": 3303,
+        "completion_tokens": 266
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 24124.686099999963
+    },
+    {
+      "question_id": "fr-single-037",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.20833333333333334,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 3.13,
+        "generation": 27746.59,
+        "total": 27749.72
+      },
+      "usage": {
+        "prompt_tokens": 3924,
+        "completion_tokens": 249
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 27768.131600001652
+    },
+    {
+      "question_id": "fr-single-038",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.12244897959183672,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 7.41,
+        "generation": 40492.92,
+        "total": 40500.34
+      },
+      "usage": {
+        "prompt_tokens": 4161,
+        "completion_tokens": 640
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 40506.77680000081
+    },
+    {
+      "question_id": "fr-single-039",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.06666666666666667,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 7.52,
+        "generation": 30049.25,
+        "total": 30056.76
+      },
+      "usage": {
+        "prompt_tokens": 4089,
+        "completion_tokens": 271
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 30068.283699998574
+    },
+    {
+      "question_id": "fr-single-040",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.5263157894736842,
+      "citation_record_ids": [
+        "code-commerce-tn:article-283",
+        "code-commerce-tn:article-291"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.4,
+        "generation": 4563.67,
+        "total": 4566.07
+      },
+      "usage": {
+        "prompt_tokens": 4368,
+        "completion_tokens": 203
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 4595.474000001559
+    },
+    {
+      "question_id": "fr-single-041",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.7058823529411765,
+      "citation_record_ids": [
+        "code-commerce-tn:article-284"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.93,
+        "generation": 28750.66,
+        "total": 28753.6
+      },
+      "usage": {
+        "prompt_tokens": 4570,
+        "completion_tokens": 186
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 28766.688099996827
+    },
+    {
+      "question_id": "fr-single-042",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.4222222222222222,
+      "citation_record_ids": [
+        "code-commerce-tn:article-347"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.75,
+        "generation": 26700.1,
+        "total": 26702.84
+      },
+      "usage": {
+        "prompt_tokens": 4187,
+        "completion_tokens": 217
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 26705.096699999558
+    },
+    {
+      "question_id": "fr-single-043",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.30769230769230765,
+      "citation_record_ids": [
+        "code-commerce-tn:article-352"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.06,
+        "generation": 23438.27,
+        "total": 23440.34
+      },
+      "usage": {
+        "prompt_tokens": 3849,
+        "completion_tokens": 157
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 23442.60939999731
+    },
+    {
+      "question_id": "fr-single-044",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.19354838709677416,
+      "citation_record_ids": [
+        "code-commerce-tn:article-349",
+        "code-commerce-tn:article-285"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 1.91,
+        "generation": 28507.37,
+        "total": 28509.28
+      },
+      "usage": {
+        "prompt_tokens": 4389,
+        "completion_tokens": 217
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 28514.213800001016
+    },
+    {
+      "question_id": "fr-single-045",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.3,
+      "citation_record_ids": [
+        "code-commerce-tn:article-350",
+        "code-commerce-tn:article-376"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 5.69,
+        "generation": 37692.52,
+        "total": 37698.21
+      },
+      "usage": {
+        "prompt_tokens": 5606,
+        "completion_tokens": 249
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 37702.50379999925
+    },
+    {
+      "question_id": "fr-single-046",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.38235294117647056,
+      "citation_record_ids": [
+        "code-commerce-tn:article-352",
+        "code-commerce-tn:article-351"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 4.7,
+        "generation": 22673.62,
+        "total": 22678.32
+      },
+      "usage": {
+        "prompt_tokens": 3623,
+        "completion_tokens": 194
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 22696.914399999514
+    },
+    {
+      "question_id": "fr-single-047",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.4197530864197531,
+      "citation_record_ids": [
+        "code-commerce-tn:article-352",
+        "code-commerce-tn:article-354"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.99,
+        "generation": 25133.46,
+        "total": 25136.45
+      },
+      "usage": {
+        "prompt_tokens": 3927,
+        "completion_tokens": 216
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 25138.527999999496
+    },
+    {
+      "question_id": "fr-single-048",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.1818181818181818,
+      "citation_record_ids": [
+        "code-commerce-tn:article-351",
+        "code-commerce-tn:article-359"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.0,
+        "generation": 26111.49,
+        "total": 26113.49
+      },
+      "usage": {
+        "prompt_tokens": 3930,
+        "completion_tokens": 267
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 26139.428499998758
+    },
+    {
+      "question_id": "fr-single-049",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.6451612903225806,
+      "citation_record_ids": [
+        "code-commerce-tn:article-354",
+        "code-commerce-tn:article-352"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.95,
+        "generation": 30801.11,
+        "total": 30804.06
+      },
+      "usage": {
+        "prompt_tokens": 4108,
+        "completion_tokens": 448
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 30819.269200001145
+    },
+    {
+      "question_id": "fr-single-050",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.6588235294117647,
+      "citation_record_ids": [
+        "code-commerce-tn:article-355"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.45,
+        "generation": 35642.93,
+        "total": 35645.37
+      },
+      "usage": {
+        "prompt_tokens": 5324,
+        "completion_tokens": 258
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 35647.75229999941
+    },
+    {
+      "question_id": "fr-single-051",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.0,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.32,
+        "generation": 27062.04,
+        "total": 27064.37
+      },
+      "usage": {
+        "prompt_tokens": 3608,
+        "completion_tokens": 362
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 27078.669999998965
+    },
+    {
+      "question_id": "fr-single-052",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.03773584905660377,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 4.44,
+        "generation": 27929.54,
+        "total": 27933.99
+      },
+      "usage": {
+        "prompt_tokens": 3794,
+        "completion_tokens": 386
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 27936.88590000238
+    },
+    {
+      "question_id": "fr-single-053",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.8378378378378378,
+      "citation_record_ids": [
+        "code-commerce-tn:article-365"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.39,
+        "generation": 26155.69,
+        "total": 26158.08
+      },
+      "usage": {
+        "prompt_tokens": 3895,
+        "completion_tokens": 249
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 26160.70519999994
+    },
+    {
+      "question_id": "fr-single-054",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.2325581395348837,
+      "citation_record_ids": [
+        "code-commerce-tn:article-384"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 1.82,
+        "generation": 25371.22,
+        "total": 25373.04
+      },
+      "usage": {
+        "prompt_tokens": 3762,
+        "completion_tokens": 260
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 25375.655600000755
+    },
+    {
+      "question_id": "fr-single-055",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.972972972972973,
+      "citation_record_ids": [
+        "code-commerce-tn:article-372"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 1,
+      "quote_checks_total": 1,
+      "timings_ms": {
+        "retrieval": 4.01,
+        "generation": 22466.71,
+        "total": 22470.72
+      },
+      "usage": {
+        "prompt_tokens": 3778,
+        "completion_tokens": 108
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 22488.15100000138
+    },
+    {
+      "question_id": "fr-single-056",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.4631578947368421,
+      "citation_record_ids": [
+        "code-commerce-tn:article-374",
+        "code-commerce-tn:article-389"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 3,
+      "quote_checks_total": 3,
+      "timings_ms": {
+        "retrieval": 1.89,
+        "generation": 35754.57,
+        "total": 35756.46
+      },
+      "usage": {
+        "prompt_tokens": 4870,
+        "completion_tokens": 393
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 35758.50250000076
+    },
+    {
+      "question_id": "fr-single-057",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.15,
+      "citation_record_ids": [
+        "code-commerce-tn:article-383"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 0.93,
+        "generation": 79324.85,
+        "total": 79325.78
+      },
+      "usage": {
+        "prompt_tokens": 4408,
+        "completion_tokens": 228
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 79330.64860000013
+    },
+    {
+      "question_id": "fr-single-058",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.04347826086956522,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.85,
+        "generation": 25145.06,
+        "total": 25147.91
+      },
+      "usage": {
+        "prompt_tokens": 3861,
+        "completion_tokens": 237
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 25152.72730000288
+    },
+    {
+      "question_id": "fr-single-059",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.3218390804597701,
+      "citation_record_ids": [
+        "code-commerce-tn:article-315"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 5.2,
+        "generation": 37097.4,
+        "total": 37102.6
+      },
+      "usage": {
+        "prompt_tokens": 5448,
+        "completion_tokens": 237
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 37108.88509999859
+    },
+    {
+      "question_id": "fr-single-060",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.03773584905660377,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 6.03,
+        "generation": 38917.06,
+        "total": 38923.09
+      },
+      "usage": {
+        "prompt_tokens": 4706,
+        "completion_tokens": 640
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 38926.98630000086
+    },
+    {
+      "question_id": "fr-single-061",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.297029702970297,
+      "citation_record_ids": [
+        "code-commerce-tn:article-390"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 4,
+      "quote_checks_total": 4,
+      "timings_ms": {
+        "retrieval": 2.18,
+        "generation": 27515.48,
+        "total": 27517.66
+      },
+      "usage": {
+        "prompt_tokens": 3591,
+        "completion_tokens": 423
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 27521.01279999988
+    },
+    {
+      "question_id": "fr-single-062",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.5098039215686275,
+      "citation_record_ids": [
+        "code-commerce-tn:article-392"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 3,
+      "quote_checks_total": 3,
+      "timings_ms": {
+        "retrieval": 2.43,
+        "generation": 26982.63,
+        "total": 26985.06
+      },
+      "usage": {
+        "prompt_tokens": 3802,
+        "completion_tokens": 348
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 27006.830599999375
+    },
+    {
+      "question_id": "fr-single-063",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.5263157894736842,
+      "citation_record_ids": [
+        "code-commerce-tn:article-400",
+        "code-commerce-tn:article-325"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 1.61,
+        "generation": 26550.07,
+        "total": 26551.68
+      },
+      "usage": {
+        "prompt_tokens": 4024,
+        "completion_tokens": 263
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 26564.482300000236
+    },
+    {
+      "question_id": "fr-single-064",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.05128205128205128,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 1.86,
+        "generation": 29708.72,
+        "total": 29710.58
+      },
+      "usage": {
+        "prompt_tokens": 3387,
+        "completion_tokens": 640
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 29724.57900000154
+    },
+    {
+      "question_id": "fr-single-065",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.125,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.03,
+        "generation": 35654.46,
+        "total": 35656.49
+      },
+      "usage": {
+        "prompt_tokens": 4443,
+        "completion_tokens": 566
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 35658.47749999739
+    },
+    {
+      "question_id": "fr-single-066",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.3577235772357724,
+      "citation_record_ids": [
+        "code-commerce-tn:article-408"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 3,
+      "quote_checks_total": 3,
+      "timings_ms": {
+        "retrieval": 2.02,
+        "generation": 33628.43,
+        "total": 33630.45
+      },
+      "usage": {
+        "prompt_tokens": 4409,
+        "completion_tokens": 451
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 33632.79049999983
+    },
+    {
+      "question_id": "fr-single-067",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.2201834862385321,
+      "citation_record_ids": [
+        "code-commerce-tn:article-410",
+        "code-commerce-tn:article-411-ter"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.64,
+        "generation": 37811.9,
+        "total": 37814.54
+      },
+      "usage": {
+        "prompt_tokens": 5150,
+        "completion_tokens": 354
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 37830.388700000185
+    },
+    {
+      "question_id": "fr-single-068",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.23529411764705882,
+      "citation_record_ids": [
+        "code-commerce-tn:article-350"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 1.66,
+        "generation": 24673.38,
+        "total": 24675.05
+      },
+      "usage": {
+        "prompt_tokens": 3873,
+        "completion_tokens": 209
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 24679.530299999897
+    },
+    {
+      "question_id": "fr-single-069",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.2807017543859649,
+      "citation_record_ids": [
+        "code-commerce-tn:article-409"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.0,
+        "generation": 35483.1,
+        "total": 35485.1
+      },
+      "usage": {
+        "prompt_tokens": 5045,
+        "completion_tokens": 342
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 35487.4953000035
+    },
+    {
+      "question_id": "fr-single-070",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.17142857142857143,
+      "citation_record_ids": [
+        "code-commerce-tn:article-404",
+        "code-commerce-tn:article-356"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 1.5,
+        "generation": 24580.28,
+        "total": 24581.78
+      },
+      "usage": {
+        "prompt_tokens": 3540,
+        "completion_tokens": 305
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 24584.068899999693
+    },
+    {
+      "question_id": "fr-cross-001",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.0851063829787234,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 3.37,
+        "generation": 32798.17,
+        "total": 32801.54
+      },
+      "usage": {
+        "prompt_tokens": 4517,
+        "completion_tokens": 305
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 32822.80389999869
+    },
+    {
+      "question_id": "fr-cross-002",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.4347826086956522,
+      "citation_record_ids": [
+        "code-commerce-tn:article-193"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 0.5,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.99,
+        "generation": 29566.61,
+        "total": 29569.6
+      },
+      "usage": {
+        "prompt_tokens": 4241,
+        "completion_tokens": 286
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 29598.83059999993
+    },
+    {
+      "question_id": "fr-cross-003",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.208955223880597,
+      "citation_record_ids": [
+        "code-commerce-tn:article-194",
+        "code-commerce-tn:article-198"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 0.5,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 6.59,
+        "generation": 26348.89,
+        "total": 26355.48
+      },
+      "usage": {
+        "prompt_tokens": 3805,
+        "completion_tokens": 295
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 26360.312200002227
+    },
+    {
+      "question_id": "fr-cross-004",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.08333333333333333,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.69,
+        "generation": 30367.24,
+        "total": 30369.94
+      },
+      "usage": {
+        "prompt_tokens": 4596,
+        "completion_tokens": 236
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 30389.508499996737
+    },
+    {
+      "question_id": "fr-cross-005",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.0851063829787234,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 9.69,
+        "generation": 30755.85,
+        "total": 30765.54
+      },
+      "usage": {
+        "prompt_tokens": 4285,
+        "completion_tokens": 384
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 30770.92249999987
+    },
+    {
+      "question_id": "fr-cross-006",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.07547169811320754,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 7.52,
+        "generation": 31843.58,
+        "total": 31851.1
+      },
+      "usage": {
+        "prompt_tokens": 4733,
+        "completion_tokens": 271
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 31875.73749999865
+    },
+    {
+      "question_id": "fr-cross-007",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.0816326530612245,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.82,
+        "generation": 29438.9,
+        "total": 29441.72
+      },
+      "usage": {
+        "prompt_tokens": 4306,
+        "completion_tokens": 320
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 29443.875600001775
+    },
+    {
+      "question_id": "fr-cross-008",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.05,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 4.46,
+        "generation": 31637.86,
+        "total": 31642.32
+      },
+      "usage": {
+        "prompt_tokens": 4562,
+        "completion_tokens": 336
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 31668.00720000174
+    },
+    {
+      "question_id": "fr-cross-010",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.5555555555555556,
+      "citation_record_ids": [
+        "code-commerce-tn:article-275"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 3.18,
+        "generation": 28691.45,
+        "total": 28694.63
+      },
+      "usage": {
+        "prompt_tokens": 4329,
+        "completion_tokens": 265
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 28697.060099999362
+    },
+    {
+      "question_id": "fr-cross-011",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.09090909090909091,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.75,
+        "generation": 22412.3,
+        "total": 22415.05
+      },
+      "usage": {
+        "prompt_tokens": 3533,
+        "completion_tokens": 218
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 22430.553400001372
+    },
+    {
+      "question_id": "fr-cross-012",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.22641509433962265,
+      "citation_record_ids": [
+        "code-commerce-tn:article-276"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 7.6,
+        "generation": 23052.73,
+        "total": 23060.33
+      },
+      "usage": {
+        "prompt_tokens": 3587,
+        "completion_tokens": 240
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 23064.632500001608
+    },
+    {
+      "question_id": "fr-cross-013",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.07272727272727274,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 3.01,
+        "generation": 31562.5,
+        "total": 31565.51
+      },
+      "usage": {
+        "prompt_tokens": 3834,
+        "completion_tokens": 591
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 31567.562699998234
+    },
+    {
+      "question_id": "fr-cross-014",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.56,
+      "citation_record_ids": [
+        "code-commerce-tn:article-370"
+      ],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.58,
+        "generation": 26390.73,
+        "total": 26393.31
+      },
+      "usage": {
+        "prompt_tokens": 4090,
+        "completion_tokens": 235
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 26395.471899999393
+    },
+    {
+      "question_id": "fr-cross-015",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.2891566265060241,
+      "citation_record_ids": [
+        "code-commerce-tn:article-350",
+        "code-commerce-tn:article-404"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 0.5,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 3.75,
+        "generation": 37360.78,
+        "total": 37364.53
+      },
+      "usage": {
+        "prompt_tokens": 5570,
+        "completion_tokens": 252
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 37366.71390000265
+    },
+    {
+      "question_id": "fr-cross-016",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.5964912280701754,
+      "citation_record_ids": [
+        "code-commerce-tn:article-350"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.88,
+        "generation": 27199.42,
+        "total": 27202.3
+      },
+      "usage": {
+        "prompt_tokens": 4116,
+        "completion_tokens": 224
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 27205.636599999707
+    },
+    {
+      "question_id": "fr-cross-017",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.5934065934065933,
+      "citation_record_ids": [
+        "code-commerce-tn:article-374"
+      ],
+      "citation_precision_against_gold": 1.0,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 7.94,
+        "generation": 37277.98,
+        "total": 37285.92
+      },
+      "usage": {
+        "prompt_tokens": 5323,
+        "completion_tokens": 314
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 37306.80729999949
+    },
+    {
+      "question_id": "fr-cross-018",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.34210526315789475,
+      "citation_record_ids": [
+        "code-commerce-tn:article-388",
+        "code-commerce-tn:article-394"
+      ],
+      "citation_precision_against_gold": 0.5,
+      "citation_recall_against_gold": 1.0,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.38,
+        "generation": 33368.36,
+        "total": 33370.73
+      },
+      "usage": {
+        "prompt_tokens": 5086,
+        "completion_tokens": 228
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 33373.29730000056
+    },
+    {
+      "question_id": "fr-cross-019",
+      "answerability": "answerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": 0.09090909090909091,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": 0.0,
+      "citation_recall_against_gold": 0.0,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.26,
+        "generation": 33222.18,
+        "total": 33224.45
+      },
+      "usage": {
+        "prompt_tokens": 4430,
+        "completion_tokens": 430
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 33228.89980000036
+    },
+    {
+      "question_id": "fr-cross-020",
+      "answerability": "answerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": 0.4158415841584159,
+      "citation_record_ids": [
+        "code-commerce-tn:article-391",
+        "code-commerce-tn:article-390",
+        "code-commerce-tn:article-386"
+      ],
+      "citation_precision_against_gold": 0.3333333333333333,
+      "citation_recall_against_gold": 0.5,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 3,
+      "quote_checks_total": 3,
+      "timings_ms": {
+        "retrieval": 7.94,
+        "generation": 30050.27,
+        "total": 30058.21
+      },
+      "usage": {
+        "prompt_tokens": 3950,
+        "completion_tokens": 470
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 30087.33360000042
+    },
+    {
+      "question_id": "fr-unanswerable-001",
+      "answerability": "unanswerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 5.07,
+        "generation": 29587.86,
+        "total": 29592.93
+      },
+      "usage": {
+        "prompt_tokens": 4166,
+        "completion_tokens": 341
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 29627.77229999847
+    },
+    {
+      "question_id": "fr-unanswerable-002",
+      "answerability": "unanswerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 4.13,
+        "generation": 20502.88,
+        "total": 20507.0
+      },
+      "usage": {
+        "prompt_tokens": 3604,
+        "completion_tokens": 46
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 20509.911199998896
+    },
+    {
+      "question_id": "fr-unanswerable-003",
+      "answerability": "unanswerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.31,
+        "generation": 25184.65,
+        "total": 25186.96
+      },
+      "usage": {
+        "prompt_tokens": 3798,
+        "completion_tokens": 262
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 25202.77040000292
+    },
+    {
+      "question_id": "fr-unanswerable-004",
+      "answerability": "unanswerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.59,
+        "generation": 26115.18,
+        "total": 26117.77
+      },
+      "usage": {
+        "prompt_tokens": 4496,
+        "completion_tokens": 52
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 26148.292900001252
+    },
+    {
+      "question_id": "fr-unanswerable-005",
+      "answerability": "unanswerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 5.7,
+        "generation": 35247.8,
+        "total": 35253.5
+      },
+      "usage": {
+        "prompt_tokens": 4448,
+        "completion_tokens": 528
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 35258.957400001236
+    },
+    {
+      "question_id": "fr-unanswerable-006",
+      "answerability": "unanswerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 3.59,
+        "generation": 24065.93,
+        "total": 24069.51
+      },
+      "usage": {
+        "prompt_tokens": 4285,
+        "completion_tokens": 46
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 24101.84129999834
+    },
+    {
+      "question_id": "fr-unanswerable-007",
+      "answerability": "unanswerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 3.47,
+        "generation": 21616.94,
+        "total": 21620.41
+      },
+      "usage": {
+        "prompt_tokens": 3862,
+        "completion_tokens": 48
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 21623.40369999947
+    },
+    {
+      "question_id": "fr-unanswerable-008",
+      "answerability": "unanswerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.07,
+        "generation": 20868.99,
+        "total": 20871.06
+      },
+      "usage": {
+        "prompt_tokens": 3791,
+        "completion_tokens": 57
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 20873.41000000015
+    },
+    {
+      "question_id": "fr-unanswerable-009",
+      "answerability": "unanswerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.45,
+        "generation": 20478.41,
+        "total": 20480.86
+      },
+      "usage": {
+        "prompt_tokens": 3689,
+        "completion_tokens": 49
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 20483.548000000155
+    },
+    {
+      "question_id": "fr-unanswerable-010",
+      "answerability": "unanswerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [
+        "code-commerce-tn:article-453"
+      ],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 1,
+      "quote_checks_total": 1,
+      "timings_ms": {
+        "retrieval": 3.69,
+        "generation": 19171.11,
+        "total": 19174.8
+      },
+      "usage": {
+        "prompt_tokens": 3272,
+        "completion_tokens": 136
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 19180.338199999824
+    },
+    {
+      "question_id": "fr-unanswerable-011",
+      "answerability": "unanswerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 8.79,
+        "generation": 29456.27,
+        "total": 29465.06
+      },
+      "usage": {
+        "prompt_tokens": 5058,
+        "completion_tokens": 44
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 29469.305200000235
+    },
+    {
+      "question_id": "fr-unanswerable-012",
+      "answerability": "unanswerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 1.83,
+        "generation": 26291.5,
+        "total": 26293.33
+      },
+      "usage": {
+        "prompt_tokens": 3763,
+        "completion_tokens": 342
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 26316.425900000468
+    },
+    {
+      "question_id": "fr-unanswerable-013",
+      "answerability": "unanswerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [
+        "code-commerce-tn:article-291",
+        "code-commerce-tn:article-271"
+      ],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.94,
+        "generation": 22835.95,
+        "total": 22838.9
+      },
+      "usage": {
+        "prompt_tokens": 3671,
+        "completion_tokens": 195
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 22841.485900000407
+    },
+    {
+      "question_id": "fr-unanswerable-014",
+      "answerability": "unanswerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [
+        "code-commerce-tn:article-8",
+        "code-commerce-tn:article-511"
+      ],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.28,
+        "generation": 24804.95,
+        "total": 24807.23
+      },
+      "usage": {
+        "prompt_tokens": 3675,
+        "completion_tokens": 300
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 24809.73180000001
+    },
+    {
+      "question_id": "fr-unanswerable-015",
+      "answerability": "unanswerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [
+        "code-commerce-tn:article-419"
+      ],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.27,
+        "generation": 38560.11,
+        "total": 38562.38
+      },
+      "usage": {
+        "prompt_tokens": 5366,
+        "completion_tokens": 382
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 38566.777200001525
+    },
+    {
+      "question_id": "fr-unanswerable-016",
+      "answerability": "unanswerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [
+        "code-commerce-tn:article-737"
+      ],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 3,
+      "quote_checks_total": 3,
+      "timings_ms": {
+        "retrieval": 3.4,
+        "generation": 24219.02,
+        "total": 24222.42
+      },
+      "usage": {
+        "prompt_tokens": 3524,
+        "completion_tokens": 316
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 24225.797600000078
+    },
+    {
+      "question_id": "fr-unanswerable-017",
+      "answerability": "unanswerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [
+        "code-commerce-tn:article-231"
+      ],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 2,
+      "quote_checks_total": 2,
+      "timings_ms": {
+        "retrieval": 2.71,
+        "generation": 28898.63,
+        "total": 28901.34
+      },
+      "usage": {
+        "prompt_tokens": 4608,
+        "completion_tokens": 179
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 28904.263000000356
+    },
+    {
+      "question_id": "fr-unanswerable-018",
+      "answerability": "unanswerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.22,
+        "generation": 20902.0,
+        "total": 20904.22
+      },
+      "usage": {
+        "prompt_tokens": 3749,
+        "completion_tokens": 47
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 20926.579900002253
+    },
+    {
+      "question_id": "fr-unanswerable-019",
+      "answerability": "unanswerable",
+      "abstain": true,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": null,
+      "quote_checks_passed": 0,
+      "quote_checks_total": 0,
+      "timings_ms": {
+        "retrieval": 2.12,
+        "generation": 22603.52,
+        "total": 22605.65
+      },
+      "usage": {
+        "prompt_tokens": 4087,
+        "completion_tokens": 42
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 22628.82130000071
+    },
+    {
+      "question_id": "fr-unanswerable-020",
+      "answerability": "unanswerable",
+      "abstain": false,
+      "answer_lexical_f1_proxy": null,
+      "citation_record_ids": [
+        "code-commerce-tn:article-397"
+      ],
+      "citation_precision_against_gold": null,
+      "citation_recall_against_gold": null,
+      "quote_exact_corpus_match_rate": 1.0,
+      "quote_checks_passed": 1,
+      "quote_checks_total": 1,
+      "timings_ms": {
+        "retrieval": 2.3,
+        "generation": 22768.48,
+        "total": 22770.78
+      },
+      "usage": {
+        "prompt_tokens": 3803,
+        "completion_tokens": 142
+      },
+      "model": "qwen2.5:3b",
+      "client_wall_ms": 22793.19730000134
+    }
+  ],
+  "recovery": {
+    "attempted_count": 17,
+    "succeeded_count": 17,
+    "failed_count": 0,
+    "attempted_question_ids": [
+      "fr-single-040",
+      "fr-single-041",
+      "fr-single-042",
+      "fr-single-043",
+      "fr-single-044",
+      "fr-single-045",
+      "fr-single-046",
+      "fr-single-047",
+      "fr-single-048",
+      "fr-single-049",
+      "fr-single-050",
+      "fr-single-051",
+      "fr-single-052",
+      "fr-single-053",
+      "fr-single-054",
+      "fr-single-055",
+      "fr-single-056"
+    ]
+  },
+  "output_note": "Recovered output; original partial result is preserved unchanged. Metrics use successful initial and retry responses."
+}
