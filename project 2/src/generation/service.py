@@ -184,7 +184,7 @@ def call_ollama(payload: dict) -> dict:
             "this service currently implements 'ollama'."
         )
     request = urllib.request.Request(
-        OLLAMA_URL + "/api/chat",
+        OLLAMA_URL + "/api/generate",
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
         headers={"Content-Type": "application/json"},
     )
@@ -319,9 +319,11 @@ def generate_answer(question: str, passages: list[RetrievalResult]) -> Answer:
     ]
     schema = Draft.model_json_schema()
     if GENERATION_PROVIDER == "ollama":
+        # Local Ollama/Qwen3.5 can return fenced JSON on /api/chat despite format.
         result = call_ollama({
             "model": OLLAMA_MODEL,
-            "messages": messages,
+            "system": SYSTEM,
+            "prompt": messages[1]["content"],
             "format": schema,
             "stream": False,
             "think": False,
@@ -350,8 +352,7 @@ def generate_answer(question: str, passages: list[RetrievalResult]) -> Answer:
         if not isinstance(result, dict) or result.get("done") is not True or result.get("done_reason") == "length":
             raise ValueError("Incomplete generation")
         message = result.get("message")
-        # Accept the former /api/generate response field for compatibility with
-        # callers that still provide its shape; production requests use /api/chat.
+        # Groq uses a chat message; Ollama /api/generate uses response.
         content = (
             message.get("content", "")
             if isinstance(message, dict)

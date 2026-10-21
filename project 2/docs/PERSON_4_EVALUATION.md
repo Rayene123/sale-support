@@ -2,7 +2,7 @@
 
 ## 1. Status and dataset
 
-The canonical test set is `data/eval/questions.jsonl`: 110 rows total, 109 approved active questions and one retained `excluded_duplicate` row (`fr-cross-009`). Active questions: 82 single-article, 8 multi-article, and 20 unanswerable-from-this-corpus. All 110 rows are French. Active answerability is 89 answerable and 20 unanswerable. No Arabic query/evidence evaluation is supported by the French-only corpus.
+The canonical test set is `data/eval/questions.jsonl`: 110 rows total, 109 approved active questions and one retained `excluded_duplicate` row (`fr-cross-009`). Active questions: 81 single-article, 8 multi-article, and 20 unanswerable-from-this-corpus. All 110 rows are French. Active answerability is 89 answerable and 20 unanswerable. No Arabic query/evidence evaluation is supported by the French-only corpus.
 
 Structural audit against `data/processed/corpus.jsonl`: all active gold IDs resolve to published, nonempty records; every quoted evidence string matches its normalized source text after whitespace normalization. This establishes structural consistency only, not legal correctness. The user reported qualified expert approval; reviewer identity/date metadata was not supplied and has not been invented.
 
@@ -133,6 +133,16 @@ python -m unittest discover -s "project 2/tests" -p "test_api.py" -v
 ```
 
 ## 5. User feedback and remaining work
+
+New generation runs validate canonical rows with the same adapter as retrieval
+evaluation and reject blank citation quotations. Each per-question result retains
+the API response for later quote and answer review; HTTP failures record their
+status code. Reports include dataset, corpus and local Python-source SHA-256
+fingerprints, the observed model names, endpoint and UTC timestamp. Source hashes
+describe the evaluator's checkout; keep the running server's configuration
+alongside the report when it differs. The historical Qwen2.5-3B files are unchanged
+and lack raw responses; these safeguards do not retrospectively revalidate them
+or establish Qwen3.5-9B accuracy.
 
 No target-user feedback was collected in this session. Conduct moderated sessions with actual target users and record only anonymous response counts and task outcomes—no names, contact details, legal case facts, or other personal data. Suggested five-point items: (1) Was the question understood? (2) Was the answer useful for finding the relevant provision? (3) Could each citation be opened and matched? (4) Was abstention clear when evidence was insufficient? (5) What one change would improve usefulness? Ask users to rate confidence separately from legal correctness. Do not treat user satisfaction as legal validation.
 

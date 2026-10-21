@@ -91,7 +91,7 @@ class GenerationTests(unittest.TestCase):
         passage = replace(PASSAGE, text="A" * 6500 + " Ils seront conservés pendant dix ans.")
         answer, model = self.generate(draft(), [passage] * 5)
         self.assertTrue(answer.abstain)
-        user_message = model.call_args.args[0]["messages"][1]["content"]
+        user_message = model.call_args.args[0]["prompt"]
         supplied = json.loads(user_message)["PASSAGES"]
         self.assertLessEqual(sum(len(p["text"]) for p in supplied), 12000)
         self.assertTrue(all(len(p["text"]) <= 6000 for p in supplied))
@@ -102,8 +102,9 @@ class GenerationTests(unittest.TestCase):
                 with self.assertRaises(expected):
                     call_ollama({})
 
-    def test_ollama_chat_request_uses_expected_configuration_and_schema(self):
+    def test_ollama_generate_request_uses_expected_configuration_and_schema(self):
         body = draft()
+        body["response"] = body.pop("message")["content"]
         response = io.BytesIO(json.dumps(body).encode("utf-8"))
         context = MagicMock()
         context.__enter__.return_value = response
@@ -117,10 +118,10 @@ class GenerationTests(unittest.TestCase):
 
         request = http.call_args.args[0]
         payload = json.loads(request.data.decode("utf-8"))
-        self.assertEqual(request.full_url, "http://127.0.0.1:11434/api/chat")
+        self.assertEqual(request.full_url, "http://127.0.0.1:11434/api/generate")
         self.assertEqual(payload["model"], "qwen3.5:9b")
-        self.assertEqual([m["role"] for m in payload["messages"]], ["system", "user"])
-        self.assertIn('"QUESTION": "Combien de temps conserver les livres ?"', payload["messages"][1]["content"])
+        self.assertIn("Réponds exclusivement en français", payload["system"])
+        self.assertIn('"QUESTION": "Combien de temps conserver les livres ?"', payload["prompt"])
         self.assertIsInstance(payload["format"], dict)
         self.assertFalse(payload["think"])
         self.assertFalse(payload["stream"])

@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import importlib.util
+import contextlib
+from hashlib import sha256
+import io
 import json
 import sys
 import tempfile
@@ -52,13 +55,89 @@ class GenerationEvalTests(unittest.TestCase):
 
     def test_loader_uses_approved_rows_and_excludes_duplicate(self):
         rows = [dict(self.question, review={"status": "approved"}),
-                {"question_id": "old", "question": "duplicate", "answerability": "answerable", "review": {"status": "excluded_duplicate"}}]
+                dict(self.question, question_id="old", review={"status": "excluded_duplicate"})]
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "q.jsonl"
             path.write_text("\n".join(json.dumps(row) for row in rows), encoding="utf-8")
             approved, counts = generation_eval.load_canonical_questions(path)
         self.assertEqual([row["question_id"] for row in approved], ["q1"])
         self.assertEqual(counts["excluded_duplicate"], 1)
+
+    def test_blank_or_malformed_quotes_never_count_as_exact_matches(self):
+        for citation in [{"record_id": "law:article-1", "quote": quote} for quote in ["", " \n\t ", None]] + [{"record_id": [], "quote": "Dix jours."}, None]:
+            with self.subTest(citation=citation):
+                result = generation_eval.score_response(self.question, {
+                    "answer_fr": "Dix jours.", "abstain": False, "citations": [citation],
+                }, self.corpus)
+                self.assertEqual(result["quote_checks_passed"], 0)
+                self.assertEqual(result["quote_checks_total"], 1)
+
+    def test_malformed_references_are_rejected_before_any_api_call(self):
+        valid = dict(self.question, review={"status": "approved"})
+        malformed = [
+            dict(valid, expected_answer=None), dict(valid, expected_answer=" "),
+            dict(valid, gold_evidence=[]), dict(valid, gold_evidence={}),
+            dict(valid, gold_evidence=[{"record_id": " ", "required": True}]),
+            dict(valid, gold_evidence=[{"record_id": "law:article-1", "required": "true"}]),
+            dict(valid, gold_evidence=[{"record_id": "law:article-1", "required": False}]),
+            dict(valid, question=" "), dict(valid, question_id=" "),
+            dict(valid, review="approved"), dict(valid, answerability="unanswerable"),
+            dict(valid, answerability=[]), dict(valid, answerability={}),
+            {k: v for k, v in valid.items() if k != "expected_answer"},
+        ]
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "questions.jsonl"
+            for row in malformed:
+                with self.subTest(row=row):
+                    path.write_text(json.dumps(row), encoding="utf-8")
+                    with patch.object(generation_eval.urllib.request, "urlopen") as http, contextlib.redirect_stderr(io.StringIO()):
+                        with self.assertRaises(SystemExit) as error:
+                            generation_eval.main(["--questions", str(path), "--output", str(Path(temp) / "out.json")])
+                    self.assertEqual(error.exception.code, 2)
+                    http.assert_not_called()
+
+    def test_report_preserves_responses_and_input_fingerprints(self):
+        row = dict(self.question, review={"status": "approved"})
+        response = {"answer_fr": "Dix jours.", "abstain": False, "model": "qwen3.5:9b",
+                    "citations": [{"record_id": "law:article-1", "quote": "Le délai est de dix jours."}]}
+
+        class FakeResponse:
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def read(self): return json.dumps(response).encode()
+
+        with tempfile.TemporaryDirectory() as temp:
+            questions, corpus, output = [Path(temp) / name for name in ["questions.jsonl", "corpus.jsonl", "report.json"]]
+            questions.write_text(json.dumps(row), encoding="utf-8")
+            corpus.write_text(json.dumps(self.corpus["law:article-1"]), encoding="utf-8")
+            with patch.object(generation_eval.urllib.request, "urlopen", return_value=FakeResponse()), contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(generation_eval.main(["--questions", str(questions), "--corpus", str(corpus), "--output", str(output)]), 0)
+            report = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(report["per_question"][0]["response"], response)
+            self.assertEqual(report["provenance"]["observed_models"], ["qwen3.5:9b"])
+            self.assertEqual(report["provenance"]["questions_sha256"], sha256(questions.read_bytes()).hexdigest())
+            self.assertEqual(report["provenance"]["corpus_sha256"], sha256(corpus.read_bytes()).hexdigest())
+            self.assertIn("src/generation/service.py", report["provenance"]["source_sha256"])
+
+    def test_invalid_api_response_is_retained_for_diagnosis(self):
+        response = {"answer_fr": " ", "abstain": False, "citations": []}
+
+        class FakeResponse:
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def read(self): return json.dumps(response).encode()
+
+        with patch.object(generation_eval.urllib.request, "urlopen", return_value=FakeResponse()):
+            rows = generation_eval.run("http://localhost:8002", [self.question], self.corpus, 10)
+        self.assertEqual(rows[0]["error"], "ValueError")
+        self.assertEqual(rows[0]["response"], response)
+
+    def test_http_failure_records_status_and_does_not_abort_remaining_questions(self):
+        error = generation_eval.urllib.error.HTTPError("http://localhost:8002/ask", 503, "Unavailable", {}, None)
+        with patch.object(generation_eval.urllib.request, "urlopen", side_effect=error):
+            rows = generation_eval.run("http://localhost:8002", [self.question, self.question], self.corpus, 10)
+        self.assertEqual(len(rows), 2)
+        self.assertTrue(all(row["http_status"] == 503 for row in rows))
 
     def test_api_runner_posts_question_and_scores_json_response(self):
         response = {"answer_fr": "Dix jours.", "abstain": False, "citations": [{"record_id": "law:article-1", "quote": "Le délai est de dix jours."}], "timings_ms": {}, "usage": {}}
@@ -75,6 +154,7 @@ class GenerationEvalTests(unittest.TestCase):
         self.assertEqual(json.loads(request.data), {"question": "Quel délai ?"})
         self.assertEqual(rows[0]["question_id"], "q1")
         self.assertNotIn("error", rows[0])
+        self.assertEqual(rows[0]["response"], response)
 
 
 if __name__ == "__main__":
