@@ -10,7 +10,7 @@ from .bm25 import BM25Retriever
 from .filters import filter_chunks
 from .hybrid import HybridRetriever
 from .rerank import rerank
-from .semantic import Embedder, SemanticRetriever
+from .semantic import Embedder, SemanticRetriever, SemanticSearch
 
 
 class RetrievalService:
@@ -21,18 +21,25 @@ class RetrievalService:
         chunks: Sequence[ArticleChunk],
         *,
         embedder: Embedder | None = None,
+        semantic_retriever: SemanticSearch | None = None,
     ) -> None:
         self._chunks = tuple(chunks)
         self._embedder = embedder
         self._bm25 = BM25Retriever(self._chunks)
-        self._semantic = (
-            SemanticRetriever(self._chunks, embedder=embedder)
-            if embedder is not None
-            else None
-        )
+        self._external_semantic = semantic_retriever is not None
+        if semantic_retriever is not None:
+            self._semantic: SemanticSearch | None = semantic_retriever
+        elif embedder is not None:
+            self._semantic = SemanticRetriever(self._chunks, embedder=embedder)
+        else:
+            self._semantic = None
         self._hybrid = (
-            HybridRetriever(self._chunks, embedder=embedder)
-            if embedder is not None
+            HybridRetriever(
+                self._chunks,
+                embedder=embedder,
+                semantic_retriever=semantic_retriever,
+            )
+            if self._semantic is not None
             else None
         )
 
@@ -53,18 +60,34 @@ class RetrievalService:
                 else BM25Retriever(chunks).search(query, top_k=top_k)
             )
         elif method == "vector":
-            if not filters:
-                if self._semantic is None:
-                    raise RuntimeError("an embedder is required for vector retrieval")
+            if self._semantic is None:
+                raise RuntimeError(
+                    "an embedder or semantic retriever is required for vector retrieval"
+                )
+            if self._external_semantic:
+                results = self._semantic.search(
+                    query,
+                    top_k=top_k,
+                    filters=filters,
+                )
+            elif not filters:
                 results = self._semantic.search(query, top_k=top_k)
             else:
                 results = SemanticRetriever(chunks, embedder=self._embedder).search(
                     query, top_k=top_k
                 )
         elif method == "hybrid":
-            if not filters:
-                if self._hybrid is None:
-                    raise RuntimeError("an embedder is required for hybrid retrieval")
+            if self._hybrid is None:
+                raise RuntimeError(
+                    "an embedder or semantic retriever is required for hybrid retrieval"
+                )
+            if self._external_semantic:
+                results = self._hybrid.search(
+                    query,
+                    top_k=top_k,
+                    filters=filters,
+                )
+            elif not filters:
                 results = self._hybrid.search(query, top_k=top_k)
             else:
                 results = HybridRetriever(chunks, embedder=self._embedder).search(

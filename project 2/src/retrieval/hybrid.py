@@ -9,7 +9,7 @@ from models.retrieval import RetrievalResult
 
 from .bm25 import BM25Retriever
 from .filters import filter_chunks
-from .semantic import Embedder, SemanticRetriever
+from .semantic import Embedder, SemanticRetriever, SemanticSearch
 
 
 class HybridRetriever:
@@ -20,6 +20,7 @@ class HybridRetriever:
         chunks: Sequence[ArticleChunk],
         *,
         embedder: Embedder | None = None,
+        semantic_retriever: SemanticSearch | None = None,
         rrf_k: int = 60,
     ) -> None:
         if rrf_k < 1:
@@ -28,11 +29,13 @@ class HybridRetriever:
         self.rrf_k = rrf_k
         self._embedder = embedder
         self._bm25 = BM25Retriever(self._chunks)
-        self._semantic = (
-            SemanticRetriever(self._chunks, embedder=embedder)
-            if embedder is not None
-            else None
-        )
+        self._external_semantic = semantic_retriever is not None
+        if semantic_retriever is not None:
+            self._semantic: SemanticSearch | None = semantic_retriever
+        elif embedder is not None:
+            self._semantic = SemanticRetriever(self._chunks, embedder=embedder)
+        else:
+            self._semantic = None
 
     def search(
         self,
@@ -48,15 +51,25 @@ class HybridRetriever:
         filtered = filter_chunks(self._chunks, filters)
         if not filtered:
             return []
-        if not filters:
-            keyword = self._bm25.search(query, top_k=candidate_k)
+        keyword = (
+            self._bm25.search(query, top_k=candidate_k)
+            if not filters
+            else BM25Retriever(filtered).search(query, top_k=candidate_k)
+        )
+        if self._external_semantic:
+            assert self._semantic is not None
+            semantic = self._semantic.search(
+                query,
+                top_k=candidate_k,
+                filters=filters,
+            )
+        elif not filters:
             if self._semantic is None:
                 raise RuntimeError(
                     "an embedder is required for unfiltered hybrid retrieval"
                 )
             semantic = self._semantic.search(query, top_k=candidate_k)
         else:
-            keyword = BM25Retriever(filtered).search(query, top_k=candidate_k)
             semantic = SemanticRetriever(filtered, embedder=self._embedder).search(
                 query, top_k=candidate_k
             )
@@ -71,15 +84,17 @@ class HybridRetriever:
             key=lambda item: (-item[1], item[0]),
         )[:top_k]
         output: list[RetrievalResult] = []
-        for rank, (chunk_id, score) in enumerate(ranked, start=1):
-            chunk = by_id[chunk_id]
+        for chunk_id, score in ranked:
+            chunk = by_id.get(chunk_id)
+            if chunk is None:
+                continue
             output.append(
                 RetrievalResult(
                     chunk_id=chunk.chunk_id,
                     record_id=chunk.record_id,
                     text=chunk.text,
                     score=score,
-                    rank=rank,
+                    rank=len(output) + 1,
                     article_number=chunk.article_number,
                     article=chunk.article,
                     heading_path=chunk.heading_path,

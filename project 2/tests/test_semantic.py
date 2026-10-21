@@ -65,6 +65,22 @@ class SemanticRetrieverTests(unittest.TestCase):
         self.assertEqual(result.article_number, 189)
         self.assertEqual(result.pdf_page, 11)
 
+    def test_search_applies_metadata_filters(self):
+        matching = self.retriever.search(
+            "query fonds",
+            top_k=2,
+            filters={"document_id": "code-commerce-tn"},
+        )
+        self.assertEqual(matching[0].record_id, "code-commerce-tn:article-189")
+        self.assertEqual(
+            self.retriever.search(
+                "query fonds",
+                top_k=2,
+                filters={"document_id": "other-document"},
+            ),
+            [],
+        )
+
     def test_embeddings_can_be_persisted(self):
         with tempfile.TemporaryDirectory() as directory:
             self.retriever.save(directory)
