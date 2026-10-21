@@ -63,9 +63,13 @@ Example response, abbreviated to the answer and one citation:
 
 The application loads Person 1's committed corpus and Person 2's article-level
 BM25 retriever once at startup. No raw PDF, embedding rebuild, cloud service or
-API key is needed. BM25 is the dependency-light starting point; retrieval
-optimization belongs to Person 4's evaluation. `/health` reports application
-liveness and the configured model; it does not check Ollama readiness.
+API key is needed. BM25 is the dependency-light production baseline; the
+retrieval ablation remains available to Person 4. Set `MIN_RETRIEVAL_SCORE` to
+a positive value calibrated on a development split to reject weak lexical
+matches before generation. The default is `0`, preserving the measured
+baseline until a threshold is selected without test-set leakage.
+`/health` reports application liveness and the configured model; it does not
+check Ollama readiness.
 
 The default is `qwen3.5:9b`, thinking disabled, temperature 0, seed 101,
 8192-token context and 640-token output limit. `OLLAMA_MODEL` and `OLLAMA_URL`

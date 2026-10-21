@@ -1,5 +1,14 @@
 # Week 8 optimization report
 
+## Requirement status
+
+The retrieval comparison below is a measured ablation, not a claim that the
+50% Week 8 target has already been met. On the fixed set, no evaluated
+retrieval variant both halves end-to-end p95 latency/cost and stays within two
+accuracy points. We therefore keep BM25 as the production baseline and do not
+invent a passing before/after result. A qualifying generation optimization
+requires a new run on the same 109 questions.
+
 ## Fixed-set retrieval comparison
 
 The same 109 approved questions were evaluated in all four stored runs. Recall and any-gold denominators are 89 answerable questions; strict multi-evidence denominator is 8 questions with multiple required article IDs. Twenty unanswerables are excluded from retrieval recall. Search latency excludes process startup and model/index initialization when the evaluator does not measure them.
@@ -22,6 +31,21 @@ The generation harness `eval/generation.py` completed the 109 approved questions
 The lexical F1 and citation-ID matches are proxies, and quote occurrence is not entailment. The project owner reports reviewing the generated answers and considers them faithful; this qualitative review does not establish legal correctness. The local Ollama run incurred no metered API token charge. Electricity, hardware amortization, and operating costs were not measured.
 
 No target-user sessions were performed. Structured feedback from real target users remains outstanding and cannot be inferred from this model evaluation. Groq follow-up is out of scope; the local Ollama evaluation completed independently.
+
+## Reproducibility and optimization gate
+
+The final BM25 evaluator run is stored in
+`data/eval/retrieval_bm25_final.json`. It evaluated all 109 approved questions
+with the same canonical set used for the other stored runs. The measured
+latency was 4.69 ms p50 and 8.36 ms p95 in the current environment; these
+values exclude process startup and model loading.
+
+The remaining optimization experiment must select one change (for example,
+shorter generation output, a smaller model, prompt caching, or a calibrated
+retrieval threshold), run the unchanged fixed set before and after, and report
+cost, end-to-end p50/p95, answer quality, citation accuracy, and abstention.
+The change is accepted only if cost or p95 falls by at least 50% and accuracy
+falls by no more than two percentage points.
 
 ## Next optimization gate
 

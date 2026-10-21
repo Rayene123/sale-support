@@ -53,6 +53,17 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.json()["reason"], "no_evidence")
         model.assert_not_called()
 
+    def test_configured_retrieval_threshold_removes_weak_matches(self):
+        weak = PASSAGE.__class__(**{**PASSAGE.__dict__, "score": 0.2})
+        strong = PASSAGE.__class__(**{**PASSAGE.__dict__, "score": 1.2})
+        self.retriever.retrieve.return_value = [weak, strong]
+        with patch("api.app.MIN_RETRIEVAL_SCORE", 1.0), patch(
+            "generation.service.call_ollama", return_value=draft()
+        ):
+            response = self.client.post("/ask", json={"question": "Test"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["citations"][0]["record_id"], strong.record_id)
+
     def test_failures_release_lock_for_next_question(self):
         for error, status in [(ConnectionError("Ollama indisponible"), 503), (TimeoutError("Délai dépassé"), 504), (ValueError("Bad JSON"), 502)]:
             with self.subTest(status=status), patch("api.app.generate_answer", side_effect=error):

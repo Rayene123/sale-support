@@ -1,0 +1,4298 @@
+{
+  "official_score_available": true,
+  "evaluation_mode": "approved_canonical",
+  "selected_method": "bm25",
+  "review_status_counts": {
+    "approved": 109,
+    "excluded_duplicate": 1
+  },
+  "results": [
+    {
+      "method": "bm25",
+      "question_counts": {
+        "evaluated_total": 109,
+        "answerable": 89,
+        "unanswerable_excluded_from_recall": 20
+      },
+      "metrics_by_k": {
+        "1": {
+          "recall_macro_average": 0.42134831460674155,
+          "recall_denominator_questions": 89,
+          "strict_multi_evidence_success": 0.0,
+          "strict_denominator_multi_evidence_questions": 8,
+          "any_gold_hit": 0.43820224719101125,
+          "any_gold_denominator_answerable_questions": 89
+        },
+        "3": {
+          "recall_macro_average": 0.6460674157303371,
+          "recall_denominator_questions": 89,
+          "strict_multi_evidence_success": 0.25,
+          "strict_denominator_multi_evidence_questions": 8,
+          "any_gold_hit": 0.6629213483146067,
+          "any_gold_denominator_answerable_questions": 89
+        },
+        "5": {
+          "recall_macro_average": 0.7415730337078652,
+          "recall_denominator_questions": 89,
+          "strict_multi_evidence_success": 0.375,
+          "strict_denominator_multi_evidence_questions": 8,
+          "any_gold_hit": 0.7640449438202247,
+          "any_gold_denominator_answerable_questions": 89
+        },
+        "10": {
+          "recall_macro_average": 0.8314606741573034,
+          "recall_denominator_questions": 89,
+          "strict_multi_evidence_success": 0.5,
+          "strict_denominator_multi_evidence_questions": 8,
+          "any_gold_hit": 0.8539325842696629,
+          "any_gold_denominator_answerable_questions": 89
+        }
+      },
+      "latency_ms": {
+        "denominator_answerable_questions": 89,
+        "p50": 4.687200067564845,
+        "p95": 8.364100009202957
+      },
+      "per_question": [
+        {
+          "question_id": "fr-single-001",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-383",
+            "code-commerce-tn:article-602",
+            "code-commerce-tn:article-480",
+            "code-commerce-tn:article-435",
+            "code-commerce-tn:article-440",
+            "code-commerce-tn:article-738",
+            "code-commerce-tn:article-502",
+            "code-commerce-tn:article-569",
+            "code-commerce-tn:article-565",
+            "code-commerce-tn:article-412"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-002",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-710",
+            "code-commerce-tn:article-7",
+            "code-commerce-tn:article-2",
+            "code-commerce-tn:article-231",
+            "code-commerce-tn:article-415",
+            "code-commerce-tn:article-503",
+            "code-commerce-tn:article-666",
+            "code-commerce-tn:article-652",
+            "code-commerce-tn:article-601",
+            "code-commerce-tn:article-709"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-2"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-2"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-2"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-003",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-3",
+            "code-commerce-tn:article-723",
+            "code-commerce-tn:article-541",
+            "code-commerce-tn:article-337",
+            "code-commerce-tn:article-709",
+            "code-commerce-tn:article-443",
+            "code-commerce-tn:article-746",
+            "code-commerce-tn:article-721",
+            "code-commerce-tn:article-404",
+            "code-commerce-tn:article-235"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-3"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-3"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-3"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-3"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-004",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-4",
+            "code-commerce-tn:article-416",
+            "code-commerce-tn:article-232",
+            "code-commerce-tn:article-1",
+            "code-commerce-tn:article-189",
+            "code-commerce-tn:article-545",
+            "code-commerce-tn:article-494",
+            "code-commerce-tn:article-734",
+            "code-commerce-tn:article-562",
+            "code-commerce-tn:article-466"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-4"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-4"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-4"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-4"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-005",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-5",
+            "code-commerce-tn:article-690",
+            "code-commerce-tn:article-651",
+            "code-commerce-tn:article-665",
+            "code-commerce-tn:article-560",
+            "code-commerce-tn:article-386",
+            "code-commerce-tn:article-369",
+            "code-commerce-tn:article-607",
+            "code-commerce-tn:article-281",
+            "code-commerce-tn:article-590"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-5"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-5"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-5"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-5"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-006",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-219",
+            "code-commerce-tn:article-346",
+            "code-commerce-tn:article-334",
+            "code-commerce-tn:article-339",
+            "code-commerce-tn:article-457",
+            "code-commerce-tn:article-515",
+            "code-commerce-tn:article-329",
+            "code-commerce-tn:article-546",
+            "code-commerce-tn:article-397",
+            "code-commerce-tn:article-419"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-007",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-2",
+            "code-commerce-tn:article-8",
+            "code-commerce-tn:article-511",
+            "code-commerce-tn:article-550",
+            "code-commerce-tn:article-710",
+            "code-commerce-tn:article-611",
+            "code-commerce-tn:article-725",
+            "code-commerce-tn:article-612",
+            "code-commerce-tn:article-728",
+            "code-commerce-tn:article-499"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-8"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-8"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-8"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-008",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-349",
+            "code-commerce-tn:article-599",
+            "code-commerce-tn:article-572",
+            "code-commerce-tn:article-712",
+            "code-commerce-tn:article-443",
+            "code-commerce-tn:article-455",
+            "code-commerce-tn:article-332",
+            "code-commerce-tn:article-485",
+            "code-commerce-tn:article-400",
+            "code-commerce-tn:article-308"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-009",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-8",
+            "code-commerce-tn:article-11",
+            "code-commerce-tn:article-219",
+            "code-commerce-tn:article-10",
+            "code-commerce-tn:article-305",
+            "code-commerce-tn:article-382",
+            "code-commerce-tn:article-225",
+            "code-commerce-tn:article-12",
+            "code-commerce-tn:article-546",
+            "code-commerce-tn:article-653"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-10"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-10"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-010",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-11",
+            "code-commerce-tn:article-522",
+            "code-commerce-tn:article-10",
+            "code-commerce-tn:article-623",
+            "code-commerce-tn:article-598",
+            "code-commerce-tn:article-389",
+            "code-commerce-tn:article-503",
+            "code-commerce-tn:article-309",
+            "code-commerce-tn:article-511",
+            "code-commerce-tn:article-695"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-11"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-11"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-11"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-11"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-011",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-2",
+            "code-commerce-tn:article-12",
+            "code-commerce-tn:article-192",
+            "code-commerce-tn:article-585",
+            "code-commerce-tn:article-302",
+            "code-commerce-tn:article-219",
+            "code-commerce-tn:article-312",
+            "code-commerce-tn:article-11",
+            "code-commerce-tn:article-515",
+            "code-commerce-tn:article-598"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-12"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-12"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-12"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-012",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-13",
+            "code-commerce-tn:article-11",
+            "code-commerce-tn:article-521",
+            "code-commerce-tn:article-444",
+            "code-commerce-tn:article-517",
+            "code-commerce-tn:article-511",
+            "code-commerce-tn:article-302",
+            "code-commerce-tn:article-532",
+            "code-commerce-tn:article-457",
+            "code-commerce-tn:article-12"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-13"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-13"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-13"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-13"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-013",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-205",
+            "code-commerce-tn:article-207",
+            "code-commerce-tn:article-244",
+            "code-commerce-tn:article-498",
+            "code-commerce-tn:article-248",
+            "code-commerce-tn:article-237",
+            "code-commerce-tn:article-467",
+            "code-commerce-tn:article-190",
+            "code-commerce-tn:article-395",
+            "code-commerce-tn:article-260"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-014",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-189-bis",
+            "code-commerce-tn:article-694",
+            "code-commerce-tn:article-216",
+            "code-commerce-tn:article-448",
+            "code-commerce-tn:article-451",
+            "code-commerce-tn:article-597",
+            "code-commerce-tn:article-467",
+            "code-commerce-tn:article-696",
+            "code-commerce-tn:article-236",
+            "code-commerce-tn:article-342"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-189-bis"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-189-bis"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-189-bis"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-189-bis"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-015",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-550",
+            "code-commerce-tn:article-8",
+            "code-commerce-tn:article-190",
+            "code-commerce-tn:article-207",
+            "code-commerce-tn:article-2",
+            "code-commerce-tn:article-678",
+            "code-commerce-tn:article-542",
+            "code-commerce-tn:article-710",
+            "code-commerce-tn:article-692",
+            "code-commerce-tn:article-208"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-190"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-190"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-190"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-016",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-226",
+            "code-commerce-tn:article-285",
+            "code-commerce-tn:article-191",
+            "code-commerce-tn:article-332",
+            "code-commerce-tn:article-700",
+            "loi-59-129-1959:article-5",
+            "code-commerce-tn:article-696",
+            "code-commerce-tn:article-389",
+            "code-commerce-tn:article-455",
+            "code-commerce-tn:article-309"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-191"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-191"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-191"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-017",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-670",
+            "code-commerce-tn:article-225",
+            "code-commerce-tn:article-202",
+            "code-commerce-tn:article-228-bis",
+            "code-commerce-tn:article-223",
+            "code-commerce-tn:article-219",
+            "code-commerce-tn:article-558",
+            "code-commerce-tn:article-192",
+            "code-commerce-tn:article-197",
+            "code-commerce-tn:article-260"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-192"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-018",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-192",
+            "code-commerce-tn:article-687",
+            "code-commerce-tn:article-622",
+            "code-commerce-tn:article-527",
+            "code-commerce-tn:article-574",
+            "code-commerce-tn:article-243",
+            "code-commerce-tn:article-251",
+            "code-commerce-tn:article-205",
+            "code-commerce-tn:article-200",
+            "code-commerce-tn:article-193"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-193"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-019",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-194",
+            "code-commerce-tn:article-253",
+            "code-commerce-tn:article-503",
+            "code-commerce-tn:article-583",
+            "code-commerce-tn:article-249",
+            "code-commerce-tn:article-457",
+            "code-commerce-tn:article-252",
+            "code-commerce-tn:article-538",
+            "code-commerce-tn:article-522",
+            "code-commerce-tn:article-11"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-194"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-194"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-194"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-194"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-020",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-670",
+            "code-commerce-tn:article-734",
+            "code-commerce-tn:article-635",
+            "code-commerce-tn:article-243",
+            "code-commerce-tn:article-216",
+            "code-commerce-tn:article-245",
+            "code-commerce-tn:article-195",
+            "code-commerce-tn:article-689",
+            "code-commerce-tn:article-201",
+            "code-commerce-tn:article-692"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-195"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-021",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-196",
+            "code-commerce-tn:article-198",
+            "code-commerce-tn:article-194",
+            "code-commerce-tn:article-710",
+            "code-commerce-tn:article-366",
+            "code-commerce-tn:article-253",
+            "code-commerce-tn:article-257",
+            "code-commerce-tn:article-343",
+            "code-commerce-tn:article-252",
+            "code-commerce-tn:article-249"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-196"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-196"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-196"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-196"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-022",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-197",
+            "code-commerce-tn:article-261",
+            "code-commerce-tn:article-204",
+            "code-commerce-tn:article-256",
+            "code-commerce-tn:article-192",
+            "code-commerce-tn:article-202",
+            "code-commerce-tn:article-218",
+            "code-commerce-tn:article-206",
+            "code-commerce-tn:article-228-bis",
+            "code-commerce-tn:article-573"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-197"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-197"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-197"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-197"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-023",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-196",
+            "code-commerce-tn:article-198",
+            "code-commerce-tn:article-194",
+            "code-commerce-tn:article-710",
+            "code-commerce-tn:article-253",
+            "code-commerce-tn:article-208",
+            "code-commerce-tn:article-343",
+            "code-commerce-tn:article-414",
+            "code-commerce-tn:article-249",
+            "code-commerce-tn:article-257"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-198"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-198"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-198"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-024",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-195",
+            "code-commerce-tn:article-527",
+            "code-commerce-tn:article-221",
+            "code-commerce-tn:article-205",
+            "code-commerce-tn:article-199",
+            "code-commerce-tn:article-220",
+            "code-commerce-tn:article-259",
+            "code-commerce-tn:article-289",
+            "code-commerce-tn:article-243",
+            "code-commerce-tn:article-207"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-199"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-199"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-025",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-200",
+            "code-commerce-tn:article-203",
+            "code-commerce-tn:article-374",
+            "code-commerce-tn:article-561",
+            "code-commerce-tn:article-379",
+            "code-commerce-tn:article-193",
+            "code-commerce-tn:article-378",
+            "code-commerce-tn:article-192",
+            "code-commerce-tn:article-567",
+            "code-commerce-tn:article-463"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-200"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-200"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-200"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-200"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-026",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-269",
+            "code-commerce-tn:article-273",
+            "code-commerce-tn:article-318",
+            "code-commerce-tn:article-283",
+            "code-commerce-tn:article-332",
+            "code-commerce-tn:article-272",
+            "code-commerce-tn:article-325",
+            "code-commerce-tn:article-310",
+            "code-commerce-tn:article-285",
+            "code-commerce-tn:article-303"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-269"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-269"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-269"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-269"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-027",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-710",
+            "code-commerce-tn:article-334",
+            "code-commerce-tn:article-279",
+            "code-commerce-tn:article-310",
+            "code-commerce-tn:article-293",
+            "code-commerce-tn:article-273",
+            "code-commerce-tn:article-295",
+            "code-commerce-tn:article-329",
+            "code-commerce-tn:article-290",
+            "code-commerce-tn:article-316"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-028",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-271",
+            "code-commerce-tn:article-300",
+            "code-commerce-tn:article-291",
+            "code-commerce-tn:article-295",
+            "code-commerce-tn:article-270",
+            "code-commerce-tn:article-322",
+            "code-commerce-tn:article-302",
+            "code-commerce-tn:article-323",
+            "code-commerce-tn:article-283",
+            "code-commerce-tn:article-285"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-271"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-271"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-271"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-271"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-029",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-297",
+            "code-commerce-tn:article-332",
+            "code-commerce-tn:article-279",
+            "code-commerce-tn:article-295",
+            "code-commerce-tn:article-271",
+            "code-commerce-tn:article-275",
+            "code-commerce-tn:article-310",
+            "code-commerce-tn:article-322",
+            "code-commerce-tn:article-289",
+            "code-commerce-tn:article-378"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-030",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-356",
+            "code-commerce-tn:article-273",
+            "code-commerce-tn:article-396",
+            "code-commerce-tn:article-202",
+            "code-commerce-tn:article-401",
+            "code-commerce-tn:article-207",
+            "code-commerce-tn:article-386",
+            "code-commerce-tn:article-279",
+            "code-commerce-tn:article-552",
+            "code-commerce-tn:article-306"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-273"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-273"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-273"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-031",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-715",
+            "code-commerce-tn:article-726",
+            "code-commerce-tn:article-710",
+            "code-commerce-tn:article-729",
+            "code-commerce-tn:article-407",
+            "code-commerce-tn:article-358",
+            "code-commerce-tn:article-352",
+            "code-commerce-tn:article-348",
+            "code-commerce-tn:article-270",
+            "code-commerce-tn:article-275"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-032",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-275",
+            "code-commerce-tn:article-276",
+            "code-commerce-tn:article-350",
+            "code-commerce-tn:article-289",
+            "code-commerce-tn:article-273",
+            "code-commerce-tn:article-322",
+            "code-commerce-tn:article-287",
+            "code-commerce-tn:article-683",
+            "code-commerce-tn:article-315",
+            "code-commerce-tn:article-271"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-275"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-275"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-275"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-275"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-033",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-277",
+            "code-commerce-tn:article-279",
+            "code-commerce-tn:article-310",
+            "code-commerce-tn:article-271",
+            "code-commerce-tn:article-294",
+            "code-commerce-tn:article-316",
+            "code-commerce-tn:article-295",
+            "code-commerce-tn:article-273",
+            "code-commerce-tn:article-317",
+            "code-commerce-tn:article-269"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-034",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-279",
+            "code-commerce-tn:article-365",
+            "code-commerce-tn:article-361",
+            "code-commerce-tn:article-276",
+            "code-commerce-tn:article-277",
+            "code-commerce-tn:article-363",
+            "code-commerce-tn:article-362",
+            "code-commerce-tn:article-281",
+            "code-commerce-tn:article-369",
+            "code-commerce-tn:article-333"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-277"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-277"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-035",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-364",
+            "code-commerce-tn:article-278",
+            "code-commerce-tn:article-211",
+            "code-commerce-tn:article-274",
+            "code-commerce-tn:article-281",
+            "code-commerce-tn:article-694",
+            "code-commerce-tn:article-362",
+            "code-commerce-tn:article-388",
+            "code-commerce-tn:article-418",
+            "code-commerce-tn:article-381"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-278"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-278"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-278"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-036",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-611",
+            "code-commerce-tn:article-716",
+            "code-commerce-tn:article-734",
+            "code-commerce-tn:article-719",
+            "code-commerce-tn:article-333",
+            "code-commerce-tn:article-712",
+            "code-commerce-tn:article-715",
+            "code-commerce-tn:article-244",
+            "code-commerce-tn:article-365",
+            "code-commerce-tn:article-201"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-037",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-369",
+            "code-commerce-tn:article-281",
+            "code-commerce-tn:article-368",
+            "code-commerce-tn:article-280",
+            "code-commerce-tn:article-710",
+            "code-commerce-tn:article-2",
+            "code-commerce-tn:article-394",
+            "code-commerce-tn:article-351",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-598"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-280"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-280"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-038",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-281",
+            "code-commerce-tn:article-369",
+            "code-commerce-tn:article-569",
+            "code-commerce-tn:article-333",
+            "code-commerce-tn:article-1",
+            "code-commerce-tn:article-277",
+            "code-commerce-tn:article-363",
+            "code-commerce-tn:article-746",
+            "code-commerce-tn:article-366",
+            "code-commerce-tn:article-456"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-281"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-281"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-281"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-281"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-039",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-282",
+            "code-commerce-tn:article-370",
+            "code-commerce-tn:article-333",
+            "code-commerce-tn:article-315",
+            "code-commerce-tn:article-389",
+            "code-commerce-tn:article-325",
+            "code-commerce-tn:article-309",
+            "code-commerce-tn:article-549",
+            "code-commerce-tn:article-220",
+            "code-commerce-tn:article-200"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-282"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-282"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-282"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-282"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-040",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-285",
+            "code-commerce-tn:article-283",
+            "code-commerce-tn:article-291",
+            "code-commerce-tn:article-323",
+            "code-commerce-tn:article-284",
+            "code-commerce-tn:article-275",
+            "code-commerce-tn:article-336",
+            "code-commerce-tn:article-309",
+            "code-commerce-tn:article-270",
+            "code-commerce-tn:article-286"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-283"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-283"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-283"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-041",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-284",
+            "code-commerce-tn:article-307",
+            "code-commerce-tn:article-294",
+            "code-commerce-tn:article-286",
+            "code-commerce-tn:article-285",
+            "code-commerce-tn:article-283",
+            "code-commerce-tn:article-350",
+            "code-commerce-tn:article-316",
+            "code-commerce-tn:article-295",
+            "code-commerce-tn:article-276"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-284"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-284"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-284"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-284"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-042",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-347",
+            "code-commerce-tn:article-371",
+            "code-commerce-tn:article-378",
+            "code-commerce-tn:article-354",
+            "code-commerce-tn:article-286",
+            "code-commerce-tn:article-372",
+            "code-commerce-tn:article-346",
+            "code-commerce-tn:article-404",
+            "code-commerce-tn:article-388",
+            "code-commerce-tn:article-297"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-347"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-347"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-347"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-347"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-043",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-352",
+            "code-commerce-tn:article-384",
+            "code-commerce-tn:article-349",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-348",
+            "code-commerce-tn:article-361",
+            "code-commerce-tn:article-395",
+            "code-commerce-tn:article-409",
+            "code-commerce-tn:article-350",
+            "code-commerce-tn:article-379"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-348"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-348"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-044",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-351",
+            "code-commerce-tn:article-349",
+            "code-commerce-tn:article-285",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-361",
+            "code-commerce-tn:article-323",
+            "code-commerce-tn:article-331",
+            "code-commerce-tn:article-283",
+            "code-commerce-tn:article-411-bis",
+            "code-commerce-tn:article-281"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-349"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-349"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-349"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-045",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-350",
+            "code-commerce-tn:article-411",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-348",
+            "code-commerce-tn:article-412-ter",
+            "code-commerce-tn:article-349",
+            "code-commerce-tn:article-363",
+            "code-commerce-tn:article-411-septies",
+            "code-commerce-tn:article-374",
+            "code-commerce-tn:article-410-bis"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-350"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-350"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-350"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-350"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-046",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-362",
+            "code-commerce-tn:article-352",
+            "code-commerce-tn:article-351",
+            "code-commerce-tn:article-679",
+            "code-commerce-tn:article-378",
+            "code-commerce-tn:article-379",
+            "code-commerce-tn:article-349",
+            "code-commerce-tn:article-367",
+            "code-commerce-tn:article-384",
+            "code-commerce-tn:article-371"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-351"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-351"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-351"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-047",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-270",
+            "code-commerce-tn:article-352",
+            "code-commerce-tn:article-351",
+            "code-commerce-tn:article-359",
+            "code-commerce-tn:article-347",
+            "code-commerce-tn:article-291",
+            "code-commerce-tn:article-283",
+            "code-commerce-tn:article-378",
+            "code-commerce-tn:article-395",
+            "code-commerce-tn:article-354"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-352"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-352"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-352"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-048",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-351",
+            "code-commerce-tn:article-359",
+            "code-commerce-tn:article-361",
+            "code-commerce-tn:article-271",
+            "code-commerce-tn:article-355",
+            "code-commerce-tn:article-333",
+            "code-commerce-tn:article-354",
+            "code-commerce-tn:article-378",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-409"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-049",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-411-bis",
+            "code-commerce-tn:article-670",
+            "code-commerce-tn:article-352",
+            "code-commerce-tn:article-354",
+            "code-commerce-tn:article-637",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-378",
+            "code-commerce-tn:article-379",
+            "code-commerce-tn:article-363",
+            "code-commerce-tn:article-408"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-354"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-354"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-050",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-355",
+            "code-commerce-tn:article-272",
+            "code-commerce-tn:article-378",
+            "code-commerce-tn:article-411-bis",
+            "code-commerce-tn:article-411",
+            "code-commerce-tn:article-401",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-412-ter",
+            "code-commerce-tn:article-379",
+            "code-commerce-tn:article-297"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-355"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-355"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-355"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-355"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-051",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-364",
+            "code-commerce-tn:article-409",
+            "code-commerce-tn:article-352",
+            "code-commerce-tn:article-384",
+            "code-commerce-tn:article-379",
+            "code-commerce-tn:article-362",
+            "code-commerce-tn:article-349",
+            "code-commerce-tn:article-310",
+            "code-commerce-tn:article-351",
+            "code-commerce-tn:article-333"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-052",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-365",
+            "code-commerce-tn:article-363",
+            "code-commerce-tn:article-361",
+            "code-commerce-tn:article-279",
+            "code-commerce-tn:article-277",
+            "code-commerce-tn:article-276",
+            "code-commerce-tn:article-362",
+            "code-commerce-tn:article-366",
+            "code-commerce-tn:article-369",
+            "code-commerce-tn:article-281"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-363"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-363"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-363"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-053",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-365",
+            "code-commerce-tn:article-351",
+            "code-commerce-tn:article-348",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-333",
+            "code-commerce-tn:article-350",
+            "code-commerce-tn:article-331",
+            "code-commerce-tn:article-368",
+            "code-commerce-tn:article-402",
+            "code-commerce-tn:article-394"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-365"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-365"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-365"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-365"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-054",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-369",
+            "code-commerce-tn:article-282",
+            "code-commerce-tn:article-384",
+            "code-commerce-tn:article-365",
+            "code-commerce-tn:article-362",
+            "code-commerce-tn:article-281",
+            "code-commerce-tn:article-361",
+            "code-commerce-tn:article-354",
+            "code-commerce-tn:article-363",
+            "code-commerce-tn:article-366"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-369"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-369"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-369"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-369"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-055",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-372",
+            "code-commerce-tn:article-395",
+            "code-commerce-tn:article-392",
+            "code-commerce-tn:article-391",
+            "code-commerce-tn:article-354",
+            "code-commerce-tn:article-378",
+            "code-commerce-tn:article-411",
+            "code-commerce-tn:article-371",
+            "code-commerce-tn:article-359",
+            "code-commerce-tn:article-1"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-372"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-372"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-372"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-372"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-056",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-374",
+            "code-commerce-tn:article-388",
+            "code-commerce-tn:article-538",
+            "code-commerce-tn:article-401",
+            "code-commerce-tn:article-200",
+            "code-commerce-tn:article-352",
+            "code-commerce-tn:article-193",
+            "code-commerce-tn:article-308",
+            "code-commerce-tn:article-295",
+            "code-commerce-tn:article-389"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-374"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-374"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-374"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-374"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-057",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-383",
+            "code-commerce-tn:article-384",
+            "code-commerce-tn:article-440",
+            "code-commerce-tn:article-502",
+            "code-commerce-tn:article-480",
+            "code-commerce-tn:article-435",
+            "code-commerce-tn:article-569",
+            "code-commerce-tn:article-627",
+            "code-commerce-tn:article-366",
+            "code-commerce-tn:article-707"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-383"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-383"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-383"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-383"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-058",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-383",
+            "code-commerce-tn:article-384",
+            "code-commerce-tn:article-352",
+            "code-commerce-tn:article-346",
+            "code-commerce-tn:article-374",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-286",
+            "code-commerce-tn:article-377",
+            "code-commerce-tn:article-349",
+            "code-commerce-tn:article-287"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-384"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-384"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-384"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-059",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-315",
+            "code-commerce-tn:article-325",
+            "code-commerce-tn:article-246",
+            "code-commerce-tn:article-410-bis",
+            "code-commerce-tn:article-734",
+            "code-commerce-tn:article-743",
+            "code-commerce-tn:article-388",
+            "code-commerce-tn:article-398",
+            "code-commerce-tn:article-374",
+            "code-commerce-tn:article-463"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-388"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-060",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-309",
+            "code-commerce-tn:article-389",
+            "code-commerce-tn:article-316",
+            "code-commerce-tn:article-315",
+            "code-commerce-tn:article-359",
+            "code-commerce-tn:article-271",
+            "code-commerce-tn:article-351",
+            "code-commerce-tn:article-275",
+            "code-commerce-tn:article-308",
+            "code-commerce-tn:article-282"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-389"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-389"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-389"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-061",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-390",
+            "code-commerce-tn:article-310",
+            "code-commerce-tn:article-398",
+            "code-commerce-tn:article-386",
+            "code-commerce-tn:article-369",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-321",
+            "code-commerce-tn:article-575",
+            "code-commerce-tn:article-403",
+            "code-commerce-tn:article-381"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-390"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-390"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-390"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-390"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-062",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-392",
+            "code-commerce-tn:article-312",
+            "code-commerce-tn:article-390",
+            "code-commerce-tn:article-393",
+            "code-commerce-tn:article-379",
+            "code-commerce-tn:article-411-bis",
+            "code-commerce-tn:article-391",
+            "code-commerce-tn:article-313",
+            "code-commerce-tn:article-411",
+            "code-commerce-tn:article-409"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-392"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-392"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-392"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-392"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-063",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-282",
+            "code-commerce-tn:article-404",
+            "code-commerce-tn:article-309",
+            "code-commerce-tn:article-307",
+            "code-commerce-tn:article-325",
+            "code-commerce-tn:article-401",
+            "code-commerce-tn:article-400",
+            "code-commerce-tn:article-346",
+            "code-commerce-tn:article-393",
+            "code-commerce-tn:article-394"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-400"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-064",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-307",
+            "code-commerce-tn:article-320",
+            "code-commerce-tn:article-319",
+            "code-commerce-tn:article-401",
+            "code-commerce-tn:article-402",
+            "code-commerce-tn:article-318",
+            "code-commerce-tn:article-387",
+            "code-commerce-tn:article-400",
+            "code-commerce-tn:article-223",
+            "code-commerce-tn:article-282"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-401"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-401"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-065",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-394",
+            "code-commerce-tn:article-309",
+            "code-commerce-tn:article-325",
+            "code-commerce-tn:article-393",
+            "code-commerce-tn:article-316",
+            "code-commerce-tn:article-282",
+            "code-commerce-tn:article-292",
+            "code-commerce-tn:article-389",
+            "code-commerce-tn:article-365",
+            "code-commerce-tn:article-404"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-404"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-066",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-408",
+            "code-commerce-tn:article-324",
+            "code-commerce-tn:article-679",
+            "code-commerce-tn:article-311",
+            "code-commerce-tn:article-573",
+            "code-commerce-tn:article-213",
+            "code-commerce-tn:article-307",
+            "code-commerce-tn:article-394",
+            "code-commerce-tn:article-386",
+            "code-commerce-tn:article-306"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-408"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-408"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-408"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-408"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-067",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-410",
+            "code-commerce-tn:article-412-bis",
+            "code-commerce-tn:article-411-ter",
+            "code-commerce-tn:article-348",
+            "code-commerce-tn:article-354",
+            "code-commerce-tn:article-674",
+            "code-commerce-tn:article-412-ter",
+            "code-commerce-tn:article-699",
+            "code-commerce-tn:article-732",
+            "code-commerce-tn:article-688"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-410"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-410"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-410"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-410"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-068",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-354",
+            "code-commerce-tn:article-409",
+            "code-commerce-tn:article-411-septies",
+            "code-commerce-tn:article-709",
+            "code-commerce-tn:article-707",
+            "code-commerce-tn:article-726",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-412-bis",
+            "code-commerce-tn:article-679",
+            "code-commerce-tn:article-350"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-069",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-409",
+            "code-commerce-tn:article-402",
+            "code-commerce-tn:article-411",
+            "code-commerce-tn:article-363",
+            "code-commerce-tn:article-412-ter",
+            "code-commerce-tn:article-371",
+            "code-commerce-tn:article-410-bis",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-348",
+            "code-commerce-tn:article-375"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-411"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-411"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-411"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-single-070",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-404",
+            "code-commerce-tn:article-4",
+            "code-commerce-tn:article-2",
+            "code-commerce-tn:article-503",
+            "code-commerce-tn:article-336",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-401",
+            "code-commerce-tn:article-397",
+            "code-commerce-tn:article-356",
+            "code-commerce-tn:article-217"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-001",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-228-bis",
+            "code-commerce-tn:article-191",
+            "code-commerce-tn:article-190",
+            "code-commerce-tn:article-259",
+            "code-commerce-tn:article-192",
+            "code-commerce-tn:article-218",
+            "code-commerce-tn:article-251",
+            "code-commerce-tn:article-231",
+            "code-commerce-tn:article-242",
+            "code-commerce-tn:article-207"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-191"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-191"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-191"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-002",
+          "required_gold_count": 2,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-193",
+            "code-commerce-tn:article-192",
+            "code-commerce-tn:article-228",
+            "code-commerce-tn:article-303",
+            "code-commerce-tn:article-380",
+            "code-commerce-tn:article-200",
+            "code-commerce-tn:article-538",
+            "code-commerce-tn:article-203",
+            "code-commerce-tn:article-567",
+            "code-commerce-tn:article-564"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-193"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": 1,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-192",
+                "code-commerce-tn:article-193"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": 1,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-192",
+                "code-commerce-tn:article-193"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": 1,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-192",
+                "code-commerce-tn:article-193"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-003",
+          "required_gold_count": 2,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-196",
+            "code-commerce-tn:article-198",
+            "code-commerce-tn:article-194",
+            "code-commerce-tn:article-222",
+            "code-commerce-tn:article-285",
+            "code-commerce-tn:article-253",
+            "code-commerce-tn:article-293",
+            "code-commerce-tn:article-370",
+            "code-commerce-tn:article-242",
+            "code-commerce-tn:article-544"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-194"
+              ]
+            },
+            "@5": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-194"
+              ]
+            },
+            "@10": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-194"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-004",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-190",
+            "code-commerce-tn:article-7",
+            "code-commerce-tn:article-191",
+            "code-commerce-tn:article-189-bis",
+            "code-commerce-tn:article-2",
+            "code-commerce-tn:article-710",
+            "code-commerce-tn:article-446",
+            "code-commerce-tn:article-461",
+            "code-commerce-tn:article-380",
+            "code-commerce-tn:article-303"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-190"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-190"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-190"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-190"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-005",
+          "required_gold_count": 2,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-564",
+            "code-commerce-tn:article-192",
+            "code-commerce-tn:article-568",
+            "code-commerce-tn:article-538",
+            "code-commerce-tn:article-228",
+            "code-commerce-tn:article-228-bis",
+            "code-commerce-tn:article-191",
+            "code-commerce-tn:article-234",
+            "code-commerce-tn:article-460",
+            "code-commerce-tn:article-193"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": 1,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-191",
+                "code-commerce-tn:article-193"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-006",
+          "required_gold_count": 2,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-200",
+            "code-commerce-tn:article-203",
+            "code-commerce-tn:article-192",
+            "code-commerce-tn:article-205",
+            "code-commerce-tn:article-560",
+            "code-commerce-tn:article-193",
+            "code-commerce-tn:article-561",
+            "code-commerce-tn:article-463",
+            "code-commerce-tn:article-207",
+            "code-commerce-tn:article-374"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-200"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": 1,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-192",
+                "code-commerce-tn:article-200"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": 1,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-192",
+                "code-commerce-tn:article-200"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": 1,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-192",
+                "code-commerce-tn:article-200"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-007",
+          "required_gold_count": 2,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-646",
+            "code-commerce-tn:article-694",
+            "code-commerce-tn:article-359",
+            "code-commerce-tn:article-190",
+            "code-commerce-tn:article-523",
+            "code-commerce-tn:article-463",
+            "code-commerce-tn:article-701",
+            "code-commerce-tn:article-231",
+            "code-commerce-tn:article-461",
+            "code-commerce-tn:article-458"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-190"
+              ]
+            },
+            "@10": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-190"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-008",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-192",
+            "code-commerce-tn:article-204",
+            "code-commerce-tn:article-195",
+            "code-commerce-tn:article-259",
+            "code-commerce-tn:article-223",
+            "code-commerce-tn:article-199",
+            "code-commerce-tn:article-207",
+            "code-commerce-tn:article-190",
+            "code-commerce-tn:article-261",
+            "code-commerce-tn:article-191"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-192"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-192"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-192"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-192"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-010",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-275",
+            "code-commerce-tn:article-294",
+            "code-commerce-tn:article-323",
+            "code-commerce-tn:article-332",
+            "code-commerce-tn:article-269",
+            "code-commerce-tn:article-296",
+            "code-commerce-tn:article-302",
+            "code-commerce-tn:article-292",
+            "code-commerce-tn:article-285",
+            "code-commerce-tn:article-336"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-275"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-275"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-275"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-275"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-011",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-715",
+            "code-commerce-tn:article-710",
+            "code-commerce-tn:article-729",
+            "code-commerce-tn:article-734",
+            "code-commerce-tn:article-726",
+            "code-commerce-tn:article-352",
+            "code-commerce-tn:article-274",
+            "code-commerce-tn:article-407",
+            "code-commerce-tn:article-283",
+            "code-commerce-tn:article-348"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-274"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-012",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-276",
+            "code-commerce-tn:article-349",
+            "code-commerce-tn:article-295",
+            "code-commerce-tn:article-344",
+            "code-commerce-tn:article-271",
+            "code-commerce-tn:article-300",
+            "code-commerce-tn:article-351",
+            "code-commerce-tn:article-329",
+            "code-commerce-tn:article-270",
+            "code-commerce-tn:article-281"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-276"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-276"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-276"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-276"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-013",
+          "required_gold_count": 2,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-365",
+            "code-commerce-tn:article-279",
+            "code-commerce-tn:article-361",
+            "code-commerce-tn:article-277",
+            "code-commerce-tn:article-363",
+            "code-commerce-tn:article-276",
+            "code-commerce-tn:article-362",
+            "code-commerce-tn:article-333",
+            "code-commerce-tn:article-281",
+            "code-commerce-tn:article-366"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-279"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": 1,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-277",
+                "code-commerce-tn:article-279"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": 1,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-277",
+                "code-commerce-tn:article-279"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-014",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-282",
+            "code-commerce-tn:article-370",
+            "code-commerce-tn:article-333",
+            "code-commerce-tn:article-315",
+            "code-commerce-tn:article-389",
+            "code-commerce-tn:article-325",
+            "code-commerce-tn:article-309",
+            "code-commerce-tn:article-549",
+            "code-commerce-tn:article-220",
+            "code-commerce-tn:article-200"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-282"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-282"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-282"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-282"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-015",
+          "required_gold_count": 2,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-350",
+            "code-commerce-tn:article-404",
+            "code-commerce-tn:article-389",
+            "code-commerce-tn:article-411",
+            "code-commerce-tn:article-285",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-398",
+            "code-commerce-tn:article-412-ter",
+            "code-commerce-tn:article-394",
+            "code-commerce-tn:article-410-bis"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-350"
+              ]
+            },
+            "@3": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-350"
+              ]
+            },
+            "@5": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-350"
+              ]
+            },
+            "@10": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-350"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-016",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-350",
+            "code-commerce-tn:article-411-bis",
+            "code-commerce-tn:article-352",
+            "code-commerce-tn:article-379",
+            "code-commerce-tn:article-270",
+            "code-commerce-tn:article-378",
+            "code-commerce-tn:article-384",
+            "code-commerce-tn:article-302",
+            "code-commerce-tn:article-411",
+            "code-commerce-tn:article-424"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-350"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-350"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-350"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-350"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-017",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-374",
+            "code-commerce-tn:article-352",
+            "code-commerce-tn:article-378",
+            "code-commerce-tn:article-200",
+            "code-commerce-tn:article-376",
+            "code-commerce-tn:article-410-bis",
+            "code-commerce-tn:article-411-septies",
+            "code-commerce-tn:article-388",
+            "code-commerce-tn:article-411",
+            "code-commerce-tn:article-412-ter"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-374"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-374"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-374"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-374"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-018",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-380",
+            "code-commerce-tn:article-388",
+            "code-commerce-tn:article-303",
+            "code-commerce-tn:article-308",
+            "code-commerce-tn:article-2",
+            "code-commerce-tn:article-410-bis",
+            "code-commerce-tn:article-394",
+            "code-commerce-tn:article-460",
+            "code-commerce-tn:article-291",
+            "code-commerce-tn:article-732"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-388"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-388"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-388"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-019",
+          "required_gold_count": 1,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-389",
+            "code-commerce-tn:article-309",
+            "code-commerce-tn:article-710",
+            "code-commerce-tn:article-359",
+            "code-commerce-tn:article-394",
+            "code-commerce-tn:article-351",
+            "code-commerce-tn:article-388",
+            "code-commerce-tn:article-316",
+            "code-commerce-tn:article-370",
+            "code-commerce-tn:article-282"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-389"
+              ]
+            },
+            "@3": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-389"
+              ]
+            },
+            "@5": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-389"
+              ]
+            },
+            "@10": {
+              "recall": 1.0,
+              "strict_multi_evidence_success": null,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-389"
+              ]
+            }
+          }
+        },
+        {
+          "question_id": "fr-cross-020",
+          "required_gold_count": 2,
+          "retrieved_unique_record_ids": [
+            "code-commerce-tn:article-398",
+            "code-commerce-tn:article-391",
+            "code-commerce-tn:article-314",
+            "code-commerce-tn:article-390",
+            "code-commerce-tn:article-386",
+            "code-commerce-tn:article-311",
+            "code-commerce-tn:article-323",
+            "code-commerce-tn:article-369",
+            "code-commerce-tn:article-315",
+            "code-commerce-tn:article-393"
+          ],
+          "metrics": {
+            "@1": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@3": {
+              "recall": 0.0,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 0,
+              "matched_gold_record_ids": []
+            },
+            "@5": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-390"
+              ]
+            },
+            "@10": {
+              "recall": 0.5,
+              "strict_multi_evidence_success": 0,
+              "any_gold_hit": 1,
+              "matched_gold_record_ids": [
+                "code-commerce-tn:article-390"
+              ]
+            }
+          }
+        }
+      ],
+      "definitions": {
+        "recall_at_k": "Per answerable question: required gold record IDs in top k distinct retrieved records divided by required gold IDs; aggregate is macro-average over answerable questions.",
+        "strict_multi_evidence_success_at_k": "Share of answerable questions with at least two required gold IDs for which all required IDs are in top k distinct retrieved records.",
+        "any_gold_hit_at_k": "Share of answerable questions with at least one required gold ID in top k distinct retrieved records.",
+        "unanswerable": "Counted separately and excluded from retrieval recall, strict success, any-gold hit, and retrieval latency denominators.",
+        "deduplication": "Repeated chunks from one record_id count once, preserving first-ranked occurrence."
+      }
+    }
+  ]
+}

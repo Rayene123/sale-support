@@ -111,8 +111,10 @@ known failure cases.
   measured as an optimization.
 - **Metadata filters** — exact filters for document, language, article,
   hierarchy, and PDF page are applied before retrieval.
-- **Abstention** — the generation layer must abstain when retrieval returns no
-  candidates or all candidates fall below its configured evidence threshold.
+- **Abstention** — the generation layer abstains when retrieval returns no
+  candidates. The API also supports the calibrated `MIN_RETRIEVAL_SCORE`
+  environment variable to remove weak BM25 matches before generation; it
+  defaults to `0` until a development-only threshold is selected.
 - **Citation validation** — every generated citation must refer to a returned
   chunk ID and its attached article/page metadata.
 

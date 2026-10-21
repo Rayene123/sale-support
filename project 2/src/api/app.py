@@ -2,6 +2,7 @@
 from contextlib import asynccontextmanager
 import json
 import logging
+import os
 from pathlib import Path
 from threading import Lock
 from time import perf_counter
@@ -17,6 +18,7 @@ from retrieval.service import RetrievalService
 
 PROJECT = Path(__file__).resolve().parents[2]
 LOGGER = logging.getLogger("uvicorn.error")
+MIN_RETRIEVAL_SCORE = float(os.getenv("MIN_RETRIEVAL_SCORE", "0"))
 
 
 class Question(BaseModel):
@@ -50,6 +52,8 @@ def create_app(retriever=None) -> FastAPI:
         started = perf_counter()
         try:
             passages = request.app.state.retriever.retrieve(body.question, method="bm25", top_k=10)
+            if MIN_RETRIEVAL_SCORE > 0:
+                passages = [passage for passage in passages if passage.score >= MIN_RETRIEVAL_SCORE]
             retrieved = perf_counter()
             try:
                 answer = generate_answer(body.question, passages)

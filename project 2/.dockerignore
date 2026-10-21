@@ -1,0 +1,9 @@
+data/raw
+data/eval
+data/indexes
+tests
+eval
+scripts
+docs
+__pycache__
+*.pyc
