@@ -17,6 +17,8 @@ not legal advice and not a guarantee of current law.
 - A FastAPI `/ask` endpoint and French browser interface.
 - Separate retrieval, generation, citation, abstention, latency, and cost
   evaluation harnesses.
+- A prepared target-user feedback protocol with French scenarios and an
+  anonymized response schema; no participant data is fabricated.
 
 The corpus is committed in processed form so the service runs without the
 source PDF. The raw 2024 PDF is intentionally not committed; rebuilding it
@@ -109,6 +111,14 @@ Export the requirements assessment as a PDF:
 
 This writes `project 2/requirements_assessment.pdf`.
 
+Export the unfinished Person 2, 3, and 4 task list:
+
+```powershell
+.\.venv\Scripts\python.exe "project 2/scripts/export_missing_tasks_pdf.py"
+```
+
+This writes `project 2/missing_tasks_persons_2_3_4.pdf`.
+
 ## Results and limitations
 
 The fixed-set retrieval results are summarized in
@@ -122,6 +132,13 @@ only a proxy, quote occurrence is not entailment, and the evaluation found
 unsupported answers and false abstentions. No legal correctness claim is made.
 No target-user session has been conducted yet; this is an explicit remaining
 external task, not a result inferred from model scores.
+
+The feedback collection package is documented in
+[USER_FEEDBACK.md](docs/USER_FEEDBACK.md). It currently reports a sample size
+of zero and contains no invented ratings or comments. A separate
+`data/feedback/synthetic_responses.csv` fixture exists only to test reporting
+code; its `TEST-` participants are not real users and must not be presented as
+feedback evidence.
 
 ## Deployment
 

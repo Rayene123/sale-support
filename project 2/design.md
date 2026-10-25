@@ -99,13 +99,16 @@ known failure cases.
 - **Chunking** — article-level chunks are the legal-safe baseline; 220-word
   windows with 40-word overlap are available for long-article comparison.
 - **Keyword index** — dependency-free Okapi BM25 over normalized article chunks.
-- **Semantic index** — local Sentence Transformers
-  `paraphrase-multilingual-MiniLM-L12-v2`, with normalized vectors and cosine
-  similarity. The model is local and requires no API key.
-- **Persistence** — embeddings are stored as NumPy arrays with a stable chunk
-  ID sidecar; the processed corpus remains the source of truth.
-- **Hybrid fusion** — Reciprocal Rank Fusion combines BM25 and semantic
-  rankings without assuming their scores share a scale.
+- **Semantic index** — Sentence Transformers
+  `paraphrase-multilingual-MiniLM-L12-v2`, with normalized 384-dimensional
+  vectors and cosine similarity. The current deployment can query the
+  `librarian-chunks` Qdrant collection; a local NumPy index remains available.
+- **Persistence** — Qdrant stores vectors and citation payloads when configured;
+  local NumPy embeddings and the processed corpus remain reproducible fallbacks.
+  BM25 is built over the chunk payloads loaded from Qdrant because the current
+  collection is dense-only.
+- **Hybrid fusion** — Reciprocal Rank Fusion combines local BM25 and Qdrant
+  semantic rankings without assuming their scores share a scale.
 - **Reranker** — deterministic exact-term coverage, phrase match, and article
   number match are the initial reproducible baseline; a cross-encoder can be
   measured as an optimization.

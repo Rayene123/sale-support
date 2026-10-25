@@ -31,9 +31,6 @@ citation against the exact passage supplied to the model.
    URL serves an older edition, so the 2024 PDF must be supplied manually and
    hash-verified. This is safer than silently indexing the wrong edition, but
    it is a clean-clone limitation.
-7. **No real-user sessions were completed.** We did not invent satisfaction or
-   legal-review results. Target-user feedback remains an external prerequisite
-   before claiming production usefulness.
 
 ## How we detected the failures
 

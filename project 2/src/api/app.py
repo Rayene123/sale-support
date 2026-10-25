@@ -41,10 +41,12 @@ def _build_retriever(*, use_qdrant: bool) -> tuple[RetrievalService, str]:
         chunks = chunk_records(load_corpus(PROJECT / "data/processed/corpus.jsonl"))
         return RetrievalService(chunks), "bm25"
     if not all((QDRANT_URL, QDRANT_API_KEY, QDRANT_COLLECTION)):
-        raise RuntimeError(
-            "RETRIEVAL_BACKEND=qdrant requires QDRANT_URL, QDRANT_API_KEY, "
-            "and QDRANT_COLLECTION in project 2/.env"
+        LOGGER.warning(
+            "Qdrant configuration is incomplete; using the committed-corpus "
+            "BM25 fallback."
         )
+        chunks = chunk_records(load_corpus(PROJECT / "data/processed/corpus.jsonl"))
+        return RetrievalService(chunks), "bm25"
     client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY, timeout=20)
     collection = client.get_collection(QDRANT_COLLECTION)
     vector_size = collection.config.params.vectors.size

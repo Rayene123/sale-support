@@ -270,9 +270,13 @@ def _build_retrievers(
     model_name: str,
     corpus_path: Path,
     method: str = "all",
+    backend: str = "local",
 ) -> list[tuple[str, Any, bool]]:
     """Build only the requested retriever, or all variants for compatibility."""
-    methods = {"all", "bm25", "vector", "hybrid", "hybrid_reranker"}
+    methods = {
+        "all", "bm25", "vector", "hybrid", "hybrid_reranker",
+        "qdrant_hybrid", "qdrant_hybrid_reranker",
+    }
     if method not in methods:
         raise ValueError(f"method must be one of {sorted(methods)}")
 
@@ -280,6 +284,23 @@ def _build_retrievers(
     from indexing.corpus import load_corpus
 
     chunks = chunk_records(load_corpus(corpus_path))
+    if backend == "qdrant" or method.startswith("qdrant_"):
+        from retrieval.hybrid import HybridRetriever
+        from retrieval.qdrant import retriever_from_env
+
+        qdrant = retriever_from_env()
+        qdrant_chunks = qdrant.load_chunks()
+        if method in {"qdrant_hybrid", "qdrant_hybrid_reranker"}:
+            hybrid = HybridRetriever(
+                qdrant_chunks,
+                semantic_retriever=qdrant,
+            )
+            return [(
+                method.removeprefix("qdrant_"),
+                hybrid,
+                method == "qdrant_hybrid_reranker",
+            )]
+        return [("qdrant_vector", qdrant, False)]
     if method == "bm25":
         from retrieval.bm25 import BM25Retriever
 
@@ -324,6 +345,13 @@ def _build_retrievers(
 
 
 def main(argv: list[str] | None = None) -> int:
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv(PROJECT_DIR.parent / ".env")
+        load_dotenv()
+    except ImportError:
+        pass
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--questions", default=str(PROJECT_DIR / "data" / "eval" / "retrieval_smoke.jsonl")
@@ -337,9 +365,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--k", nargs="+", type=int, default=[1, 3, 5, 10])
     parser.add_argument(
         "--method",
-        choices=("all", "bm25", "vector", "hybrid", "hybrid_reranker"),
+        choices=(
+            "all", "bm25", "vector", "hybrid", "hybrid_reranker",
+            "qdrant_hybrid", "qdrant_hybrid_reranker",
+        ),
         default="all",
         help="retrieval method to evaluate; 'all' preserves the original behavior",
+    )
+    parser.add_argument(
+        "--backend",
+        choices=("local", "qdrant"),
+        default="local",
+        help="semantic backend for qdrant_hybrid methods",
     )
     args = parser.parse_args(argv)
     try:
@@ -382,6 +419,7 @@ def main(argv: list[str] | None = None) -> int:
             args.model,
             PROJECT_DIR / "data" / "processed" / "corpus.jsonl",
             args.method,
+            args.backend,
         )
     except Exception as exc:
         parser.error(f"could not initialize retrieval components: {exc}")

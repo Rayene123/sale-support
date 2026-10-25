@@ -71,9 +71,9 @@ normal text retrieval because the consolidated source contains no article body.
 
 ### Qdrant Cloud vector index
 
-The local NumPy semantic index is the default. The same chunks can also be
-stored in Qdrant Cloud (or a self-hosted Qdrant) and used for `method="vector"`
-or `method="hybrid"`.
+The local NumPy semantic index remains available for reproducibility. The
+configured Qdrant Cloud collection is the production semantic backend and can
+be used for `method="vector"` or `method="hybrid"`.
 
 1. In the Qdrant Cloud console, create a cluster and copy its endpoint and API
    key. The free tier is sufficient for this corpus (a few hundred vectors at
@@ -125,15 +125,33 @@ or `method="hybrid"`.
    )
    ```
 
-`method="hybrid"` combines Qdrant semantic results with the local BM25 index
-using RRF. Metadata filters accepted by the service are pushed down to Qdrant
-for the semantic side. `article_suffix` is not stored on chunks, so it is not a
-supported Qdrant filter.
+`method="hybrid"` combines Qdrant semantic results with BM25 over the chunk
+payloads loaded from the same collection using RRF. The current collection is
+dense-only; native sparse BM25 vectors have not been added. Metadata filters
+accepted by the service are pushed down to Qdrant for the semantic side.
+`article_suffix` is not stored on chunks, so it is not a supported Qdrant
+filter.
 
-The web API in `src/api/app.py` currently calls BM25 directly. To serve
-Qdrant-backed answers, construct its `RetrievalService` with
-`semantic_retriever=retriever_from_env()` and change the `method=` argument in
-the `/ask` route to `"vector"` or `"hybrid"`.
+The web API loads Qdrant-backed hybrid retrieval when the Qdrant variables are
+available in `.env`; it falls back to the committed corpus and local BM25 when
+the configuration is incomplete. This makes the deployed path and the local
+clean-clone path explicit.
+
+Run the official Qdrant hybrid evaluation on the canonical set with:
+
+```powershell
+python "project 2/eval/retrieval.py" `
+  --questions "project 2/data/eval/questions.jsonl" `
+  --method qdrant_hybrid `
+  --output "project 2/data/eval/retrieval_qdrant_hybrid_final.json" `
+  --k 1 3 5 10
+```
+
+Use `qdrant_hybrid_reranker` to evaluate the same set with the deterministic
+reranker. The optional `CrossEncoderReranker` in
+`src/retrieval/rerank.py` can be selected by an integration caller when its
+model is available; the deterministic reranker remains the reproducible
+baseline.
 
 Never commit `.env` or a real API key; the committed `.env.example` contains
 placeholders only. Changing the embedding model changes the vector dimension:
@@ -155,6 +173,24 @@ The smoke set is too small for final quality claims: one question changes a
 recall percentage by 12.5 points. Person 4 owns the required larger labeled
 evaluation set. These numbers establish the Person 2 baseline and the
 keyword/vector/hybrid/reranker comparison.
+
+### Official Qdrant evaluation
+
+The canonical approved set contains 109 questions: 89 answerable questions
+used for recall and 20 unanswerable questions excluded from retrieval recall.
+The live Qdrant collection was evaluated after loading `.env` and using the
+same question set and scoring rules for both methods.
+
+| Method | Recall@1 | Recall@3 | Recall@5 | Recall@10 | Strict multi-evidence@10 | p50 (ms) | p95 (ms) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Qdrant hybrid | 45.51% | 73.60% | 79.21% | 87.08% | 25.00% | 318.14 | 449.02 |
+| Qdrant hybrid + reranker | 45.51% | 71.35% | 79.78% | 87.08% | 25.00% | 344.05 | 759.98 |
+
+The deterministic reranker did not improve Recall@10 or strict multi-evidence
+success and increased p95 latency. The production default therefore remains
+Qdrant hybrid without reranking. The raw reproducible results are stored in
+`data/eval/retrieval_qdrant_hybrid_final.json` and
+`data/eval/retrieval_qdrant_hybrid_reranker_final.json`.
 
 ### Performance fix
 
