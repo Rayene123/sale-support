@@ -77,6 +77,12 @@ Build the optional semantic index:
 .\.venv\Scripts\python.exe "project 2/scripts/build_indexes.py"
 ```
 
+To use Qdrant Cloud instead of the local NumPy index, set `QDRANT_URL` and
+`QDRANT_API_KEY` in `.env`, then run
+`python "project 2/scripts/upload_qdrant.py" --recreate`. See the
+[Qdrant section](docs/PERSON_2_RETRIEVAL.md#qdrant-cloud-vector-index) for the
+collection layout and the retrieval example.
+
 Run retrieval ablations on the fixed evaluation set:
 
 ```powershell

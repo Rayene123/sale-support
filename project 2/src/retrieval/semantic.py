@@ -1,7 +1,7 @@
 """Semantic embedding retrieval using a local Sentence Transformers model."""
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Protocol
 
@@ -10,11 +10,30 @@ import numpy as np
 from indexing.chunking import ArticleChunk
 from models.retrieval import RetrievalResult
 
+from .filters import filter_chunks
+
 
 class Embedder(Protocol):
     """Small interface that keeps embedding tests independent of model downloads."""
 
     def encode(self, texts: list[str], *, normalize_embeddings: bool) -> np.ndarray:
+        ...
+
+
+class SemanticSearch(Protocol):
+    """A semantic backend that can rank chunks for a query.
+
+    The local :class:`SemanticRetriever` and the Qdrant-backed retriever both
+    satisfy the parts used by the retrieval service.
+    """
+
+    def search(
+        self,
+        query: str,
+        *,
+        top_k: int = 5,
+        filters: Mapping[str, object] | None = None,
+    ) -> list[RetrievalResult]:
         ...
 
 
@@ -89,7 +108,13 @@ class SemanticRetriever:
         """Return a copy suitable for persistence."""
         return self._embeddings.copy()
 
-    def search(self, query: str, *, top_k: int = 5) -> list[RetrievalResult]:
+    def search(
+        self,
+        query: str,
+        *,
+        top_k: int = 5,
+        filters: Mapping[str, object] | None = None,
+    ) -> list[RetrievalResult]:
         if top_k < 1:
             raise ValueError("top_k must be at least 1")
         if not query.strip() or not self._chunks:
@@ -106,6 +131,15 @@ class SemanticRetriever:
             enumerate(scores.tolist()),
             key=lambda item: (-item[1], self._chunks[item[0]].chunk_id),
         )
+        if filters is not None:
+            allowed = {
+                chunk.chunk_id for chunk in filter_chunks(self._chunks, filters)
+            }
+            ranked = [
+                item
+                for item in ranked
+                if self._chunks[item[0]].chunk_id in allowed
+            ]
         return [
             self._result(index, score, rank)
             for rank, (index, score) in enumerate(ranked[:top_k], start=1)

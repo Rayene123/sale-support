@@ -69,6 +69,76 @@ The article strategy produces 582 searchable chunks. The 220-word/40-word
 overlap strategy produces 631 chunks. Repealed articles are excluded from
 normal text retrieval because the consolidated source contains no article body.
 
+### Qdrant Cloud vector index
+
+The local NumPy semantic index is the default. The same chunks can also be
+stored in Qdrant Cloud (or a self-hosted Qdrant) and used for `method="vector"`
+or `method="hybrid"`.
+
+1. In the Qdrant Cloud console, create a cluster and copy its endpoint and API
+   key. The free tier is sufficient for this corpus (a few hundred vectors at
+   384 dimensions).
+2. Put the values in the repository `.env` (git-ignored) or the environment:
+
+   ```dotenv
+   QDRANT_URL=https://<cluster-id>.cloud.qdrant.io:6333
+   QDRANT_API_KEY=<secret>
+   QDRANT_COLLECTION=librarian-chunks
+   # QDRANT_PREFER_GRPC=true
+   ```
+
+3. Install the dependencies (already listed in `requirements.txt`):
+
+   ```powershell
+   python -m pip install -r "project 2/requirements.txt"
+   ```
+
+4. Chunk, embed, and upload the corpus. Use `--recreate` for the first upload
+   and after changing the embedding model or chunking strategy:
+
+   ```powershell
+   python "project 2/scripts/upload_qdrant.py" --recreate
+   ```
+
+   The script reuses the article-aware chunker and
+   `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (384
+   dimensions), then upserts one point per chunk. Point IDs are derived from
+   `chunk_id`, so re-running without `--recreate` overwrites existing points
+   instead of duplicating them. The collection uses cosine distance.
+
+   Each point payload carries the citation fields (`chunk_id`, `record_id`,
+   `article`, `article_number`, `heading_path`, `pdf_page`, `source_url`) plus
+   the flattened heading levels (`book`, `titre`, `chapitre`, `section`,
+   `sous_section`).
+
+5. Use it through the normal facade:
+
+   ```python
+   from retrieval.qdrant import retriever_from_env
+   from retrieval.service import RetrievalService
+
+   service = RetrievalService(chunks, semantic_retriever=retriever_from_env())
+   results = service.retrieve(
+       "Quels biens font partie du fonds de commerce ?",
+       method="vector",
+       top_k=5,
+   )
+   ```
+
+`method="hybrid"` combines Qdrant semantic results with the local BM25 index
+using RRF. Metadata filters accepted by the service are pushed down to Qdrant
+for the semantic side. `article_suffix` is not stored on chunks, so it is not a
+supported Qdrant filter.
+
+The web API in `src/api/app.py` currently calls BM25 directly. To serve
+Qdrant-backed answers, construct its `RetrievalService` with
+`semantic_retriever=retriever_from_env()` and change the `method=` argument in
+the `/ask` route to `"vector"` or `"hybrid"`.
+
+Never commit `.env` or a real API key; the committed `.env.example` contains
+placeholders only. Changing the embedding model changes the vector dimension:
+recreate the collection instead of mixing dimensions.
+
 ### Retrieval ablation
 
 The current development smoke set contains 8 labeled questions. Results are
