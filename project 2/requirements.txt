@@ -1,6 +1,8 @@
 pypdf==6.21.1
 numpy>=1.26,<3
 sentence-transformers>=3.0,<6
+qdrant-client>=1.12,<2
+python-dotenv>=1.0,<2
 fastapi>=0.100,<1
 pydantic>=2,<3
 uvicorn>=0.23,<1

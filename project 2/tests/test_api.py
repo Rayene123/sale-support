@@ -27,7 +27,7 @@ class ApiTests(unittest.TestCase):
         self.retriever.retrieve.assert_called_once_with("Conserver les livres ?", method="bm25", top_k=10)
 
     def test_real_retrieval_covers_short_books_question(self):
-        with TestClient(create_app()) as client, patch("generation.service.call_ollama", return_value=draft()):
+        with TestClient(create_app(use_qdrant=False)) as client, patch("generation.service.call_ollama", return_value=draft()):
             response = client.post("/ask", json={"question": "Combien de temps faut-il conserver les livres de commerce ?"})
         self.assertFalse(response.json()["abstain"])
         self.assertEqual(response.json()["citations"][0]["chunk_id"], PASSAGE.chunk_id)

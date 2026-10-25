@@ -61,10 +61,15 @@ Example response, abbreviated to the answer and one citation:
  "article":"Article 10","pdf_page":9,"quote":"Ils seront conservés pendant dix ans."}]}
 ```
 
-The application loads Person 1's committed corpus and Person 2's article-level
-BM25 retriever once at startup. No raw PDF, embedding rebuild, cloud service or
-API key is needed. BM25 is the dependency-light production baseline; the
-retrieval ablation remains available to Person 4. Set `MIN_RETRIEVAL_SCORE` to
+With `RETRIEVAL_BACKEND=qdrant`, the application loads chunk payloads from the
+configured Qdrant collection once at startup. BM25 is built over those Qdrant
+payloads, while the semantic leg queries the collection's 384-dimensional
+cosine vectors; the API therefore uses Qdrant-backed hybrid retrieval. The
+current collection is dense-only, so BM25 scoring is computed locally over the
+text loaded from Qdrant rather than pretending that a dense vector is BM25.
+Without Qdrant configuration, the committed corpus and local BM25 fallback are
+used. No raw PDF, embedding rebuild, or generation API key is needed in local
+Ollama mode. Set `MIN_RETRIEVAL_SCORE` to
 a positive value calibrated on a development split to reject weak lexical
 matches before generation. The default is `0`, preserving the measured
 baseline until a threshold is selected without test-set leakage.

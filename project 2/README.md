@@ -56,6 +56,12 @@ The response contains `answer_fr`, `abstain`, `reason`, `citations`,
 For a hosted provider, set `GENERATION_PROVIDER=groq` and
 `GROQ_API_KEY`; never commit the key.
 
+When `project 2/.env` contains the Qdrant variables, the default API backend
+loads chunks from Qdrant, runs BM25 locally over those payloads, and combines
+it with Qdrant cosine-vector search. Set `RETRIEVAL_BACKEND=local` to force the
+committed-corpus BM25 fallback. The current Qdrant collection is dense-only;
+adding sparse BM25 vectors would require a separate collection migration.
+
 ## Build and evaluate
 
 The processed corpus is already available. With the verified raw PDF, rebuild
@@ -88,6 +94,14 @@ Run tests:
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s "project 2/tests" -p "test_*.py"
 ```
+
+Export the requirements assessment as a PDF:
+
+```powershell
+.\.venv\Scripts\python.exe "project 2/scripts/export_assessment_pdf.py"
+```
+
+This writes `project 2/requirements_assessment.pdf`.
 
 ## Results and limitations
 

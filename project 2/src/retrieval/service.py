@@ -9,6 +9,7 @@ from models.retrieval import RetrievalResult
 from .bm25 import BM25Retriever
 from .filters import filter_chunks
 from .hybrid import HybridRetriever
+from .qdrant import QdrantRetriever
 from .rerank import rerank
 from .semantic import Embedder, SemanticRetriever
 
@@ -21,18 +22,23 @@ class RetrievalService:
         chunks: Sequence[ArticleChunk],
         *,
         embedder: Embedder | None = None,
+        qdrant_retriever: QdrantRetriever | None = None,
     ) -> None:
         self._chunks = tuple(chunks)
         self._embedder = embedder
         self._bm25 = BM25Retriever(self._chunks)
-        self._semantic = (
+        self._semantic = qdrant_retriever or (
             SemanticRetriever(self._chunks, embedder=embedder)
             if embedder is not None
             else None
         )
         self._hybrid = (
-            HybridRetriever(self._chunks, embedder=embedder)
-            if embedder is not None
+            HybridRetriever(
+                self._chunks,
+                embedder=embedder,
+                semantic_backend=qdrant_retriever,
+            )
+            if embedder is not None or qdrant_retriever is not None
             else None
         )
 
@@ -58,18 +64,21 @@ class RetrievalService:
                     raise RuntimeError("an embedder is required for vector retrieval")
                 results = self._semantic.search(query, top_k=top_k)
             else:
-                results = SemanticRetriever(chunks, embedder=self._embedder).search(
-                    query, top_k=top_k
-                )
+                if self._semantic is not None and isinstance(self._semantic, QdrantRetriever):
+                    results = self._semantic.search(
+                        query, top_k=top_k, filters=filters
+                    )
+                else:
+                    results = SemanticRetriever(chunks, embedder=self._embedder).search(
+                        query, top_k=top_k
+                    )
         elif method == "hybrid":
             if not filters:
                 if self._hybrid is None:
                     raise RuntimeError("an embedder is required for hybrid retrieval")
                 results = self._hybrid.search(query, top_k=top_k)
             else:
-                results = HybridRetriever(chunks, embedder=self._embedder).search(
-                    query, top_k=top_k
-                )
+                results = self._hybrid.search(query, top_k=top_k, filters=filters)
         else:
             raise ValueError("method must be one of 'bm25', 'vector', or 'hybrid'")
         return rerank(query, results, top_k=top_k) if rerank_results else results
