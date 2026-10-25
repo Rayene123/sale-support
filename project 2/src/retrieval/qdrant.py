@@ -342,57 +342,12 @@ class QdrantRetriever:
     """
 
     def __init__(self, client: Any, *, collection: str, embedder: Any) -> None:
->>>>>>> 3ae38865fda897cce391be3f5140b182c401025f
         self._client = client
         self._collection = collection
         self._embedder = embedder
 
-<<<<<<< HEAD
-=======
-    @property
-    def collection(self) -> str:
-        return self._collection
-
->>>>>>> 3ae38865fda897cce391be3f5140b182c401025f
-    def search(
-        self,
-        query: str,
-        *,
-        top_k: int = 5,
-        filters: Mapping[str, object] | None = None,
-    ) -> list[RetrievalResult]:
-<<<<<<< HEAD
-=======
-        """Return up to ``top_k`` chunks ranked by cosine similarity."""
->>>>>>> 3ae38865fda897cce391be3f5140b182c401025f
-        if top_k < 1:
-            raise ValueError("top_k must be at least 1")
-        if not query.strip():
-            return []
-<<<<<<< HEAD
-        vector = self._embedder.encode(
-            [query],
-            normalize_embeddings=True,
-        )
-        if getattr(vector, "shape", None) != (1, 384):
-            raise ValueError(
-                "Qdrant embeddings must have shape (1, 384) for this collection"
-            )
-        response = self._client.query_points(
-            collection_name=self._collection,
-            query=vector[0].tolist(),
-            query_filter=self._make_filter(filters),
-            limit=top_k,
-            with_payload=True,
-            with_vectors=False,
-        )
-        return [
-            self._result(point.payload or {}, float(point.score), rank)
-            for rank, point in enumerate(response.points, start=1)
-        ]
-
     def load_chunks(self) -> list[ArticleChunk]:
-        """Load the indexed payloads for the local BM25 leg of hybrid search."""
+        """Load payloads for the local BM25 leg of hybrid retrieval."""
         chunks: list[ArticleChunk] = []
         offset = None
         while True:
@@ -403,10 +358,42 @@ class QdrantRetriever:
                 with_payload=True,
                 with_vectors=False,
             )
-            chunks.extend(
-                self._chunk_from_payload(point.payload or {})
-                for point in points
-            )
+            for point in points:
+                payload = point.payload or {}
+                headings = tuple(payload.get("heading_path") or ())
+                required = (
+                    "chunk_id", "record_id", "text", "article",
+                    "article_number", "document_id", "language", "pdf_page",
+                    "source_url", "source_sha256", "source_date",
+                    "source_edition",
+                )
+                missing = [field for field in required if field not in payload]
+                if missing:
+                    raise ValueError(
+                        f"Qdrant point {point.id} is missing payload fields {missing}"
+                    )
+                chunks.append(ArticleChunk(
+                    chunk_id=payload["chunk_id"],
+                    record_id=payload["record_id"],
+                    text=payload["text"],
+                    chunk_index=int(payload.get("chunk_index", 0)),
+                    chunk_count=int(payload.get("chunk_count", 1)),
+                    article=payload["article"],
+                    article_number=int(payload["article_number"]),
+                    heading_path=headings,
+                    document_id=payload["document_id"],
+                    language=payload["language"],
+                    pdf_page=int(payload["pdf_page"]),
+                    printed_page=(
+                        int(payload["printed_page"])
+                        if payload.get("printed_page") is not None
+                        else None
+                    ),
+                    source_url=payload["source_url"],
+                    source_sha256=payload["source_sha256"],
+                    source_date=payload["source_date"],
+                    source_edition=payload["source_edition"],
+                ))
             if offset is None:
                 break
         chunks.sort(key=lambda chunk: chunk.chunk_id)
@@ -414,108 +401,22 @@ class QdrantRetriever:
             raise ValueError(f"Qdrant collection {self._collection!r} is empty")
         return chunks
 
-    @staticmethod
-    def _make_filter(filters: Mapping[str, object] | None) -> Filter | None:
-        if not filters:
-            return None
-        supported = {
-            "chunk_id",
-            "record_id",
-            "document_id",
-            "language",
-            "article_number",
-            "book",
-            "titre",
-            "chapitre",
-            "section",
-            "sous_section",
-            "pdf_page",
-        }
-        unknown = set(filters) - supported
-        if unknown:
-            raise ValueError(f"unsupported metadata filters: {sorted(unknown)}")
-        return Filter(
-            must=[
-                FieldCondition(key=key, match=MatchValue(value=value))
-                for key, value in filters.items()
-            ]
-        )
+    @property
+    def collection(self) -> str:
+        return self._collection
 
-    @staticmethod
-    def _result(payload: dict[str, Any], score: float, rank: int) -> RetrievalResult:
-        required = (
-            "chunk_id",
-            "record_id",
-            "text",
-            "article_number",
-            "article",
-            "pdf_page",
-            "source_url",
-        )
-        missing = [key for key in required if key not in payload]
-        if missing:
-            raise ValueError(f"Qdrant payload is missing fields: {missing}")
-        heading_path = payload.get("heading_path", [])
-        if not isinstance(heading_path, list):
-            raise ValueError("Qdrant heading_path must be a list")
-        return RetrievalResult(
-            chunk_id=str(payload["chunk_id"]),
-            record_id=str(payload["record_id"]),
-            text=str(payload["text"]),
-            score=score,
-            rank=rank,
-            article_number=int(payload["article_number"]),
-            article=str(payload["article"]),
-            heading_path=tuple(str(item) for item in heading_path),
-            pdf_page=int(payload["pdf_page"]),
-            source_url=str(payload["source_url"]),
-            retrieval_method="vector",
-        )
-
-    @classmethod
-    def _chunk_from_payload(cls, payload: dict[str, Any]) -> ArticleChunk:
-        required = (
-            "chunk_id",
-            "record_id",
-            "text",
-            "article_number",
-            "article",
-            "pdf_page",
-            "source_url",
-            "source_sha256",
-            "source_date",
-            "source_edition",
-        )
-        missing = [key for key in required if key not in payload]
-        if missing:
-            raise ValueError(f"Qdrant payload is missing fields: {missing}")
-        heading_path = payload.get("heading_path", [])
-        if not isinstance(heading_path, list):
-            raise ValueError("Qdrant heading_path must be a list")
-        return ArticleChunk(
-            chunk_id=str(payload["chunk_id"]),
-            record_id=str(payload["record_id"]),
-            text=str(payload["text"]),
-            chunk_index=int(payload.get("chunk_index", 0)),
-            chunk_count=int(payload.get("chunk_count", 1)),
-            article=str(payload["article"]),
-            article_number=int(payload["article_number"]),
-            heading_path=tuple(str(item) for item in heading_path),
-            document_id=str(payload.get("document_id", "")),
-            language=str(payload.get("language", "")),
-            pdf_page=int(payload["pdf_page"]),
-            printed_page=(
-                int(payload["printed_page"])
-                if payload.get("printed_page") is not None
-                else None
-            ),
-            source_url=str(payload["source_url"]),
-            source_sha256=str(payload["source_sha256"]),
-            source_date=str(payload["source_date"]),
-            source_edition=str(payload["source_edition"]),
-        )
-=======
-
+    def search(
+        self,
+        query: str,
+        *,
+        top_k: int = 5,
+        filters: Mapping[str, object] | None = None,
+    ) -> list[RetrievalResult]:
+        """Return up to ``top_k`` chunks ranked by cosine similarity."""
+        if top_k < 1:
+            raise ValueError("top_k must be at least 1")
+        if not query.strip():
+            return []
         vector = np.asarray(
             self._embedder.encode([query], normalize_embeddings=True),
             dtype=np.float32,
@@ -560,4 +461,3 @@ def retriever_from_env(
         collection=collection or config.collection,
         embedder=embedder,
     )
->>>>>>> 3ae38865fda897cce391be3f5140b182c401025f

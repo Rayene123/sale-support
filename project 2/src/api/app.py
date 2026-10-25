@@ -56,7 +56,7 @@ def _build_retriever(*, use_qdrant: bool) -> tuple[RetrievalService, str]:
     embedder = SentenceTransformerEmbedder()
     qdrant = QdrantRetriever(client, QDRANT_COLLECTION, embedder=embedder)
     chunks = qdrant.load_chunks()
-    return RetrievalService(chunks, qdrant_retriever=qdrant), "hybrid"
+    return RetrievalService(chunks, semantic_retriever=qdrant), "hybrid"
 
 
 def create_app(retriever=None, *, use_qdrant: bool | None = None) -> FastAPI:
