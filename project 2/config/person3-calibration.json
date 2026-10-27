@@ -1,0 +1,290 @@
+{
+  "backend": "qdrant",
+  "method": "hybrid",
+  "index_sha256": "fed5914cbd2fa5ecd27ab0e18d9b0ee74cbc92e48913a65a954ea54651ff99b7",
+  "created_at_utc": "2026-10-27T20:45:53.365643+00:00",
+  "selected_threshold": 0.0,
+  "corpus_sha256": "3a0de2e247c2bd6bc222e20dba70b064bfef33a5327f072204b8527dcefd9639",
+  "development_sha256": "60a0972f14636c08b90e5f26a62f77e2af42d71b3bd2e47de13481accc37cbfb",
+  "canonical_sha256": "9418c2fa9ab62f41cacd11f883222883ac453f910f2596310fc5fb350dcd973d",
+  "min_answerable_recall": 0.9,
+  "rows": [
+    {
+      "question_id": "p3-dev-01",
+      "answerable": true,
+      "has_results": true,
+      "score": 0.0315136476426799
+    },
+    {
+      "question_id": "p3-dev-02",
+      "answerable": true,
+      "has_results": true,
+      "score": 0.03047794966520434
+    },
+    {
+      "question_id": "p3-dev-03",
+      "answerable": true,
+      "has_results": true,
+      "score": 0.03252247488101534
+    },
+    {
+      "question_id": "p3-dev-04",
+      "answerable": true,
+      "has_results": true,
+      "score": 0.03177805800756621
+    },
+    {
+      "question_id": "p3-dev-05",
+      "answerable": true,
+      "has_results": true,
+      "score": 0.03278688524590164
+    },
+    {
+      "question_id": "p3-dev-06",
+      "answerable": true,
+      "has_results": true,
+      "score": 0.032018442622950824
+    },
+    {
+      "question_id": "p3-dev-07",
+      "answerable": true,
+      "has_results": true,
+      "score": 0.03278688524590164
+    },
+    {
+      "question_id": "p3-dev-08",
+      "answerable": true,
+      "has_results": true,
+      "score": 0.031754032258064516
+    },
+    {
+      "question_id": "p3-dev-09",
+      "answerable": true,
+      "has_results": true,
+      "score": 0.03278688524590164
+    },
+    {
+      "question_id": "p3-dev-10",
+      "answerable": true,
+      "has_results": true,
+      "score": 0.03021353930031804
+    },
+    {
+      "question_id": "p3-dev-11",
+      "answerable": true,
+      "has_results": true,
+      "score": 0.032266458495966696
+    },
+    {
+      "question_id": "p3-dev-12",
+      "answerable": true,
+      "has_results": true,
+      "score": 0.0315136476426799
+    },
+    {
+      "question_id": "p3-dev-13",
+      "answerable": false,
+      "has_results": true,
+      "score": 0.032266458495966696
+    },
+    {
+      "question_id": "p3-dev-14",
+      "answerable": false,
+      "has_results": true,
+      "score": 0.01639344262295082
+    },
+    {
+      "question_id": "p3-dev-15",
+      "answerable": false,
+      "has_results": true,
+      "score": 0.029236022193768675
+    },
+    {
+      "question_id": "p3-dev-16",
+      "answerable": false,
+      "has_results": true,
+      "score": 0.03278688524590164
+    },
+    {
+      "question_id": "p3-dev-17",
+      "answerable": false,
+      "has_results": true,
+      "score": 0.01639344262295082
+    },
+    {
+      "question_id": "p3-dev-18",
+      "answerable": false,
+      "has_results": true,
+      "score": 0.032266458495966696
+    },
+    {
+      "question_id": "p3-dev-19",
+      "answerable": false,
+      "has_results": true,
+      "score": 0.03021353930031804
+    },
+    {
+      "question_id": "p3-dev-20",
+      "answerable": false,
+      "has_results": true,
+      "score": 0.03278688524590164
+    },
+    {
+      "question_id": "p3-dev-21",
+      "answerable": false,
+      "has_results": true,
+      "score": 0.030536130536130537
+    },
+    {
+      "question_id": "p3-dev-22",
+      "answerable": false,
+      "has_results": true,
+      "score": 0.031054405392392875
+    },
+    {
+      "question_id": "p3-dev-23",
+      "answerable": false,
+      "has_results": true,
+      "score": 0.029827662395050816
+    },
+    {
+      "question_id": "p3-dev-24",
+      "answerable": false,
+      "has_results": true,
+      "score": 0.02813852813852814
+    }
+  ],
+  "candidates": [
+    {
+      "threshold": 0.0,
+      "false_reject": 0,
+      "false_accept": 12,
+      "answerable_recall": 1.0,
+      "unanswerable_admission_rate": 1.0
+    },
+    {
+      "threshold": 0.016393442622950824,
+      "false_reject": 0,
+      "false_accept": 10,
+      "answerable_recall": 1.0,
+      "unanswerable_admission_rate": 0.8333333333333334
+    },
+    {
+      "threshold": 0.028138528138528143,
+      "false_reject": 0,
+      "false_accept": 9,
+      "answerable_recall": 1.0,
+      "unanswerable_admission_rate": 0.75
+    },
+    {
+      "threshold": 0.02923602219376868,
+      "false_reject": 0,
+      "false_accept": 8,
+      "answerable_recall": 1.0,
+      "unanswerable_admission_rate": 0.6666666666666666
+    },
+    {
+      "threshold": 0.02982766239505082,
+      "false_reject": 0,
+      "false_accept": 7,
+      "answerable_recall": 1.0,
+      "unanswerable_admission_rate": 0.5833333333333334
+    },
+    {
+      "threshold": 0.030213539300318042,
+      "false_reject": 1,
+      "false_accept": 6,
+      "answerable_recall": 0.9166666666666666,
+      "unanswerable_admission_rate": 0.5
+    },
+    {
+      "threshold": 0.030477949665204344,
+      "false_reject": 2,
+      "false_accept": 6,
+      "answerable_recall": 0.8333333333333334,
+      "unanswerable_admission_rate": 0.5
+    },
+    {
+      "threshold": 0.03053613053613054,
+      "false_reject": 2,
+      "false_accept": 5,
+      "answerable_recall": 0.8333333333333334,
+      "unanswerable_admission_rate": 0.4166666666666667
+    },
+    {
+      "threshold": 0.03105440539239288,
+      "false_reject": 2,
+      "false_accept": 4,
+      "answerable_recall": 0.8333333333333334,
+      "unanswerable_admission_rate": 0.3333333333333333
+    },
+    {
+      "threshold": 0.03151364764267991,
+      "false_reject": 4,
+      "false_accept": 4,
+      "answerable_recall": 0.6666666666666666,
+      "unanswerable_admission_rate": 0.3333333333333333
+    },
+    {
+      "threshold": 0.03175403225806452,
+      "false_reject": 5,
+      "false_accept": 4,
+      "answerable_recall": 0.5833333333333334,
+      "unanswerable_admission_rate": 0.3333333333333333
+    },
+    {
+      "threshold": 0.031778058007566216,
+      "false_reject": 6,
+      "false_accept": 4,
+      "answerable_recall": 0.5,
+      "unanswerable_admission_rate": 0.3333333333333333
+    },
+    {
+      "threshold": 0.03201844262295083,
+      "false_reject": 7,
+      "false_accept": 4,
+      "answerable_recall": 0.4166666666666667,
+      "unanswerable_admission_rate": 0.3333333333333333
+    },
+    {
+      "threshold": 0.0322664584959667,
+      "false_reject": 8,
+      "false_accept": 2,
+      "answerable_recall": 0.3333333333333333,
+      "unanswerable_admission_rate": 0.16666666666666666
+    },
+    {
+      "threshold": 0.03252247488101535,
+      "false_reject": 9,
+      "false_accept": 2,
+      "answerable_recall": 0.25,
+      "unanswerable_admission_rate": 0.16666666666666666
+    },
+    {
+      "threshold": 0.03278688524590165,
+      "false_reject": 12,
+      "false_accept": 0,
+      "answerable_recall": 0.0,
+      "unanswerable_admission_rate": 0.0
+    }
+  ],
+  "note": "Retrieval admission only, not measured generation faithfulness or legal correctness. Validate on development generation before freezing final evaluation.",
+  "candidate_threshold": 0.030213539300318042,
+  "development_generation_decision": {
+    "promoted": false,
+    "rule": "No increase in answerable abstentions or unanswerable answers; fewer unanswerable answers or generation calls; no HTTP errors.",
+    "baseline": {
+      "errors": 0,
+      "answerable_abstentions": 2,
+      "unanswerable_answers": 0,
+      "generation_calls": 24
+    },
+    "candidate": {
+      "errors": 0,
+      "answerable_abstentions": 4,
+      "unanswerable_answers": 0,
+      "generation_calls": 17
+    },
+    "limit": "Small authored development split; abstention labels do not establish semantic/legal correctness."
+  }
+}

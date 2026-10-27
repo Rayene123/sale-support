@@ -79,7 +79,8 @@ def _build_retriever(*, use_qdrant: bool) -> tuple[RetrievalService, str]:
             f"Qdrant collection {QDRANT_COLLECTION!r} has vector size "
             f"{vector_size}, expected 384"
         )
-    embedder = SentenceTransformerEmbedder()
+    embedder = SentenceTransformerEmbedder(os.getenv(
+        "EMBEDDING_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"))
     qdrant = QdrantRetriever(client, collection=QDRANT_COLLECTION, embedder=embedder)
     chunks = qdrant.load_chunks()
     return RetrievalService(chunks, semantic_retriever=qdrant), "hybrid"
@@ -127,7 +128,9 @@ def create_app(retriever=None, *, use_qdrant: bool | None = None) -> FastAPI:
         app.state.threshold = threshold
         app.state.configuration = {
             "generation_provider": GENERATION_PROVIDER, "model": MODEL,
+            "reasoning_effort": os.getenv("OPENAI_REASONING_EFFORT", "none") if GENERATION_PROVIDER == "openai" else None,
             "retrieval_backend": backend, "retrieval_method": method,
+            "embedding_revision": os.getenv("EMBEDDING_REVISION") if backend == "qdrant" else None,
             "collection": QDRANT_COLLECTION if backend == "qdrant" else None,
             "min_retrieval_score": threshold, "calibration_sha256": calibration_id,
             "prompt_sha256": hashlib.sha256(SYSTEM.encode()).hexdigest(),
@@ -149,7 +152,7 @@ def create_app(retriever=None, *, use_qdrant: bool | None = None) -> FastAPI:
         if password and request.url.path != "/health":
             expected = "Basic " + base64.b64encode(f"librarian:{password}".encode()).decode()
             if not secrets.compare_digest(request.headers.get("authorization", "").encode(), expected.encode()):
-                return Response("Accès réservé à la démonstration.", status_code=401,
+                return Response("Accès réservé au projet.", status_code=401,
                                 headers={"WWW-Authenticate": 'Basic realm="The Librarian"'})
         return await call_next(request)
 
@@ -159,10 +162,14 @@ def create_app(retriever=None, *, use_qdrant: bool | None = None) -> FastAPI:
 
     @app.get("/health")
     def health(request: Request):
-        return {"status": "ok", "model": MODEL, "configuration": request.app.state.configuration}
+        return {"status": "ok", "model": MODEL,
+                "paid_calls_allowed": os.getenv("ALLOW_PAID_CALLS", "").lower() == "true",
+                "configuration": request.app.state.configuration}
 
     @app.post("/ask", response_model=Answer)
     def ask(body: Question, request: Request):
+        if GENERATION_PROVIDER in {"openai", "groq"} and os.getenv("ALLOW_PAID_CALLS", "").lower() != "true":
+            raise HTTPException(503, "Les appels au modèle payant sont désactivés pour préserver le crédit.")
         if not request.app.state.generation_lock.acquire(blocking=False):
             raise HTTPException(429, "Une question est déjà en cours. Réessayez après sa réponse.", headers={"Retry-After": "5"})
         started = perf_counter()
@@ -212,7 +219,7 @@ def create_app(retriever=None, *, use_qdrant: bool | None = None) -> FastAPI:
             except ConnectionError as exc:
                 raise HTTPException(503, str(exc)) from exc
             except ValueError as exc:
-                raise HTTPException(502, "Le modèle local a renvoyé une réponse illisible.") from exc
+                raise HTTPException(502, "Le service de génération a renvoyé une réponse illisible.") from exc
             finished = perf_counter()
             answer.retrieval_queries = queries
             answer.configuration = request.app.state.configuration
