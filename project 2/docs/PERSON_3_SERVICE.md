@@ -121,11 +121,11 @@ Semantic support and independent legal correctness remain separate judgments.
 
 ## Credit protection and deployment
 
-Paid Groq requests are blocked unless `ALLOW_PAID_CALLS=true`, even when a key
-exists. There is no automatic paid fallback. The professor's provider is not
-yet identified, so no additional gateway adapter or paid experiment is enabled.
-Before enabling paid calls, agree on the provider and a run allowance; the flag
-alone is not a dollar spending cap. Existing tests use mocked HTTP only.
+Paid Groq and OpenAI requests are blocked unless `ALLOW_PAID_CALLS=true`, even
+when a key exists. There is no automatic paid fallback. Groq uses
+`GROQ_API_KEY`; OpenAI uses `OPENAI_API_KEY` and `OPENAI_MODEL` (default
+`gpt-6-luna`). Never commit either key. The flag enables paid calls but is not a
+dollar spending cap. Existing tests use mocked HTTP only.
 
 An optional `DEMO_PASSWORD` protects the interface, `/ask` and API docs with
 HTTP Basic authentication (username `librarian`); `/health` remains a free

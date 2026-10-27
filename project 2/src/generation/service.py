@@ -17,9 +17,20 @@ from models.retrieval import RetrievalResult
 GENERATION_PROVIDER = os.getenv("GENERATION_PROVIDER", "ollama").strip().lower()
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3.5:9b")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
-MODEL = GROQ_MODEL if GENERATION_PROVIDER == "groq" else OLLAMA_MODEL
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+OPENAI_SERVICE_TIER = os.getenv("OPENAI_SERVICE_TIER", "default").strip().lower()
+if OPENAI_SERVICE_TIER not in {"default", "flex"}:
+    raise ValueError("OPENAI_SERVICE_TIER must be 'default' or 'flex'.")
+GENERATION_CONTEXT_CHARS = int(os.getenv("GENERATION_CONTEXT_CHARS", "12000"))
+if GENERATION_CONTEXT_CHARS < 1:
+    raise ValueError("GENERATION_CONTEXT_CHARS must be a positive integer.")
+MODEL = {
+    "groq": GROQ_MODEL,
+    "openai": OPENAI_MODEL,
+}.get(GENERATION_PROVIDER, OLLAMA_MODEL)
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
 GROQ_CHAT_COMPLETIONS_URL = "https://api.groq.com/openai/v1/chat/completions"
+OPENAI_CHAT_COMPLETIONS_URL = "https://api.openai.com/v1/chat/completions"
 LOGGER = logging.getLogger(__name__)
 # Keep the provider's strict JSON Schema within Groq's supported subset. These
 # bounds remain enforced by Draft/Pydantic after the response is received.
@@ -164,12 +175,22 @@ def _groq_request_diagnostic(payload: dict) -> dict:
         "stream": payload.get("stream"),
         "temperature": payload.get("temperature"),
         "max_completion_tokens": payload.get("max_completion_tokens"),
+        "service_tier": payload.get("service_tier"),
     }
 
 
 def _log_groq_parse_error(phase: str, exc: Exception, description: str) -> None:
     LOGGER.error(json.dumps({
         "event": "groq_parse_error",
+        "phase": phase,
+        "exception_type": type(exc).__name__,
+        "description": description,
+    }))
+
+
+def _log_openai_parse_error(phase: str, exc: Exception, description: str) -> None:
+    LOGGER.error(json.dumps({
+        "event": "openai_parse_error",
         "phase": phase,
         "exception_type": type(exc).__name__,
         "description": description,
@@ -282,6 +303,82 @@ def call_groq(payload: dict) -> dict:
     }
 
 
+def call_openai(payload: dict) -> dict:
+    """Call OpenAI Chat Completions and adapt its reply to the internal format."""
+    if os.getenv("ALLOW_PAID_CALLS", "").lower() != "true":
+        raise ConnectionError("Les appels API payants sont dÃ©sactivÃ©s. Utilisez le modÃ¨le local.")
+    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        raise ConnectionError("OPENAI_API_KEY is required when GENERATION_PROVIDER=openai.")
+
+    request = urllib.request.Request(
+        OPENAI_CHAT_COMPLETIONS_URL,
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=90) as response:
+            result = json.load(response)
+    except urllib.error.HTTPError as exc:
+        status = exc.code
+        LOGGER.error(json.dumps({
+            "event": "openai_http_error",
+            "status": status,
+            "request": {
+                **_groq_request_diagnostic(payload),
+                "endpoint": OPENAI_CHAT_COMPLETIONS_URL,
+            },
+            "error_body": _groq_error_diagnostic(exc),
+        }))
+        if status == 429 or status >= 500:
+            raise ConnectionError(f"OpenAI API temporarily unavailable (HTTP {status}).") from None
+        raise ValueError(f"OpenAI API rejected the request (HTTP {status}).") from None
+    except TimeoutError as exc:
+        raise TimeoutError("OpenAI generation timed out.") from exc
+    except urllib.error.URLError as exc:
+        if isinstance(exc.reason, TimeoutError):
+            raise TimeoutError("OpenAI generation timed out.") from exc
+        raise ConnectionError("OpenAI API is unavailable.") from None
+    except OSError as exc:
+        raise ConnectionError("OpenAI API is unavailable.") from None
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        _log_openai_parse_error("response_json", exc, "Response body was not valid JSON.")
+        raise ValueError("OpenAI API returned malformed JSON.") from exc
+
+    try:
+        choice = result["choices"][0]
+        message = choice["message"]
+        content = message["content"]
+        finish_reason = choice["finish_reason"]
+        usage = result.get("usage") or {}
+        if not isinstance(content, str) or not isinstance(finish_reason, str) or not isinstance(usage, dict):
+            raise TypeError
+        prompt_tokens = usage.get("prompt_tokens")
+        completion_tokens = usage.get("completion_tokens")
+        if any(value is not None and (not isinstance(value, int) or isinstance(value, bool))
+               for value in (prompt_tokens, completion_tokens)):
+            raise TypeError
+    except (KeyError, IndexError, TypeError) as exc:
+        _log_openai_parse_error(
+            "completion_envelope", exc,
+            "Required chat completion fields were missing or invalid.",
+        )
+        raise ValueError("OpenAI API returned an incomplete chat completion.") from exc
+
+    return {
+        "done": True,
+        "done_reason": "length" if finish_reason == "length" else finish_reason,
+        "message": {"content": content},
+        "prompt_eval_count": prompt_tokens,
+        "eval_count": completion_tokens,
+        "service_tier": result.get("service_tier"),
+    }
+
+
 def _groq_schema(schema: dict) -> dict:
     """Remove schema bounds Groq strict mode does not support.
 
@@ -301,7 +398,7 @@ def _groq_schema(schema: dict) -> dict:
 
 
 def generate_answer(question: str, passages: list[RetrievalResult], *, search_queries: list[str] | None = None) -> Answer:
-    budget = 12000
+    budget = GENERATION_CONTEXT_CHARS
     supplied = []
     for passage in passages:
         if budget <= 0:
@@ -353,6 +450,24 @@ def generate_answer(question: str, passages: list[RetrievalResult], *, search_qu
             "temperature": 0,
             "max_completion_tokens": 640,
         })
+    elif GENERATION_PROVIDER == "openai":
+        result = call_openai({
+            "model": OPENAI_MODEL,
+            "messages": messages,
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "generation_draft",
+                    "strict": True,
+                    "schema": schema,
+                },
+            },
+            "stream": False,
+            "temperature": 0,
+            "reasoning_effort": "none",
+            "max_completion_tokens": 640,
+            "service_tier": OPENAI_SERVICE_TIER,
+        })
     else:
         raise ValueError(f"Unsupported generation provider: {GENERATION_PROVIDER!r}.")
     try:
@@ -368,10 +483,9 @@ def generate_answer(question: str, passages: list[RetrievalResult], *, search_qu
         try:
             draft = Draft.model_validate_json(content)
         except (ValueError, TypeError) as exc:
-            if GENERATION_PROVIDER == "groq":
-                _log_groq_parse_error(
-                    "draft_json", exc, "Assistant content did not satisfy the local Draft schema."
-                )
+            if GENERATION_PROVIDER in {"groq", "openai"}:
+                log_error = _log_openai_parse_error if GENERATION_PROVIDER == "openai" else _log_groq_parse_error
+                log_error("draft_json", exc, "Assistant content did not satisfy the local Draft schema.")
             raise
         if draft.abstain:
             if draft.claims or not draft.reason:
@@ -397,4 +511,9 @@ def generate_answer(question: str, passages: list[RetrievalResult], *, search_qu
         answer = abstention("invalid_output", "Je ne peux pas fournir une réponse dont les citations sont vérifiables. Veuillez reformuler la question.")
     if isinstance(result, dict):
         answer.usage = {"prompt_tokens": result.get("prompt_eval_count"), "completion_tokens": result.get("eval_count")}
+        if GENERATION_PROVIDER == "openai":
+            answer.configuration = {
+                "openai_service_tier_requested": OPENAI_SERVICE_TIER,
+                "openai_service_tier_actual": result.get("service_tier"),
+            }
     return answer
