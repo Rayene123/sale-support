@@ -7,16 +7,19 @@ the cited quotation occurs in the canonical corpus text.
 from __future__ import annotations
 
 import argparse
+import base64
 from datetime import datetime, timezone
 from hashlib import sha256
 import json
 import math
+import os
 import re
 import statistics
 import sys
 import time
 import urllib.error
 import urllib.request
+from urllib.parse import urlsplit
 from pathlib import Path
 from typing import Any
 
@@ -249,8 +252,14 @@ def score_reviews(items: list[dict], reviews: list[dict]) -> dict:
 def run(api_url: str, questions: list[dict[str, Any]], corpus: dict[str, dict[str, Any]], timeout: float,
         checkpoint: Path | None = None) -> list[dict[str, Any]]:
     rows = []
+    headers = {"Content-Type": "application/json"}
+    if password := os.getenv("DEMO_PASSWORD", ""):
+        target = urlsplit(api_url)
+        if target.scheme != "https" and not (target.scheme == "http" and target.hostname in {"127.0.0.1", "localhost"}):
+            raise ValueError("demo credentials require HTTPS outside localhost")
+        headers["Authorization"] = "Basic " + base64.b64encode(f"librarian:{password}".encode()).decode()
     for question in questions:
-        req = urllib.request.Request(api_url.rstrip("/") + "/ask", data=json.dumps({"question": question["question"]}, ensure_ascii=False).encode(), headers={"Content-Type": "application/json"}, method="POST")
+        req = urllib.request.Request(api_url.rstrip("/") + "/ask", data=json.dumps({"question": question["question"]}, ensure_ascii=False).encode(), headers=headers, method="POST")
         start = time.perf_counter()
         payload = None
         try:
@@ -289,6 +298,9 @@ def run_metadata(questions_path: str | Path, corpus_path: str | Path, api_url: s
 
 
 def main(argv: list[str] | None = None) -> int:
+    from dotenv import load_dotenv
+    load_dotenv(PROJECT_DIR / ".env")
+    load_dotenv(PROJECT_DIR.parent / ".env")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--questions", default=str(PROJECT_DIR / "data/eval/questions.jsonl"))
     parser.add_argument("--corpus", default=str(PROJECT_DIR / "data/processed/corpus.jsonl"))
