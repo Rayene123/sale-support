@@ -32,6 +32,15 @@ def draft(**changes):
 
 
 class GenerationTests(unittest.TestCase):
+    def setUp(self):
+        self.enterContext(patch.dict(os.environ, {"ALLOW_PAID_CALLS": "true"}))
+
+    def test_paid_calls_disabled_even_when_a_key_is_present(self):
+        with patch.dict(os.environ, {"ALLOW_PAID_CALLS": "false", "GROQ_API_KEY": "test-only-key"}), patch("generation.service.urllib.request.urlopen") as http:
+            with self.assertRaisesRegex(ConnectionError, "désactivés"):
+                call_groq({})
+        http.assert_not_called()
+
     def generate(self, response, passages=None):
         with patch("generation.service.call_ollama", return_value=response) as model:
             answer = generate_answer("Combien de temps conserver les livres ?", passages if passages is not None else [PASSAGE])

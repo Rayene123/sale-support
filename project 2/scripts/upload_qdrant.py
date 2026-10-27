@@ -29,8 +29,8 @@ def _load_dotenv() -> None:
         from dotenv import load_dotenv
     except ImportError:
         return
+    load_dotenv(PROJECT_DIR / ".env")
     load_dotenv(PROJECT_DIR.parent / ".env")
-    load_dotenv()
 
 
 def main() -> int:

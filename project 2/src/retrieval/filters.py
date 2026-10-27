@@ -46,6 +46,10 @@ def filter_chunks(
             "sous_section": chunk.heading_path[4] if len(chunk.heading_path) > 4 else None,
             "pdf_page": chunk.pdf_page,
         }
-        if all(values.get(key) == expected for key, expected in filters.items()):
+        if all(
+            values.get(key) in expected if isinstance(expected, (list, tuple, set, frozenset))
+            else values.get(key) == expected
+            for key, expected in filters.items()
+        ):
             matches.append(chunk)
     return matches

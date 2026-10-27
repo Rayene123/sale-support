@@ -15,26 +15,30 @@
 </style>
 <main>
   <header><span class="label">Recherche documentaire · en français</span><h1>The Librarian</h1><p>Interrogez le Code de commerce tunisien et retrouvez les passages cités.</p><p class="muted">Outil pédagogique local · corpus français, édition 2024. Les sources disponibles ne garantissent pas le droit actuel.</p></header>
-  <form id="form"><label for="question">Votre question</label><textarea id="question" maxlength="2000" required placeholder="Combien de temps faut-il conserver les livres de commerce ?"></textarea><button id="submit">Rechercher une réponse</button></form>
+  <form id="form"><label for="question">Votre question</label><textarea id="question" maxlength="2000" required placeholder="Combien de temps faut-il conserver les livres de commerce ?"></textarea><button id="submit">Rechercher une réponse</button> <button type="button" id="reset">Nouvelle conversation</button></form>
   <p id="status" role="status" aria-live="polite"></p>
   <section id="result" hidden><h2 id="heading">Réponse</h2><p id="answer"></p><div id="sources"><h3>Sources citées</h3><ol id="citations"></ol></div><p id="timing" class="muted"></p></section>
 </main>
 <script>
 const $=id=>document.getElementById(id);
+let history=[];
+$('reset').addEventListener('click',()=>{history=[];$('question').value='';$('result').hidden=true;$('status').textContent='Nouvelle conversation.';$('question').focus();});
 $('form').addEventListener('submit',async event=>{
   event.preventDefault();const question=$('question').value.trim();if(!question){$('question').focus();return;}
-  $('submit').disabled=true;$('result').hidden=true;$('status').textContent='Recherche en cours… Le premier chargement du modèle peut prendre un peu plus de temps.';
+  $('submit').disabled=true;$('reset').disabled=true;$('question').readOnly=true;$('result').hidden=true;$('status').textContent='Recherche en cours… Le premier chargement du modèle peut prendre un peu plus de temps.';
   try{
-    const response=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question})});
+    const response=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question,history})});
     const data=await response.json();if(!response.ok)throw new Error(typeof data.detail==='string'?data.detail:'La question ne peut pas être traitée. Vérifiez sa longueur.');
-    $('heading').textContent=data.reason==='invalid_output'?'Réponse non validée':data.abstain?'Informations insuffisantes':'Réponse';$('answer').textContent=data.answer_fr;$('citations').replaceChildren();
+    $('heading').textContent=data.reason==='clarification'?'Précision nécessaire':data.reason==='invalid_output'?'Réponse non validée':data.abstain?'Informations insuffisantes':'Réponse';$('answer').textContent=data.answer_fr;$('citations').replaceChildren();
+    history=[...history,{role:'user',content:question},{role:'assistant',content:data.answer_fr.slice(0,1000)}].slice(-4);
+    while(history.reduce((n,t)=>n+t.content.length,0)>6000)history.shift();
     for(const citation of data.citations){const item=document.createElement('li'),link=document.createElement('a'),quote=document.createElement('blockquote');
       link.textContent=`${citation.article} · page PDF ${citation.pdf_page}`;link.href=citation.source_url;link.target='_blank';link.rel='noopener noreferrer';
       quote.textContent=citation.quote;item.append(link,quote);$('citations').append(item);}
     $('sources').hidden=!data.citations.length;$('timing').textContent=`Réponse en ${(data.timings_ms.total/1000).toFixed(1)} s`;
     $('result').hidden=false;$('status').textContent='';
   }catch(error){$('status').textContent=error instanceof TypeError?'Le service local est inaccessible. Vérifiez qu’il est démarré.':error.message;}
-  finally{$('submit').disabled=false;}
+  finally{$('submit').disabled=false;$('reset').disabled=false;$('question').readOnly=false;}
 });
 </script>
 </html>

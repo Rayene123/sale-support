@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from dataclasses import asdict
+from hashlib import sha256
+import json
 
 from indexing.chunking import ArticleChunk
 from models.retrieval import RetrievalResult
@@ -25,6 +28,10 @@ class RetrievalService:
         semantic_retriever: SemanticSearch | None = None,
     ) -> None:
         self._chunks = tuple(chunks)
+        self.index_sha256 = sha256(json.dumps(
+            [asdict(c) for c in sorted(self._chunks, key=lambda c: c.chunk_id)],
+            ensure_ascii=False, sort_keys=True,
+        ).encode()).hexdigest()
         self._embedder = embedder
         self._bm25 = BM25Retriever(self._chunks)
         self._external_semantic = semantic_retriever is not None
@@ -37,7 +44,7 @@ class RetrievalService:
         self._hybrid = (
             HybridRetriever(
                 self._chunks,
-                semantic_retriever=semantic_retriever,
+                semantic_retriever=self._semantic,
             )
             if self._semantic is not None
             else None

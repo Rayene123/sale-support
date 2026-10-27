@@ -63,16 +63,19 @@ class Citation(Claim):
     article: str
     pdf_page: int
     source_url: str
+    heading_path: tuple[str, ...] = ()
 
 
 class Answer(BaseModel):
     answer_fr: str
     abstain: bool
     citations: list[Citation] = Field(default_factory=list)
-    reason: Literal["no_evidence", "insufficient_evidence", "invalid_output"] | None = None
+    reason: Literal["no_evidence", "insufficient_evidence", "invalid_output", "clarification", "below_threshold"] | None = None
     model: str = MODEL
     timings_ms: dict[str, float] = Field(default_factory=dict)
     usage: dict[str, int | None] = Field(default_factory=dict)
+    retrieval_queries: list[str] = Field(default_factory=list)
+    configuration: dict = Field(default_factory=dict)
 
 
 def _groq_error_diagnostic(error: urllib.error.HTTPError) -> dict:
@@ -177,7 +180,7 @@ def abstention(reason: str, message: str) -> Answer:
     return Answer(answer_fr=message, abstain=True, reason=reason)
 
 
-def call_ollama(payload: dict) -> dict:
+def call_ollama(payload: dict, *, timeout: float = 90) -> dict:
     if GENERATION_PROVIDER != "ollama":
         raise RuntimeError(
             f"Unsupported generation provider: {GENERATION_PROVIDER!r}; "
@@ -189,7 +192,7 @@ def call_ollama(payload: dict) -> dict:
         headers={"Content-Type": "application/json"},
     )
     try:
-        with urllib.request.urlopen(request, timeout=90) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
             return json.load(response)
     except TimeoutError as exc:
         raise TimeoutError("Le modèle local n'a pas répondu à temps.") from exc
@@ -201,6 +204,8 @@ def call_ollama(payload: dict) -> dict:
 
 def call_groq(payload: dict) -> dict:
     """Call Groq and adapt its OpenAI-compatible reply to the internal format."""
+    if os.getenv("ALLOW_PAID_CALLS", "").lower() != "true":
+        raise ConnectionError("Les appels API payants sont désactivés. Utilisez le modèle local.")
     api_key = os.environ.get("GROQ_API_KEY", "").strip()
     if not api_key:
         raise ConnectionError("GROQ_API_KEY is required when GENERATION_PROVIDER=groq.")
@@ -295,7 +300,7 @@ def _groq_schema(schema: dict) -> dict:
     return schema
 
 
-def generate_answer(question: str, passages: list[RetrievalResult]) -> Answer:
+def generate_answer(question: str, passages: list[RetrievalResult], *, search_queries: list[str] | None = None) -> Answer:
     budget = 12000
     supplied = []
     for passage in passages:
@@ -312,7 +317,9 @@ def generate_answer(question: str, passages: list[RetrievalResult]) -> Answer:
         {
             "role": "user",
             "content": json.dumps(
-                {"QUESTION": question, "PASSAGES": [p.to_dict() for p in supplied]},
+                {"QUESTION": question, "RECHERCHE": search_queries or [question],
+                 "PASSAGES": [{"chunk_id": p.chunk_id, "article": p.article,
+                               "heading_path": p.heading_path, "text": p.text} for p in supplied]},
                 ensure_ascii=False,
             ),
         },
@@ -380,7 +387,7 @@ def generate_answer(question: str, passages: list[RetrievalResult]) -> Answer:
                 if " ".join(claim.quote.split()) not in " ".join(source.text.split()):
                     raise ValueError("Quote is not in the supplied source")
                 citations.append(Citation(**claim.model_dump(), **{
-                    key: getattr(source, key) for key in ("record_id", "article", "pdf_page", "source_url")
+                    key: getattr(source, key) for key in ("record_id", "article", "pdf_page", "source_url", "heading_path")
                 }))
             answer = Answer(
                 answer_fr="\n".join(f"{c.text} [{i}]" for i, c in enumerate(citations, 1)),

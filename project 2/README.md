@@ -42,6 +42,9 @@ ollama pull qwen3.5:9b
 Start the service:
 
 ```powershell
+$env:GENERATION_PROVIDER="ollama"
+$env:OLLAMA_MODEL="qwen3.5:9b"
+$env:ALLOW_PAID_CALLS="false"
 .\.venv\Scripts\python.exe -m uvicorn api.app:app --app-dir "project 2/src" --host 127.0.0.1 --port 8002
 ```
 
@@ -54,9 +57,14 @@ Invoke-RestMethod http://127.0.0.1:8002/ask -Method Post `
 ```
 
 The response contains `answer_fr`, `abstain`, `reason`, `citations`,
-`timings_ms`, and `usage`. No API key is required for the local Ollama mode.
-For a hosted provider, set `GENERATION_PROVIDER=groq` and
-`GROQ_API_KEY`; never commit the key.
+`timings_ms`, `usage`, resolved `retrieval_queries` and the actual runtime
+`configuration`. Optional bounded conversation history resolves follow-up
+questions; missing context produces a request for clarification.
+No API key is required for the local Ollama mode. Paid requests are blocked
+by default. The existing Groq adapter requires `GENERATION_PROVIDER=groq`,
+`GROQ_API_KEY` and explicit `ALLOW_PAID_CALLS=true`; never commit the key.
+See [Persona 3 service](docs/PERSON_3_SERVICE.md) for calibration, claim-review
+exports and demo access protection.
 
 When `project 2/.env` contains the Qdrant variables, the default API backend
 loads chunks from Qdrant, runs BM25 locally over those payloads, and combines
@@ -142,12 +150,12 @@ feedback evidence.
 
 ## Deployment
 
-The application is deployable as a single web process. The local default
-requires Ollama on the same host. A hosted deployment should use the Groq
-provider (or a private Ollama host), set `GENERATION_PROVIDER`, `GROQ_API_KEY`,
-and `OLLAMA_MODEL`/`GROQ_MODEL` as appropriate, and expose only `/`, `/ask`,
-`/health`, and `/docs`. The repository does not claim a public URL because no
-hosting account or secret was supplied in this workspace.
+The application runs as a single web process and needs access to its private
+Ollama host. Docker Desktop uses `host.docker.internal`; on Linux, configure
+an explicit private Ollama address or host-gateway mapping. Protect an external
+demo with HTTPS and `DEMO_PASSWORD`. Paid providers remain opt-in; the existing
+Groq adapter requires the explicit enable flag described above. The repository
+does not claim a verified public deployment; no hosting account was supplied.
 
 Before publishing a URL, run the fixed generation evaluation against the
 deployed endpoint and record the URL, model, configuration, and timestamp in

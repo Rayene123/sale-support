@@ -23,8 +23,8 @@ class ApiTests(unittest.TestCase):
         body = response.json()
         self.assertFalse(body["abstain"])
         self.assertEqual(body["citations"][0]["pdf_page"], 8)
-        self.assertEqual(set(body["timings_ms"]), {"retrieval", "generation", "total"})
-        self.retriever.retrieve.assert_called_once_with("Conserver les livres ?", method="bm25", top_k=10)
+        self.assertEqual(set(body["timings_ms"]), {"rewrite", "retrieval", "generation", "total"})
+        self.retriever.retrieve.assert_called_once_with("Pendant combien de temps faut-il conserver les livres de commerce ?", method="bm25", top_k=10)
 
     def test_real_retrieval_covers_short_books_question(self):
         with TestClient(create_app(use_qdrant=False)) as client, patch("generation.service.call_ollama", return_value=draft()):
@@ -41,7 +41,7 @@ class ApiTests(unittest.TestCase):
     def test_invalid_citation_is_returned_as_abstention(self):
         bad = draft(claims=[{"text": "Faux délai.", "chunk_id": "invented", "quote": "invented"}])
         with patch("generation.service.call_ollama", return_value=bad):
-            response = self.client.post("/ask", json={"question": "Quel délai ?"})
+            response = self.client.post("/ask", json={"question": "Quel délai de conservation des livres ?"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["reason"], "invalid_output")
         self.assertEqual(response.json()["citations"], [])
@@ -57,7 +57,7 @@ class ApiTests(unittest.TestCase):
         weak = PASSAGE.__class__(**{**PASSAGE.__dict__, "score": 0.2})
         strong = PASSAGE.__class__(**{**PASSAGE.__dict__, "score": 1.2})
         self.retriever.retrieve.return_value = [weak, strong]
-        with patch("api.app.MIN_RETRIEVAL_SCORE", 1.0), patch(
+        with patch.object(self.app.state, "threshold", 1.0), patch(
             "generation.service.call_ollama", return_value=draft()
         ):
             response = self.client.post("/ask", json={"question": "Test"})

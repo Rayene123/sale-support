@@ -47,11 +47,97 @@ python -m uvicorn api.app:app --app-dir "project 2/src" --host 127.0.0.1 --port 
 
 Open `http://127.0.0.1:8002` for the French interface, or `/docs` for the API.
 `POST /ask` accepts `{"question":"Combien de temps conserver les livres de commerce ?"}`.
+Optional `history` holds up to four `{role: "user"|"assistant", content: "..."}`
+turns, each at most 2000 characters and 6000 characters combined. The browser
+keeps this context only in memory and offers a new-conversation button.
 It returns `answer_fr`, `abstain`, `citations`, `reason`, `model`, `timings_ms`
 and `usage`. Each answer point is numbered `[1]`, `[2]`, etc., corresponding to
 its citation, which includes the point text, chunk/record IDs, article, exact
 quote, PDF page and publisher URL. URLs come from the corpus; a publisher
 landing page is not a direct link to the locally supplied 2024 PDF.
+
+The response also includes `retrieval_queries` and a non-secret `configuration`
+snapshot: actual backend/method/model, score threshold, prompt/corpus/source
+hashes and revision. These hashes are captured by the running server at startup.
+`/health` exposes the same snapshot without making an inference request.
+
+## Question preparation
+
+Clear standalone questions follow the direct search path. The short books
+retention phrase has a deterministic expansion. Vague follow-ups without
+context return `reason="clarification"`, without retrieval or generation.
+Contextual follow-ups and multi-part questions can make one bounded local
+Ollama rewrite call (20-second timeout, at most three queries). Numbers and
+explicit negation/exception words are checked; intent preservation still needs
+human evaluation. A failed ambiguous rewrite requests clarification. A failed
+standalone multi-part rewrite retains the original question.
+
+Search results are merged round-robin and deduplicated, retaining at most ten
+chunks. Original user wording and resolved search queries remain distinct in
+the generation prompt. `QUESTION_REWRITING=false` provides the direct baseline.
+Rewrite time and token usage are recorded separately and included in totals.
+
+## Development calibration
+
+`data/eval/person3_dev.jsonl` is a separate, authored 24-case development
+fixture (12 answerable, 12 unanswerable), not expert-approved legal evaluation.
+The calibration command rejects exact overlap with the canonical question set:
+
+```powershell
+python "project 2/eval/calibrate.py" --backend local --output calibration-local.json
+```
+
+Use `--backend qdrant` with the actual configured collection for production
+hybrid calibration. The candidate search minimizes unanswerable admission
+while keeping at least 90% answerable admission on this small development set.
+This measures a retrieval gate, not generated-answer correctness. Validate the
+selected rule on development generation before freezing the final evaluation.
+BM25, cosine and RRF scales are not interchangeable confidence probabilities.
+
+Set `CALIBRATION_FILE` to the saved file to apply its threshold. Startup rejects
+backend/method/corpus/index-payload mismatches or invalid thresholds. The index
+fingerprint covers the actual loaded chunks, including Qdrant payloads; the
+separate corpus fingerprint describes the committed source file. A fully filtered result
+returns `reason="below_threshold"` without a generation call. Without a file,
+`MIN_RETRIEVAL_SCORE` remains available and defaults to zero (uncalibrated).
+
+## Semantic support review
+
+The existing evaluation harness exports exact generated claims and full cited
+articles for human support review:
+
+```powershell
+python "project 2/eval/generation.py" --api-url http://127.0.0.1:8002 --output run.json --review-export claims.jsonl
+python "project 2/eval/generation.py" --score-existing run.json --reviews reviewed-claims.jsonl --output reviewed-run.json
+```
+
+Review labels are `supported`, `partially_supported`, `unsupported`, or `unclear`;
+a reviewer identifier, reason and exact claim fingerprint are required. Blank
+exported labels are pending, never automatic approvals. Different reviewers
+may label one claim; disagreements stay unclear rather than being silently
+resolved. Reports show reviewed/unreviewed counts, disagreement and strict
+support rate. Rescoring makes no API calls and checks question/corpus hashes.
+Semantic support and independent legal correctness remain separate judgments.
+
+## Credit protection and deployment
+
+Paid Groq requests are blocked unless `ALLOW_PAID_CALLS=true`, even when a key
+exists. There is no automatic paid fallback. The professor's provider is not
+yet identified, so no additional gateway adapter or paid experiment is enabled.
+Before enabling paid calls, agree on the provider and a run allowance; the flag
+alone is not a dollar spending cap. Existing tests use mocked HTTP only.
+
+An optional `DEMO_PASSWORD` protects the interface, `/ask` and API docs with
+HTTP Basic authentication (username `librarian`); `/health` remains a free
+liveness/configuration endpoint. Use HTTPS for an external demo. Keep the
+provider key and Ollama private. Retrieval outages return a recoverable 503;
+malformed retrieval payloads return 502 rather than an unsupported-answer claim.
+
+The Docker image installs CPU-only PyTorch for the embedding model and defaults
+to paid calls disabled. Build from `project 2/`; pass environment configuration
+at runtime, never bake keys into the image. A hosting account, permitted corpus
+publication scope, real Qdrant configuration and deployed evaluation are still
+required before claiming a verified public production deployment.
 
 Example response, abbreviated to the answer and one citation:
 

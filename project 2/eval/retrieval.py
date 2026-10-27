@@ -285,12 +285,14 @@ def _build_retrievers(
 
     chunks = chunk_records(load_corpus(corpus_path))
     if backend == "qdrant" or method.startswith("qdrant_"):
+        if method not in {"qdrant_hybrid", "qdrant_hybrid_reranker", "vector", "hybrid", "hybrid_reranker"}:
+            raise ValueError("Qdrant backend requires vector, hybrid or hybrid_reranker")
         from retrieval.hybrid import HybridRetriever
         from retrieval.qdrant import retriever_from_env
 
         qdrant = retriever_from_env()
         qdrant_chunks = qdrant.load_chunks()
-        if method in {"qdrant_hybrid", "qdrant_hybrid_reranker"}:
+        if method in {"qdrant_hybrid", "qdrant_hybrid_reranker", "hybrid", "hybrid_reranker"}:
             hybrid = HybridRetriever(
                 qdrant_chunks,
                 semantic_retriever=qdrant,
@@ -298,7 +300,7 @@ def _build_retrievers(
             return [(
                 method.removeprefix("qdrant_"),
                 hybrid,
-                method == "qdrant_hybrid_reranker",
+                method.endswith("hybrid_reranker"),
             )]
         return [("qdrant_vector", qdrant, False)]
     if method == "bm25":
@@ -348,8 +350,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         from dotenv import load_dotenv
 
+        load_dotenv(PROJECT_DIR / ".env")
         load_dotenv(PROJECT_DIR.parent / ".env")
-        load_dotenv()
     except ImportError:
         pass
     parser = argparse.ArgumentParser(description=__doc__)
