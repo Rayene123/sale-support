@@ -21,7 +21,7 @@ PROJECT = Path(__file__).resolve().parents[2]
 load_dotenv(PROJECT / ".env")
 load_dotenv(PROJECT.parent / ".env")
 
-from generation.service import Answer, MODEL, GENERATION_PROVIDER, SYSTEM, abstention, generate_answer
+from generation.service import Answer, MODEL, GENERATION_PROVIDER, GENERATION_CONTEXT_CHARS, OPENAI_SERVICE_TIER, SYSTEM, abstention, generate_answer
 from generation.questions import prepare_question
 from indexing.chunking import chunk_records
 from indexing.corpus import load_corpus
@@ -128,6 +128,7 @@ def create_app(retriever=None, *, use_qdrant: bool | None = None) -> FastAPI:
         app.state.threshold = threshold
         app.state.configuration = {
             "generation_provider": GENERATION_PROVIDER, "model": MODEL,
+            "openai_service_tier_requested": OPENAI_SERVICE_TIER if GENERATION_PROVIDER == "openai" else None,
             "reasoning_effort": os.getenv("OPENAI_REASONING_EFFORT", "none") if GENERATION_PROVIDER == "openai" else None,
             "retrieval_backend": backend, "retrieval_method": method,
             "embedding_revision": os.getenv("EMBEDDING_REVISION") if backend == "qdrant" else None,
@@ -140,7 +141,7 @@ def create_app(retriever=None, *, use_qdrant: bool | None = None) -> FastAPI:
             "source_sha256": {str(p.relative_to(PROJECT)).replace("\\", "/"): hashlib.sha256(p.read_bytes()).hexdigest()
                               for p in sorted((PROJECT / "src").rglob("*.py"))},
             "rewrite": os.getenv("QUESTION_REWRITING", "true").lower() == "true",
-            "top_k": 10, "context_chars": 12000, "max_output_tokens": 640,
+            "top_k": 10, "context_chars": GENERATION_CONTEXT_CHARS, "max_output_tokens": 640,
         }
         yield
 
@@ -222,7 +223,9 @@ def create_app(retriever=None, *, use_qdrant: bool | None = None) -> FastAPI:
                 raise HTTPException(502, "Le service de génération a renvoyé une réponse illisible.") from exc
             finished = perf_counter()
             answer.retrieval_queries = queries
-            answer.configuration = request.app.state.configuration
+            response_configuration = dict(request.app.state.configuration)
+            response_configuration.update(answer.configuration)
+            answer.configuration = response_configuration
             answer.usage.setdefault("prompt_tokens", 0)
             answer.usage.setdefault("completion_tokens", 0)
             answer.usage.update(rewrite_usage)

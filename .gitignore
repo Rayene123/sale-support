@@ -18,3 +18,4 @@ project 1/judge/.env
 project 2/data/raw/*.pdf
 project 2/data/indexes/
 project 2/data/eval/retrieval_results.json
+project 2/docs/PROJECT_FINAL_REPORT.md

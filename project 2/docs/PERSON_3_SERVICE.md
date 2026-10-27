@@ -152,7 +152,10 @@ exists. There is no automatic paid fallback. Identify a provider only after its
 credentials and endpoint have been verified; never send a key to a guessed
 third-party gateway.
 Before enabling paid calls, agree on the provider and a run allowance; the flag
-alone is not a dollar spending cap. Existing tests use mocked HTTP only.
+alone is not a dollar spending cap. Groq uses `GROQ_API_KEY`. OpenAI uses
+`OPENAI_API_KEY`; neither key belongs in source control. The optional OpenAI
+SQLite ledger limits calls made through that ledger, not other applications
+using the same account. Existing automated provider tests use mocked HTTP.
 
 An optional `DEMO_PASSWORD` protects the interface, `/ask` and API docs with
 HTTP Basic authentication (username `librarian`); `/health` remains a free
