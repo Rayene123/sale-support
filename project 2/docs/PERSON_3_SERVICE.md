@@ -66,8 +66,9 @@ hashes and revision. These hashes are captured by the running server at startup.
 Clear standalone questions follow the direct search path. The short books
 retention phrase has a deterministic expansion. Vague follow-ups without
 context return `reason="clarification"`, without retrieval or generation.
-Contextual follow-ups and multi-part questions can make one bounded local
-Ollama rewrite call (20-second timeout, at most three queries). Numbers and
+Contextual follow-ups and multi-part questions can make one bounded rewrite
+call (OpenAI when selected, otherwise local Ollama; 20-second timeout, at most
+three queries). Numbers and
 explicit negation/exception words are checked; intent preservation still needs
 human evaluation. A failed ambiguous rewrite requests clarification. A failed
 standalone multi-part rewrite retains the original question.
@@ -121,11 +122,40 @@ Semantic support and independent legal correctness remain separate judgments.
 
 ## Credit protection and deployment
 
-Paid Groq and OpenAI requests are blocked unless `ALLOW_PAID_CALLS=true`, even
-when a key exists. There is no automatic paid fallback. Groq uses
-`GROQ_API_KEY`; OpenAI uses `OPENAI_API_KEY` and `OPENAI_MODEL` (default
-`gpt-6-luna`). Never commit either key. The flag enables paid calls but is not a
-dollar spending cap. Existing tests use mocked HTTP only.
+OpenAI is available with `GENERATION_PROVIDER=openai`, `OPENAI_API_KEY`,
+`OPENAI_MODEL=gpt-6-luna` and explicit `ALLOW_PAID_CALLS=true` in the ignored
+`project 2/.env`. It uses the Responses API with strict structured output,
+`store=false`, `OPENAI_REASONING_EFFORT=none`, a 640-token generation limit
+and the same local citation validator. Contextual rewriting uses that provider
+with a 256-token limit and a 20-second timeout; it does not require Ollama.
+Incomplete/refused/malformed output fails closed. Provider errors expose only
+safe status messages, with no automatic retries or paid fallback.
+
+The default provider remains Ollama. API credentials and Qdrant credentials
+are separate. A successful `/models` listing does not prove inference permission,
+remaining credit or previous usage. Output limits bound response size; they
+are not an account-wide dollar cap. Track actual token usage and consult the
+professor's account dashboard for the shared balance. Model prices and access
+must be checked before a larger evaluation.
+
+For a bounded GPT-6 Luna run, configure both `OPENAI_BUDGET_FILE` (a persistent
+SQLite path) and `OPENAI_BUDGET_USD`. The service reserves a conservative cost
+before sending each request; concurrent processes share that ledger. Known usage
+settles at the cache-write input ceiling and standard output rate; failed or
+unmeasured calls keep their reservation. Exhaustion or invalid accounting blocks
+the call. This guards calls using this ledger, not other teammates or services
+using the same account. The guard currently rejects other models rather than
+guessing their prices. Prices must be refreshed if the provider changes them.
+
+Paid Groq requests are blocked unless `ALLOW_PAID_CALLS=true`, even when a key
+exists. There is no automatic paid fallback. Identify a provider only after its
+credentials and endpoint have been verified; never send a key to a guessed
+third-party gateway.
+Before enabling paid calls, agree on the provider and a run allowance; the flag
+alone is not a dollar spending cap. Groq uses `GROQ_API_KEY`. OpenAI uses
+`OPENAI_API_KEY`; neither key belongs in source control. The optional OpenAI
+SQLite ledger limits calls made through that ledger, not other applications
+using the same account. Existing automated provider tests use mocked HTTP.
 
 An optional `DEMO_PASSWORD` protects the interface, `/ask` and API docs with
 HTTP Basic authentication (username `librarian`); `/health` remains a free
@@ -133,11 +163,68 @@ liveness/configuration endpoint. Use HTTPS for an external demo. Keep the
 provider key and Ollama private. Retrieval outages return a recoverable 503;
 malformed retrieval payloads return 502 rather than an unsupported-answer claim.
 
-The Docker image installs CPU-only PyTorch for the embedding model and defaults
-to paid calls disabled. Build from `project 2/`; pass environment configuration
-at runtime, never bake keys into the image. A hosting account, permitted corpus
-publication scope, real Qdrant configuration and deployed evaluation are still
-required before claiming a verified public production deployment.
+Docker preparation stops at step 3: build the image and run the container
+locally. Step 4, exposing the API publicly, is deferred.
+
+Build from the repository root:
+
+```powershell
+docker build -t librarian-project2:latest "project 2"
+docker run -d --name librarian-project2 --restart unless-stopped --memory=2g --cpus=2 --env-file "path/to/project2-docker.env" -p 127.0.0.1:8002:8000 librarian-project2:latest
+```
+
+The image installs CPU-only PyTorch and bundles MiniLM at revision
+`e8f8c211226b894fcb81acc59f3b34ba3efd5f42`. Build-time public model downloads
+do not use the professor's API key. Runtime embedding loading is offline and
+does not need a PC cache mount. The image runs as UID 10001, responds on
+`0.0.0.0:${PORT:-8000}`, handles container stop signals directly, and probes
+`/health`. Run one API worker. Open `http://127.0.0.1:8002/` after startup.
+The port binding is local; these commands do not create a public URL or upload
+the image to a registry. `APP_REVISION` may be supplied as a build argument;
+the health response also fingerprints the actual Python source files.
+
+Keep source and corpus private under the existing course permission. A Docker
+Hub upload is not required for local execution.
+
+Create the runtime file outside Git using unquoted `KEY=value` lines.
+Do not pass a dotenv file containing quoted values directly to Docker's
+`--env-file`. The current paused Qdrant configuration uses:
+
+| Variable | Runtime value |
+| --- | --- |
+| `GENERATION_PROVIDER` | `openai` (generation remains paused) |
+| `OPENAI_MODEL` | `gpt-6-luna` |
+| `OPENAI_REASONING_EFFORT` | `none` |
+| `ALLOW_PAID_CALLS` | `false` |
+| `RETRIEVAL_BACKEND` | `qdrant` |
+| `QDRANT_URL` | Existing cluster's HTTPS URL |
+| `QDRANT_COLLECTION` | `librarian-chunks` |
+| `QDRANT_API_KEY` | Qdrant secret, never the model key |
+| `CALIBRATION_FILE` | `/app/config/person3-calibration.json` |
+| `DEMO_PASSWORD` | Strong course-access secret; username `librarian` |
+
+`DEMO_PASSWORD` is the existing setting name for HTTP Basic authentication;
+it protects the browser, `/ask` and API docs. `/health` is public. Use HTTPS.
+Omit `OPENAI_API_KEY` while paid requests are paused. `/ask` returns
+503 immediately without rewriting, retrieval or provider calls in this mode;
+`/health.paid_calls_allowed` is false. This explicitly pauses answers instead
+of pretending that a running API means its generation backend is available.
+
+The bundled calibration is the previously selected, development-validated
+threshold zero. Startup verifies its corpus and actual Qdrant payload hashes.
+Do not silently recalibrate when a deployment encounters a mismatch.
+
+Before enabling paid calls later, obtain an explicit run allowance, mount
+persistent storage at `/state` writable by UID 10001, and set
+`OPENAI_BUDGET_FILE=/state/budget.sqlite` with `OPENAI_BUDGET_USD`. Preserve the
+ledger across restarts and redeployments; an ephemeral file resets protection.
+Keep previously recorded spending when reusing an existing allowance.
+
+Local checks while paid calls are paused: `/health`, startup fingerprints,
+authentication, interface, invalid-input 422 and paused `/ask` 503. A successful
+health check does not verify generation. Public endpoint verification and final
+generation evaluation remain deferred with step 4; they are not prerequisites
+for building and running the local container.
 
 Example response, abbreviated to the answer and one citation:
 

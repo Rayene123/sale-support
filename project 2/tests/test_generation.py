@@ -2,13 +2,17 @@
 import io
 import json
 import os
+from pathlib import Path
+import sqlite3
+import tempfile
 import unittest
 from dataclasses import replace
+from contextlib import closing
 from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError, URLError
 
 import _paths  # noqa: F401
-from generation.service import Draft, call_groq, call_openai, call_ollama, generate_answer
+from generation.service import Draft, call_groq, call_ollama, call_openai, generate_answer
 from models.retrieval import RetrievalResult
 
 
@@ -423,6 +427,110 @@ class GenerationTests(unittest.TestCase):
         self.assertTrue(answer.abstain)
         self.assertEqual(answer.reason, "invalid_output")
         self.assertEqual(answer.citations, [])
+
+
+class OpenAIAdapterTests(unittest.TestCase):
+    def setUp(self):
+        self.enterContext(patch.dict(os.environ, {"ALLOW_PAID_CALLS": "true", "OPENAI_API_KEY": "test-only-key"}))
+
+    def envelope(self, **changes):
+        return {"status": "completed", "output": [{"type": "message", "content": [
+            {"type": "output_text", "text": draft()["message"]["content"]}]}],
+            "usage": {"input_tokens": 200, "output_tokens": 50}, **changes}
+
+    def http(self, data):
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps(data).encode()
+        return response
+
+    def test_openai_strict_response_uses_existing_citation_validation(self):
+        with patch("generation.service.GENERATION_PROVIDER", "openai"), patch(
+                "generation.service.urllib.request.urlopen", return_value=self.http(self.envelope())) as http:
+            answer = generate_answer("Conservation ?", [PASSAGE])
+        self.assertFalse(answer.abstain)
+        self.assertEqual(answer.citations[0].record_id, PASSAGE.record_id)
+        self.assertEqual(answer.usage, {"prompt_tokens": 200, "completion_tokens": 50})
+        request = http.call_args.args[0]
+        self.assertEqual(request.full_url, "https://api.openai.com/v1/responses")
+        payload = json.loads(request.data)
+        self.assertFalse(payload["store"])
+        self.assertEqual(payload["max_output_tokens"], 640)
+        self.assertTrue(payload["text"]["format"]["strict"])
+
+    def test_openai_disabled_or_missing_key_does_not_send_request(self):
+        for settings in [{"ALLOW_PAID_CALLS": "false"}, {"OPENAI_API_KEY": ""}]:
+            with self.subTest(settings=settings), patch.dict(os.environ, settings), patch(
+                    "generation.service.urllib.request.urlopen") as http:
+                with self.assertRaises(ConnectionError):
+                    call_openai("system", "question", Draft.model_json_schema())
+                http.assert_not_called()
+
+    def test_openai_incomplete_refusal_and_bad_citations_abstain(self):
+        bad = self.envelope()
+        bad["output"][0]["content"][0]["text"] = draft()["message"]["content"].replace("dix ans.", "vingt ans.")
+        for result in [self.envelope(status="incomplete"), self.envelope(output=[]), bad]:
+            with self.subTest(result=result), patch("generation.service.GENERATION_PROVIDER", "openai"), patch(
+                    "generation.service.urllib.request.urlopen", return_value=self.http(result)):
+                answer = generate_answer("Conservation ?", [PASSAGE])
+                self.assertEqual(answer.reason, "invalid_output")
+                self.assertFalse(answer.citations)
+
+    def test_openai_transport_errors_are_safe_and_not_retried(self):
+        for status, error_type in [(401, ConnectionError), (429, ConnectionError), (503, ConnectionError), (400, ValueError)]:
+            error = HTTPError("https://api.openai.com/v1/responses", status, "secret-provider-body", {}, io.BytesIO(b"secret"))
+            with self.subTest(status=status), patch("generation.service.urllib.request.urlopen", side_effect=error) as http:
+                with self.assertRaises(error_type) as caught:
+                    call_openai("system", "question", Draft.model_json_schema())
+                self.assertNotIn("secret", str(caught.exception))
+                self.assertEqual(http.call_count, 1)
+        with patch("generation.service.urllib.request.urlopen", side_effect=URLError(TimeoutError())):
+            with self.assertRaises(TimeoutError):
+                call_openai("system", "question", Draft.model_json_schema())
+
+    def test_openai_malformed_usage_is_rejected(self):
+        for usage in [[], {"input_tokens": -1}, {"output_tokens": True}]:
+            with self.subTest(usage=usage), patch("generation.service.urllib.request.urlopen", return_value=self.http(self.envelope(usage=usage))):
+                with self.assertRaises(ValueError):
+                    call_openai("system", "question", Draft.model_json_schema())
+
+    def test_openai_rewrite_schema_requires_defaulted_fields(self):
+        from generation.questions import SearchPlan
+        with patch("generation.service.urllib.request.urlopen", return_value=self.http(self.envelope())) as http:
+            call_openai("system", "question", SearchPlan.model_json_schema(), timeout=20, max_output_tokens=256)
+        payload = json.loads(http.call_args.args[0].data)
+        schema = payload["text"]["format"]["schema"]
+        self.assertEqual(set(schema["required"]), {"queries", "clarification"})
+        self.assertNotIn("default", schema["properties"]["clarification"])
+        self.assertEqual(payload["max_output_tokens"], 256)
+        self.assertEqual(http.call_args.kwargs["timeout"], 20)
+
+    def test_persistent_budget_blocks_before_http_and_settles_usage(self):
+        with tempfile.TemporaryDirectory() as folder, patch("generation.service.OPENAI_MODEL", "gpt-6-luna"), patch.dict(
+                os.environ, {"OPENAI_BUDGET_FILE": str(Path(folder) / "budget.sqlite"), "OPENAI_BUDGET_USD": "0.001"}), patch(
+                "generation.service.urllib.request.urlopen", return_value=self.http(self.envelope())) as http:
+            with self.assertRaisesRegex(ConnectionError, "budget"):
+                call_openai("system", "question", Draft.model_json_schema())
+            http.assert_not_called()
+            os.environ["OPENAI_BUDGET_USD"] = "0.1"
+            call_openai("system", "question", Draft.model_json_schema())
+            with closing(sqlite3.connect(os.environ["OPENAI_BUDGET_FILE"])) as db:
+                reserved, charged = db.execute("SELECT reserved,charged FROM calls").fetchone()
+            self.assertGreater(reserved, charged)
+            self.assertAlmostEqual(charged, (200 * .125 + 50 * .5) / 1e6)
+
+    def test_failed_calls_keep_the_reservation_and_unknown_model_is_blocked(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {
+                "OPENAI_BUDGET_FILE": str(Path(folder) / "budget.sqlite"), "OPENAI_BUDGET_USD": "0.1"}), patch(
+                "generation.service.OPENAI_MODEL", "gpt-6-luna"), patch(
+                "generation.service.urllib.request.urlopen", side_effect=TimeoutError):
+            with self.assertRaises(TimeoutError):
+                call_openai("system", "question", Draft.model_json_schema())
+            with closing(sqlite3.connect(os.environ["OPENAI_BUDGET_FILE"])) as db:
+                self.assertIsNone(db.execute("SELECT charged FROM calls").fetchone()[0])
+            with patch("generation.service.OPENAI_MODEL", "unpriced-model"), patch("generation.service.urllib.request.urlopen") as http:
+                with self.assertRaises(ConnectionError):
+                    call_openai("system", "question", Draft.model_json_schema())
+                http.assert_not_called()
 
 
 if __name__ == "__main__":

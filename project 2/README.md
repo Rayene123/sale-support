@@ -74,6 +74,10 @@ temporarily unavailable capacity. The requested and API-reported service tiers
 are included in each answer's configuration snapshot.
 See [Persona 3 service](docs/PERSON_3_SERVICE.md) for calibration, claim-review
 exports and demo access protection.
+OpenAI is also supported: set `GENERATION_PROVIDER=openai`, `OPENAI_API_KEY`,
+`OPENAI_MODEL=gpt-6-luna`, `OPENAI_REASONING_EFFORT=none` and explicit
+`ALLOW_PAID_CALLS=true` in the ignored `project 2/.env`. Both rewriting and
+generation then use OpenAI; retrieval and citation validation stay in the app.
 
 When `project 2/.env` contains the Qdrant variables, the default API backend
 loads chunks from Qdrant, runs BM25 locally over those payloads, and combines
@@ -152,16 +156,21 @@ synthetic fixture is presented as real-user evidence.
 
 ## Deployment
 
-The application runs as a single web process and needs access to its private
-Ollama host. Docker Desktop uses `host.docker.internal`; on Linux, configure
-an explicit private Ollama address or host-gateway mapping. Protect an external
-demo with HTTPS and `DEMO_PASSWORD`. Paid providers remain opt-in; the existing
-Groq adapter requires the explicit enable flag described above. The repository
-does not claim a verified public deployment; no hosting account was supplied.
+The Docker image includes the pinned MiniLM embedding model, runs without a
+host model-cache mount, uses a non-root user, and checks `/health`. Run one
+worker. It accepts the hosting platform's `PORT` variable (default `8000`).
+Docker packaging, image building and local container execution are complete.
+Public API exposure (step 4) is deferred.
 
-Before publishing a URL, run the fixed generation evaluation against the
-deployed endpoint and record the URL, model, configuration, and timestamp in
-the evaluation report.
+Paid calls are disabled by default. With an OpenAI/Groq provider and
+`ALLOW_PAID_CALLS=false`, `/ask` returns 503 before any rewrite, retrieval or
+generation; `/health` reports this setting without calling the model. Do not
+upload the professor's model key while calls are paused. Qdrant's key is separate.
+
+See [Person 3 deployment instructions](docs/PERSON_3_SERVICE.md#credit-protection-and-deployment)
+for local run commands, runtime settings and the frozen calibration. The
+[Person 3 report](docs/PERSON_3_REPORT.md) summarizes implementation and measured
+results. Final evaluation against a future public endpoint remains pending.
 
 ## Deliverables
 

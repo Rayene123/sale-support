@@ -42,6 +42,22 @@ def rewrite(queries, clarification=""):
 
 
 class QuestionTests(unittest.TestCase):
+    def test_openai_followup_uses_same_provider_and_requires_all_schema_fields(self):
+        with patch("generation.questions.GENERATION_PROVIDER", "openai"), patch(
+                "generation.questions.call_openai", return_value=rewrite(["Quelle conservation des livres ?"])) as provider, patch(
+                "generation.questions.call_ollama") as local:
+            plan, usage = prepare_question("Et quel délai ?", [{"role": "user", "content": "La conservation des livres."}])
+        self.assertEqual(plan.queries, ["Quelle conservation des livres ?"])
+        self.assertEqual(usage["rewrite_prompt_tokens"], 40)
+        self.assertEqual(provider.call_args.kwargs, {"timeout": 20, "max_output_tokens": 256})
+        local.assert_not_called()
+
+    def test_rewrite_cannot_insert_the_corpus_edition_as_a_user_fact(self):
+        with patch("generation.questions.GENERATION_PROVIDER", "openai"), patch(
+                "generation.questions.call_openai", return_value=rewrite(["Quelle conservation des livres, édition 2024 ?"])):
+            plan, _ = prepare_question("Et quel délai ?", [{"role": "user", "content": "La conservation des livres."}])
+        self.assertTrue(plan.clarification)
+
     def test_clear_question_does_not_call_a_model(self):
         with patch("generation.questions.call_ollama") as model:
             result, usage = prepare_question("  Qui paraphe le livre-journal ?  ", [])
@@ -185,6 +201,20 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(self.client.get("/", headers={"Authorization": "Basic " + token}).status_code, 200)
         self.retriever.retrieve.assert_not_called()
 
+    def test_paused_paid_provider_skips_rewrite_retrieval_and_generation(self):
+        for provider in ("openai", "groq"):
+            with patch("api.app.GENERATION_PROVIDER", provider), patch.dict(
+                    os.environ, {"ALLOW_PAID_CALLS": "false"}), patch(
+                    "api.app.prepare_question") as rewrite, patch("api.app.generate_answer") as generate:
+                response = self.client.post("/ask", json={"question": "Combien de temps conserver les livres ?"})
+                self.assertEqual(response.status_code, 503)
+                self.assertIn("désactivés", response.json()["detail"])
+                self.assertFalse(self.client.get("/health").json()["paid_calls_allowed"])
+                rewrite.assert_not_called()
+                generate.assert_not_called()
+                self.retriever.retrieve.assert_not_called()
+                self.assertFalse(self.app.state.generation_lock.locked())
+
     def test_mismatched_calibration_is_rejected_on_startup(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "calibration.json"
@@ -219,6 +249,17 @@ class PipelineTests(unittest.TestCase):
             service, method = _build_retriever(use_qdrant=True)
         qdrant.assert_called_once_with(client, collection="test-collection", embedder=embedder.return_value)
         self.assertEqual(method, "hybrid")
+
+    def test_qdrant_can_load_embedding_model_bundled_in_the_image(self):
+        client = Mock()
+        client.get_collection.return_value = SimpleNamespace(config=SimpleNamespace(params=SimpleNamespace(vectors=SimpleNamespace(size=384))))
+        with patch("api.app.QDRANT_URL", "https://example.invalid"), patch(
+                "api.app.QDRANT_API_KEY", "test-only-key"), patch("api.app.QDRANT_COLLECTION", "test-collection"), patch(
+                "api.app.QdrantClient", return_value=client), patch.dict(os.environ, {"EMBEDDING_MODEL": "/opt/models/minilm"}), patch(
+                "api.app.SentenceTransformerEmbedder") as embedder, patch("api.app.QdrantRetriever") as qdrant:
+            qdrant.return_value.load_chunks.return_value = [make_chunk(189, "fonds", "Livre II")]
+            _build_retriever(use_qdrant=True)
+        embedder.assert_called_once_with("/opt/models/minilm")
 
     def test_configured_qdrant_api_with_real_in_memory_collection(self):
         import numpy as np
@@ -277,6 +318,24 @@ class RetrievalRegressionTests(unittest.TestCase):
 
 
 class CalibrationReviewTests(unittest.TestCase):
+    def test_evaluation_sends_demo_auth_only_to_https_or_localhost(self):
+        headers = []
+        class Reply:
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def read(self): return b'{"abstain":true,"answer_fr":"Absent.","citations":[]}'
+        def request(req, **kwargs):
+            headers.append(req.get_header("Authorization"))
+            return Reply()
+        question = {"question_id": "q", "question": "Quel sujet ?", "answerability": "unanswerable"}
+        with patch.dict(os.environ, {"DEMO_PASSWORD": "test-only-password"}), patch.object(
+                evaluation.urllib.request, "urlopen", side_effect=request):
+            evaluation.run("https://demo.example", [question], {}, 1)
+            self.assertTrue(headers[0].startswith("Basic "))
+            for url in ["http://example.com", "http://localhost:password@example.com"]:
+                with self.assertRaises(ValueError):
+                    evaluation.run(url, [question], {}, 1)
+
     def test_review_export_and_rescoring_are_offline_and_fingerprint_bound(self):
         question = {"question_id": "fixture-q1", "question": "Quel délai ?", "answerability": "answerable",
                     "expected_answer": "Dix jours.", "gold_evidence": [{"record_id": "fixture:article-1", "required": True}],

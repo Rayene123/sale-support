@@ -3,11 +3,15 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
 import re
+import sqlite3
 import urllib.error
 import urllib.request
+from contextlib import closing
 from dataclasses import replace
+from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -397,6 +401,97 @@ def _groq_schema(schema: dict) -> dict:
     return schema
 
 
+def _reserve_openai_budget(payload: dict):
+    path, limit = os.getenv("OPENAI_BUDGET_FILE", ""), os.getenv("OPENAI_BUDGET_USD", "")
+    if not path and not limit:
+        return None
+    try:
+        ceiling = float(limit)
+        tokens = len(json.dumps(payload, ensure_ascii=False).encode()) * 2 + 4096
+        if not path or not math.isfinite(ceiling) or ceiling <= 0 or OPENAI_MODEL != "gpt-6-luna" or tokens > 272000:
+            raise ValueError
+        reserve = (tokens * .125 + payload["max_output_tokens"] * .5) / 1e6
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        with closing(sqlite3.connect(path, timeout=5)) as db, db:
+            db.execute("CREATE TABLE IF NOT EXISTS calls (id INTEGER PRIMARY KEY, reserved REAL NOT NULL, charged REAL)")
+            db.execute("BEGIN IMMEDIATE")
+            used = db.execute("SELECT COALESCE(SUM(COALESCE(charged,reserved)),0) FROM calls").fetchone()[0]
+            if used + reserve > ceiling:
+                raise ConnectionError("Le budget de vérification est épuisé. Aucun appel n'a été envoyé.")
+            call_id = db.execute("INSERT INTO calls(reserved) VALUES (?)", (reserve,)).lastrowid
+        return path, call_id
+    except (ValueError, OSError, sqlite3.Error):
+        raise ConnectionError("Le contrôle du budget OpenAI est indisponible ou invalide.") from None
+
+
+def call_openai(system: str, prompt: str, schema: dict, *, timeout: float = 90,
+                max_output_tokens: int = 640) -> dict:
+    if os.getenv("ALLOW_PAID_CALLS", "").lower() != "true":
+        raise ConnectionError("Les appels API payants sont désactivés.")
+    key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not key:
+        raise ConnectionError("La clé OpenAI n'est pas configurée.")
+
+    def strict(value):
+        if isinstance(value, list):
+            return [strict(v) for v in value]
+        if not isinstance(value, dict):
+            return value
+        result = {k: strict(v) for k, v in value.items() if k != "default"}
+        if result.get("type") == "object":
+            result["required"] = list(result.get("properties", {}))
+            result["additionalProperties"] = False
+        return result
+
+    payload = {"model": OPENAI_MODEL, "instructions": system, "input": prompt,
+               "store": False, "max_output_tokens": max_output_tokens,
+               "reasoning": {"effort": os.getenv("OPENAI_REASONING_EFFORT", "none")},
+               "text": {"format": {"type": "json_schema", "name": "grounded_result",
+                                   "strict": True, "schema": strict(_groq_schema(schema))}}}
+    request = urllib.request.Request("https://api.openai.com/v1/responses",
+        data=json.dumps(payload, ensure_ascii=False).encode(),
+        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"}, method="POST")
+    reservation = _reserve_openai_budget(payload)
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            result = json.load(response)
+    except urllib.error.HTTPError as exc:
+        LOGGER.warning(json.dumps({"event": "openai_http_error", "status": exc.code}))
+        if exc.code in {401, 403, 429} or exc.code >= 500:
+            raise ConnectionError(f"OpenAI est indisponible ou l'accès est refusé (HTTP {exc.code}).") from None
+        raise ValueError(f"OpenAI a refusé la requête (HTTP {exc.code}).") from None
+    except (TimeoutError, urllib.error.URLError, OSError) as exc:
+        if isinstance(exc, TimeoutError) or isinstance(getattr(exc, "reason", None), TimeoutError):
+            raise TimeoutError("OpenAI n'a pas répondu à temps.") from None
+        raise ConnectionError("OpenAI est temporairement inaccessible.") from None
+    except (ValueError, UnicodeDecodeError):
+        raise ValueError("Réponse OpenAI illisible.") from None
+    try:
+        status = result["status"]
+        content = "\n".join(part["text"] for item in result["output"] if item.get("type") == "message"
+                            for part in item["content"] if part.get("type") == "output_text")
+        usage = result.get("usage")
+        if usage is None:
+            usage = {}
+        if not isinstance(usage, dict):
+            raise TypeError
+        counts = [usage.get("input_tokens"), usage.get("output_tokens")]
+        if not isinstance(status, str) or any(v is not None and
+                (type(v) is not int or v < 0) for v in counts):
+            raise ValueError
+    except (KeyError, TypeError, AttributeError, ValueError):
+        raise ValueError("Réponse OpenAI incomplète.") from None
+    if reservation and all(v is not None for v in counts):
+        # Cache-write rates are the conservative ceiling, not a billing receipt.
+        try:
+            with closing(sqlite3.connect(reservation[0], timeout=5)) as db, db:
+                db.execute("UPDATE calls SET charged=? WHERE id=?", ((counts[0] * .125 + counts[1] * .5) / 1e6, reservation[1]))
+        except sqlite3.Error:
+            pass  # Keep the full reservation if accounting cannot be settled.
+    return {"done": status == "completed", "done_reason": "length" if status == "incomplete" else status,
+            "message": {"content": content}, "prompt_eval_count": counts[0], "eval_count": counts[1]}
+
+
 def generate_answer(question: str, passages: list[RetrievalResult], *, search_queries: list[str] | None = None) -> Answer:
     budget = GENERATION_CONTEXT_CHARS
     supplied = []
@@ -434,6 +529,8 @@ def generate_answer(question: str, passages: list[RetrievalResult], *, search_qu
             "keep_alive": "5m",
             "options": {"temperature": 0, "seed": 101, "num_ctx": 8192, "num_predict": 640},
         })
+    elif GENERATION_PROVIDER == "openai":
+        result = call_openai(SYSTEM, messages[1]["content"], schema)
     elif GENERATION_PROVIDER == "groq":
         result = call_groq({
             "model": GROQ_MODEL,

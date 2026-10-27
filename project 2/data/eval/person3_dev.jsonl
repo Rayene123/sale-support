@@ -4,21 +4,21 @@
 {"question_id": "p3-dev-04", "question": "Les actes accomplis par un commerçant sont-ils présumés accessoires à son activité ?", "answerable": true, "source_record_ids": ["code-commerce-tn:article-4"]}
 {"question_id": "p3-dev-05", "question": "Une personne physique à faible chiffre d'affaires peut-elle être dispensée de la tenue d'une comptabilité ?", "answerable": true, "source_record_ids": ["code-commerce-tn:article-7"]}
 {"question_id": "p3-dev-06", "question": "Faut-il établir chaque année un inventaire des éléments actifs et passifs de l'entreprise ?", "answerable": true, "source_record_ids": ["code-commerce-tn:article-8"]}
-{"question_id": "p3-dev-07", "question": "Qui peut parapher le livre-journal d'aprÃ¨s l'article 9 ?", "answerable": true, "source_record_ids": ["code-commerce-tn:article-9"]}
-{"question_id": "p3-dev-08", "question": "Les blancs et altÃ©rations dans les livres sont-ils autorisÃ©s par l'article 10 ?", "answerable": true, "source_record_ids": ["code-commerce-tn:article-10"]}
+{"question_id": "p3-dev-07", "question": "Qui peut parapher le livre-journal d'après l'article 9 ?", "answerable": true, "source_record_ids": ["code-commerce-tn:article-9"]}
+{"question_id": "p3-dev-08", "question": "Les blancs et altérations dans les livres sont-ils autorisés par l'article 10 ?", "answerable": true, "source_record_ids": ["code-commerce-tn:article-10"]}
 {"question_id": "p3-dev-09", "question": "La clientèle doit-elle obligatoirement figurer parmi les éléments d'un fonds de commerce ?", "answerable": true, "source_record_ids": ["code-commerce-tn:article-189"]}
 {"question_id": "p3-dev-10", "question": "Une cession de fonds consentie sous condition doit-elle être constatée par écrit ?", "answerable": true, "source_record_ids": ["code-commerce-tn:article-190"]}
 {"question_id": "p3-dev-11", "question": "Qui doit faire publier une cession de fonds dans un journal quotidien et au JORT ?", "answerable": true, "source_record_ids": ["code-commerce-tn:article-191"]}
 {"question_id": "p3-dev-12", "question": "Le créancier peut-il convenir avec un tiers de lui confier la possession du gage ?", "answerable": true, "source_record_ids": ["code-commerce-tn:article-600"]}
 {"question_id": "p3-dev-13", "question": "Quel sera le prix du bitcoin demain ?", "answerable": false, "source_record_ids": []}
-{"question_id": "p3-dev-14", "question": "Quel mÃ©dicament prendre pour une pneumonie ?", "answerable": false, "source_record_ids": []}
+{"question_id": "p3-dev-14", "question": "Quel médicament prendre pour une pneumonie ?", "answerable": false, "source_record_ids": []}
 {"question_id": "p3-dev-15", "question": "Quel est le menu de la cantine cette semaine ?", "answerable": false, "source_record_ids": []}
-{"question_id": "p3-dev-16", "question": "Quelle est la mÃ©tÃ©o prÃ©vue Ã  Tunis dimanche ?", "answerable": false, "source_record_ids": []}
-{"question_id": "p3-dev-17", "question": "Quel taux exact de TVA s'applique Ã  mon activitÃ© en 2026 ?", "answerable": false, "source_record_ids": []}
-{"question_id": "p3-dev-18", "question": "Quelle banque propose le crÃ©dit commercial le moins cher aujourd'hui ?", "answerable": false, "source_record_ids": []}
-{"question_id": "p3-dev-19", "question": "Quelle est l'adresse personnelle du propriÃ©taire de mon fonds ?", "answerable": false, "source_record_ids": []}
-{"question_id": "p3-dev-20", "question": "Mon dossier de faillite a-t-il Ã©tÃ© acceptÃ© hier par le tribunal ?", "answerable": false, "source_record_ids": []}
-{"question_id": "p3-dev-21", "question": "Quel dÃ©cret de 2026 a changÃ© le seuil de chiffre d'affaires applicable Ã  mon entreprise ?", "answerable": false, "source_record_ids": []}
+{"question_id": "p3-dev-16", "question": "Quelle est la météo prévue à Tunis dimanche ?", "answerable": false, "source_record_ids": []}
+{"question_id": "p3-dev-17", "question": "Quel taux exact de TVA s'applique à mon activité en 2026 ?", "answerable": false, "source_record_ids": []}
+{"question_id": "p3-dev-18", "question": "Quelle banque propose le crédit commercial le moins cher aujourd'hui ?", "answerable": false, "source_record_ids": []}
+{"question_id": "p3-dev-19", "question": "Quelle est l'adresse personnelle du propriétaire de mon fonds ?", "answerable": false, "source_record_ids": []}
+{"question_id": "p3-dev-20", "question": "Mon dossier de faillite a-t-il été accepté hier par le tribunal ?", "answerable": false, "source_record_ids": []}
+{"question_id": "p3-dev-21", "question": "Quel décret de 2026 a changé le seuil de chiffre d'affaires applicable à mon entreprise ?", "answerable": false, "source_record_ids": []}
 {"question_id": "p3-dev-22", "question": "Quand mon transporteur livrera-t-il effectivement mon colis ?", "answerable": false, "source_record_ids": []}
-{"question_id": "p3-dev-23", "question": "Quel numÃ©ro de compte bancaire mon crÃ©ancier utilise-t-il ?", "answerable": false, "source_record_ids": []}
-{"question_id": "p3-dev-24", "question": "Quel est le montant prÃ©cis de mon bÃ©nÃ©fice commercial de l'annÃ©e derniÃ¨re ?", "answerable": false, "source_record_ids": []}
+{"question_id": "p3-dev-23", "question": "Quel numéro de compte bancaire mon créancier utilise-t-il ?", "answerable": false, "source_record_ids": []}
+{"question_id": "p3-dev-24", "question": "Quel est le montant précis de mon bénéfice commercial de l'année dernière ?", "answerable": false, "source_record_ids": []}
