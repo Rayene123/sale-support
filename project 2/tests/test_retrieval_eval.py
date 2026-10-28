@@ -43,6 +43,25 @@ def normalized(question_id, gold, *, answerability="answerable", status="approve
 
 
 class RetrievalEvaluationTests(unittest.TestCase):
+    def test_distinct_article_recall_expands_past_duplicate_chunks(self):
+        result = retrieval.evaluate(FakeRetriever(["A", "A", "B"]),
+                                    [normalized("windows", ["B"])], "window", (2,))
+        self.assertEqual(result["metrics_by_k"]["2"]["recall_macro_average"], 1.)
+        self.assertEqual(result["per_question"][0]["retrieved_unique_record_ids"], ["A", "B"])
+
+    def test_distinct_article_search_stops_when_candidates_are_exhausted(self):
+        result = retrieval.evaluate(FakeRetriever(["A", "A"]),
+                                    [normalized("windows", ["B"])], "window", (2,))
+        self.assertEqual(result["metrics_by_k"]["2"]["recall_macro_average"], 0.)
+
+    def test_reranking_keeps_enough_candidates_for_distinct_article_metrics(self):
+        candidates = [SimpleNamespace(record_id=rid) for rid in ("A", "A", "B")]
+        with patch("retrieval.rerank.rerank", side_effect=lambda q, r, top_k: r[:top_k]) as reranker:
+            result = retrieval.evaluate(FakeRetriever([r.record_id for r in candidates]),
+                                        [normalized("windows", ["B"])], "window", (2,), rerank_results=True)
+        self.assertEqual(result["metrics_by_k"]["2"]["recall_macro_average"], 1.)
+        self.assertEqual(reranker.call_args.kwargs["top_k"], 3)
+
     def test_builder_selects_only_requested_method(self):
         with (
             patch("indexing.corpus.load_corpus", return_value=["corpus"]),

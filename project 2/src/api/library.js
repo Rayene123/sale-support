@@ -278,11 +278,19 @@ function fillArticle(article,citation){
   $('article-title').textContent=article.article;$('book-article').replaceChildren();
   const escaped=citation.quote.trim().split(/\s+/).map(word=>word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('\\s+');
   const match=escaped?new RegExp(escaped,'u').exec(article.text):null;
-  if(match){
-    const mark=document.createElement('mark');mark.textContent=match[0];$('book-article').append(document.createTextNode(article.text.slice(0,match.index)),mark,document.createTextNode(article.text.slice(match.index+match[0].length)));
-    scrollArticle();
-  }else $('book-article').textContent=article.text;
-  const edition=(article.source_edition||'').match(/\b(?:19|20)\d{2}\b/)?.[0]||'2024';
+  const sameSource=article.article===citation.article
+    &&article.pdf_page===citation.pdf_page
+    &&article.source_url===citation.source_url
+    &&JSON.stringify(article.heading_path||[])===JSON.stringify(citation.heading_path||[]);
+  if(!match||!sameSource){
+    $('book-article').textContent='Le texte intégral disponible ne correspond pas au passage cité. Consultez le passage et sa source publiée.';
+    $('article-status').textContent='Versions des sources non concordantes. Le passage cité reste consultable.';
+    return;
+  }
+  const mark=document.createElement('mark');mark.textContent=match[0];
+  $('book-article').append(document.createTextNode(article.text.slice(0,match.index)),mark,document.createTextNode(article.text.slice(match.index+match[0].length)));
+  scrollArticle();
+  const edition=(article.source_edition||'').match(/\b(?:19|20)\d{2}\b/)?.[0]||'non précisée';
   $('article-status').textContent=`Corpus ${edition} · page PDF ${article.pdf_page}`;$('article-status').title=article.source_edition||'';
 }
 async function openSource(index){

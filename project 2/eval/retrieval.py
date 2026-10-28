@@ -192,11 +192,16 @@ def evaluate(
         }
     for q in answerable:
         started = time.perf_counter()
-        results = retriever.search(q["question"], top_k=max(ks))
-        if rerank_results:
+        candidate_k = max(ks)
+        while True:
+            results = retriever.search(q["question"], top_k=candidate_k)
+            if len(_unique_ranked_ids(results)) >= max(ks) or len(results) < candidate_k:
+                break
+            candidate_k *= 2
+        if rerank_results and results:
             from retrieval.rerank import rerank
 
-            results = rerank(q["question"], results, top_k=max(ks))
+            results = rerank(q["question"], results, top_k=len(results))
         latency.append((time.perf_counter() - started) * 1000)
         ranked_ids = _unique_ranked_ids(results)
         gold = set(q["required_gold_record_ids"])

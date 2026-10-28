@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ingestion.schema import ArticleRecord
+from ingestion.schema import ARTICLE_SUFFIXES, HEADING_FIELDS, ArticleRecord
 
 ChunkStrategy = str
 CHUNK_STRATEGIES: tuple[str, ...] = ("article", "window")
@@ -29,6 +29,18 @@ class ArticleChunk:
     source_sha256: str
     source_date: str
     source_edition: str
+
+
+def chunk_metadata(chunk: ArticleChunk) -> dict[str, str | None]:
+    """Read named levels without assuming every level exists in the path."""
+    levels = dict(zip(("livre", "titre", "chapitre", "section", "sous-section"), HEADING_FIELDS))
+    values = dict.fromkeys(HEADING_FIELDS)
+    for heading in chunk.heading_path:
+        field = levels.get(heading.split(maxsplit=1)[0].rstrip(".").casefold())
+        if field:
+            values[field] = heading
+    suffix = chunk.record_id.rsplit("-", 1)[-1]
+    return {**values, "article_suffix": suffix if suffix in ARTICLE_SUFFIXES else None}
 
 
 def _validate_options(strategy: ChunkStrategy, max_words: int, overlap_words: int) -> None:

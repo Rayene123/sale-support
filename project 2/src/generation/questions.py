@@ -4,7 +4,10 @@ import re
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from generation.service import GENERATION_PROVIDER, OLLAMA_MODEL, call_ollama, call_openai
+from generation.service import (
+    GENERATION_PROVIDER, GROQ_MODEL, OLLAMA_MODEL,
+    _groq_schema, call_groq, call_ollama, call_openai,
+)
 
 
 class SearchPlan(BaseModel):
@@ -39,23 +42,37 @@ def prepare_question(question: str, history: list[dict[str, str]]) -> tuple[Sear
         return SearchPlan(queries=["Pendant combien de temps faut-il conserver les livres de commerce ?"]), {}
     vague = bool(VAGUE.fullmatch(query))
     followup = bool(FOLLOWUP.match(query))
+    contextual = vague or followup or bool(history)
     if (vague or followup) and not history:
         return SearchPlan(queries=[], clarification=CLARIFY), {}
     multipart = query.count("?") > 1 or bool(re.search(r"\b(?:d'une part|d’autre part|et aussi)\b", query, re.I))
-    if not vague and not followup and not multipart:
+    if not contextual and not multipart:
         return SearchPlan(queries=[query]), {}
     usage = {"rewrite_prompt_tokens": None, "rewrite_completion_tokens": None}
+    prompt = json.dumps({"question": query, "history": history}, ensure_ascii=False)
     try:
         if GENERATION_PROVIDER == "openai":
-            response = call_openai(SYSTEM, json.dumps({"question": query, "history": history}, ensure_ascii=False),
+            response = call_openai(SYSTEM, prompt,
                                    SearchPlan.model_json_schema(), timeout=20, max_output_tokens=256)
-        else:
+        elif GENERATION_PROVIDER == "groq":
+            schema = _groq_schema(SearchPlan.model_json_schema())
+            schema["required"] = list(schema["properties"])
+            response = call_groq({
+                "model": GROQ_MODEL,
+                "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt}],
+                "response_format": {"type": "json_schema", "json_schema": {
+                    "name": "search_plan", "strict": True, "schema": schema}},
+                "stream": False, "temperature": 0, "max_completion_tokens": 256,
+            }, timeout=20)
+        elif GENERATION_PROVIDER == "ollama":
             response = call_ollama({
                 "model": OLLAMA_MODEL, "system": SYSTEM,
-                "prompt": json.dumps({"question": query, "history": history}, ensure_ascii=False),
+                "prompt": prompt,
                 "format": SearchPlan.model_json_schema(), "stream": False, "think": False,
                 "options": {"temperature": 0, "seed": 101, "num_ctx": 4096, "num_predict": 256},
             }, timeout=20)
+        else:
+            raise ValueError("Unsupported rewrite provider")
         usage = {"rewrite_prompt_tokens": response.get("prompt_eval_count"),
                  "rewrite_completion_tokens": response.get("eval_count")}
         if response.get("done") is not True or response.get("done_reason") == "length":
@@ -87,5 +104,5 @@ def prepare_question(question: str, history: list[dict[str, str]]) -> tuple[Sear
             plan.queries = list(dict.fromkeys(plan.queries))
         return plan, usage
     except (ConnectionError, TimeoutError, ValueError, TypeError, AttributeError, RuntimeError):
-        return (SearchPlan(queries=[], clarification=CLARIFY) if vague or followup
+        return (SearchPlan(queries=[], clarification=CLARIFY) if contextual
                 else SearchPlan(queries=[query])), usage

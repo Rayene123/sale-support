@@ -42,6 +42,39 @@ def rewrite(queries, clarification=""):
 
 
 class QuestionTests(unittest.TestCase):
+    def test_pronoun_followup_is_resolved_using_history(self):
+        history = [{"role": "user", "content": "Je parle des livres de commerce."}]
+        with patch("generation.questions.call_ollama", return_value=rewrite([
+                "Combien de temps faut-il conserver les livres de commerce ?"])) as model:
+            plan, _ = prepare_question("Combien de temps faut-il les conserver ?", history)
+        self.assertIn("livres de commerce", plan.queries[0])
+        self.assertEqual(json.loads(model.call_args.args[0]["prompt"])["history"], history)
+
+    def test_failed_contextual_rewrite_does_not_search_unresolved_pronouns(self):
+        with patch("generation.questions.call_ollama", side_effect=TimeoutError):
+            plan, _ = prepare_question("Combien de temps faut-il les conserver ?", [
+                {"role": "user", "content": "Les livres de commerce."}])
+        self.assertEqual(plan.queries, [])
+        self.assertTrue(plan.clarification)
+
+    def test_groq_rewrite_uses_groq_and_never_ollama(self):
+        with patch("generation.questions.GENERATION_PROVIDER", "groq"), patch(
+                "generation.questions.call_groq", return_value=rewrite([
+                    "Quel délai de conservation des livres ?"])) as provider, patch(
+                "generation.questions.call_ollama") as local, patch(
+                "generation.questions.call_openai") as openai:
+            plan, usage = prepare_question("Et quel délai ?", [{"role": "user", "content": "Les livres."}])
+        self.assertIn("livres", plan.queries[0])
+        self.assertEqual(usage["rewrite_prompt_tokens"], 40)
+        self.assertEqual(provider.call_args.kwargs, {"timeout": 20})
+        payload = provider.call_args.args[0]
+        self.assertEqual(payload["max_completion_tokens"], 256)
+        schema = payload["response_format"]["json_schema"]["schema"]
+        self.assertEqual(set(schema["required"]), {"queries", "clarification"})
+        self.assertNotIn("maxItems", schema["properties"]["queries"])
+        local.assert_not_called()
+        openai.assert_not_called()
+
     def test_openai_followup_uses_same_provider_and_requires_all_schema_fields(self):
         with patch("generation.questions.GENERATION_PROVIDER", "openai"), patch(
                 "generation.questions.call_openai", return_value=rewrite(["Quelle conservation des livres ?"])) as provider, patch(
