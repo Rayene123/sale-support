@@ -45,6 +45,12 @@ class GenerationTests(unittest.TestCase):
                 call_groq({})
         http.assert_not_called()
 
+    def test_openai_paid_calls_disabled_even_when_a_key_is_present(self):
+        with patch.dict(os.environ, {"ALLOW_PAID_CALLS": "false", "OPENAI_API_KEY": "test-only-key"}), patch("generation.service.urllib.request.urlopen") as http:
+            with self.assertRaises(ConnectionError):
+                call_openai("system", "question", Draft.model_json_schema())
+        http.assert_not_called()
+
     def generate(self, response, passages=None):
         with patch("generation.service.call_ollama", return_value=response) as model:
             answer = generate_answer("Combien de temps conserver les livres ?", passages if passages is not None else [PASSAGE])
@@ -65,6 +71,14 @@ class GenerationTests(unittest.TestCase):
         answer, model = self.generate(draft(), passages=[])
         self.assertEqual(answer.reason, "no_evidence")
         model.assert_not_called()
+
+    def test_generation_context_character_budget_is_configurable(self):
+        with patch("generation.service.GENERATION_CONTEXT_CHARS", 80), \
+                patch("generation.service.call_ollama", return_value=draft()) as model:
+            generate_answer("Question", [PASSAGE])
+        request = model.call_args.args[0]
+        supplied = json.loads(request["prompt"])["PASSAGES"]
+        self.assertEqual(sum(len(passage["text"]) for passage in supplied), 80)
 
     def test_unsupported_question_can_abstain_without_citations(self):
         answer, _ = self.generate(draft(abstain=True, reason="Le délai demandé est absent des passages.", claims=[]))
@@ -195,6 +209,51 @@ class GenerationTests(unittest.TestCase):
             with self.assertRaisesRegex(ConnectionError, "GROQ_API_KEY is required"):
                 call_groq({"model": "openai/gpt-oss-20b"})
         http.assert_not_called()
+
+    def test_openai_missing_key_fails_without_http_request(self):
+        with (
+            patch.dict(os.environ, {"OPENAI_API_KEY": ""}),
+            patch("generation.service.urllib.request.urlopen") as http,
+        ):
+            with self.assertRaises(ConnectionError):
+                call_openai("system", "question", Draft.model_json_schema())
+        http.assert_not_called()
+
+    def test_openai_response_auth_schema_and_service_tier(self):
+        api_response = {
+            "status": "completed",
+            "output": [{"type": "message", "content": [
+                {"type": "output_text", "text": draft()["message"]["content"]}]}],
+            "usage": {"input_tokens": 234, "output_tokens": 38},
+            "service_tier": "flex",
+        }
+        context = MagicMock()
+        context.__enter__.return_value = io.BytesIO(json.dumps(api_response).encode("utf-8"))
+        with (
+            patch("generation.service.GENERATION_PROVIDER", "openai"),
+            patch("generation.service.OPENAI_MODEL", "gpt-6-luna"),
+            patch("generation.service.OPENAI_SERVICE_TIER", "flex"),
+            patch.dict(os.environ, {"OPENAI_API_KEY": "test-only-key"}),
+            patch("generation.service.urllib.request.urlopen", return_value=context) as http,
+        ):
+            answer = generate_answer("Combien de temps conserver les livres ?", [PASSAGE])
+
+        request = http.call_args.args[0]
+        payload = json.loads(request.data.decode("utf-8"))
+        self.assertEqual(request.full_url, "https://api.openai.com/v1/responses")
+        self.assertEqual(request.get_header("Authorization"), "Bearer test-only-key")
+        self.assertEqual(payload["model"], "gpt-6-luna")
+        self.assertEqual(payload["text"]["format"]["type"], "json_schema")
+        self.assertTrue(payload["text"]["format"]["strict"])
+        self.assertEqual(payload["reasoning"]["effort"], "none")
+        self.assertEqual(payload["service_tier"], "flex")
+        self.assertEqual(payload["max_output_tokens"], 640)
+        self.assertFalse(payload["store"])
+        self.assertFalse(answer.abstain)
+        self.assertEqual(answer.citations[0].record_id, PASSAGE.record_id)
+        self.assertEqual(answer.usage, {"prompt_tokens": 234, "completion_tokens": 38})
+        self.assertEqual(answer.configuration["openai_service_tier_requested"], "flex")
+        self.assertEqual(answer.configuration["openai_service_tier_actual"], "flex")
 
     def test_groq_timeout_and_http_errors_are_sanitized(self):
         with patch.dict(os.environ, {"GROQ_API_KEY": "test-only-key"}):

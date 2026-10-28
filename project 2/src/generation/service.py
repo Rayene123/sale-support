@@ -22,7 +22,16 @@ GENERATION_PROVIDER = os.getenv("GENERATION_PROVIDER", "ollama").strip().lower()
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3.5:9b")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
-MODEL = {"groq": GROQ_MODEL, "openai": OPENAI_MODEL}.get(GENERATION_PROVIDER, OLLAMA_MODEL)
+OPENAI_SERVICE_TIER = os.getenv("OPENAI_SERVICE_TIER", "default").strip().lower()
+if OPENAI_SERVICE_TIER not in {"default", "flex"}:
+    raise ValueError("OPENAI_SERVICE_TIER must be 'default' or 'flex'.")
+GENERATION_CONTEXT_CHARS = int(os.getenv("GENERATION_CONTEXT_CHARS", "12000"))
+if GENERATION_CONTEXT_CHARS < 1:
+    raise ValueError("GENERATION_CONTEXT_CHARS must be a positive integer.")
+MODEL = {
+    "groq": GROQ_MODEL,
+    "openai": OPENAI_MODEL,
+}.get(GENERATION_PROVIDER, OLLAMA_MODEL)
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
 GROQ_CHAT_COMPLETIONS_URL = "https://api.groq.com/openai/v1/chat/completions"
 LOGGER = logging.getLogger(__name__)
@@ -169,12 +178,22 @@ def _groq_request_diagnostic(payload: dict) -> dict:
         "stream": payload.get("stream"),
         "temperature": payload.get("temperature"),
         "max_completion_tokens": payload.get("max_completion_tokens"),
+        "service_tier": payload.get("service_tier"),
     }
 
 
 def _log_groq_parse_error(phase: str, exc: Exception, description: str) -> None:
     LOGGER.error(json.dumps({
         "event": "groq_parse_error",
+        "phase": phase,
+        "exception_type": type(exc).__name__,
+        "description": description,
+    }))
+
+
+def _log_openai_parse_error(phase: str, exc: Exception, description: str) -> None:
+    LOGGER.error(json.dumps({
+        "event": "openai_parse_error",
         "phase": phase,
         "exception_type": type(exc).__name__,
         "description": description,
@@ -349,6 +368,7 @@ def call_openai(system: str, prompt: str, schema: dict, *, timeout: float = 90,
 
     payload = {"model": OPENAI_MODEL, "instructions": system, "input": prompt,
                "store": False, "max_output_tokens": max_output_tokens,
+               "service_tier": OPENAI_SERVICE_TIER,
                "reasoning": {"effort": os.getenv("OPENAI_REASONING_EFFORT", "none")},
                "text": {"format": {"type": "json_schema", "name": "grounded_result",
                                    "strict": True, "schema": strict(_groq_schema(schema))}}}
@@ -393,12 +413,13 @@ def call_openai(system: str, prompt: str, schema: dict, *, timeout: float = 90,
         except sqlite3.Error:
             pass  # Keep the full reservation if accounting cannot be settled.
     return {"done": status == "completed", "done_reason": "length" if status == "incomplete" else status,
-            "message": {"content": content}, "prompt_eval_count": counts[0], "eval_count": counts[1]}
+            "message": {"content": content}, "prompt_eval_count": counts[0], "eval_count": counts[1],
+            "service_tier": result.get("service_tier")}
 
 
 def generate_answer(question: str, passages: list[RetrievalResult], *, search_queries: list[str] | None = None,
                     on_validation=None) -> Answer:
-    budget = 12000
+    budget = GENERATION_CONTEXT_CHARS
     supplied = []
     for passage in passages:
         if budget <= 0:
@@ -469,10 +490,9 @@ def generate_answer(question: str, passages: list[RetrievalResult], *, search_qu
         try:
             draft = Draft.model_validate_json(content)
         except (ValueError, TypeError) as exc:
-            if GENERATION_PROVIDER == "groq":
-                _log_groq_parse_error(
-                    "draft_json", exc, "Assistant content did not satisfy the local Draft schema."
-                )
+            if GENERATION_PROVIDER in {"groq", "openai"}:
+                log_error = _log_openai_parse_error if GENERATION_PROVIDER == "openai" else _log_groq_parse_error
+                log_error("draft_json", exc, "Assistant content did not satisfy the local Draft schema.")
             raise
         if draft.abstain:
             if draft.claims or not draft.reason:
@@ -498,4 +518,9 @@ def generate_answer(question: str, passages: list[RetrievalResult], *, search_qu
         answer = abstention("invalid_output", "Je ne peux pas fournir une réponse dont les citations sont vérifiables. Veuillez reformuler la question.")
     if isinstance(result, dict):
         answer.usage = {"prompt_tokens": result.get("prompt_eval_count"), "completion_tokens": result.get("eval_count")}
+        if GENERATION_PROVIDER == "openai":
+            answer.configuration = {
+                "openai_service_tier_requested": OPENAI_SERVICE_TIER,
+                "openai_service_tier_actual": result.get("service_tier"),
+            }
     return answer

@@ -63,6 +63,15 @@ questions; missing context produces a request for clarification.
 No API key is required for the local Ollama mode. Paid requests are blocked
 by default. The existing Groq adapter requires `GENERATION_PROVIDER=groq`,
 `GROQ_API_KEY` and explicit `ALLOW_PAID_CALLS=true`; never commit the key.
+OpenAI generation is also supported with `GENERATION_PROVIDER=openai`,
+`OPENAI_API_KEY`, and `OPENAI_MODEL` (default `gpt-6-luna`). OpenAI requests
+also require explicit `ALLOW_PAID_CALLS=true`; the key is read from the
+environment and must never be committed. OpenAI uses the same structured
+claim schema and local citation/quote validation as the other providers.
+`OPENAI_SERVICE_TIER=default` selects standard processing; `flex` selects
+lower-cost Flex processing for offline evaluation and may have slower or
+temporarily unavailable capacity. The requested and API-reported service tiers
+are included in each answer's configuration snapshot.
 See [Persona 3 service](docs/PERSON_3_SERVICE.md) for calibration, claim-review
 exports and demo access protection.
 OpenAI is also supported: set `GENERATION_PROVIDER=openai`, `OPENAI_API_KEY`,
@@ -107,7 +116,7 @@ Run retrieval ablations on the fixed evaluation set:
 
 Use the same command with `--method vector`, `hybrid`, and
 `hybrid-reranker` for the ablation. Generation evaluation requires the API
-and a running model; see [PERSON_4_EVALUATION.md](docs/PERSON_4_EVALUATION.md).
+and a running model; see the [Person 4 report](docs/PERSON_4_REPORT.md).
 
 Run tests:
 
@@ -133,24 +142,17 @@ This writes `project 2/missing_tasks_persons_2_3_4.pdf`.
 
 ## Results and limitations
 
-The fixed-set retrieval results are summarized in
-[optimisation.md](optimisation.md) and the full table is in
-[PERSON_4_EVALUATION.md](docs/PERSON_4_EVALUATION.md). At k=10, hybrid
+The fixed-set retrieval results and full table are in the
+[Person 4 report](docs/PERSON_4_REPORT.md). At k=10, hybrid
 retrieval reaches 87.08% macro recall versus 83.15% for BM25, but is slower.
 The deterministic reranker did not improve k=10 coverage in this evaluation.
 
 Generation results are deliberately reported with limitations: lexical F1 is
 only a proxy, quote occurrence is not entailment, and the evaluation found
 unsupported answers and false abstentions. No legal correctness claim is made.
-No target-user session has been conducted yet; this is an explicit remaining
-external task, not a result inferred from model scores.
-
-The feedback collection package is documented in
-[USER_FEEDBACK.md](docs/USER_FEEDBACK.md). It currently reports a sample size
-of zero and contains no invented ratings or comments. A separate
-`data/feedback/synthetic_responses.csv` fixture exists only to test reporting
-code; its `TEST-` participants are not real users and must not be presented as
-feedback evidence.
+Real-user feedback was removed from the agreed deliverables. The feedback
+collection package and zero-response report remain optional artifacts; no
+synthetic fixture is presented as real-user evidence.
 
 ## Deployment
 
@@ -174,8 +176,10 @@ results. Final evaluation against a future public endpoint remains pending.
 
 - [design.md](design.md): corpus, chunking, indexing, retrieval, citations,
   and known failures.
-- [optimisation.md](optimisation.md): fixed-set measurements and optimization
-  gate.
+- [docs/PROJECT_FINAL_REPORT.md](docs/PROJECT_FINAL_REPORT.md): whole-project
+  scope, team deliverables, architecture, results, costs, and limitations.
+- [docs/PERSON_4_REPORT.md](docs/PERSON_4_REPORT.md): Person 4's evaluation
+  history, results, optimization comparison, cost model, and limitations.
 - [postmortem.md](postmortem.md): failures, detection, and next iteration.
 - [data/eval/questions.jsonl](data/eval/questions.jsonl): canonical evaluation
   questions with source evidence.
