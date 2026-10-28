@@ -9,11 +9,12 @@ import os
 import secrets
 import subprocess
 from pathlib import Path
-from threading import Lock
+from queue import Queue
+from threading import Lock, Thread
 from time import perf_counter
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, Response, StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from dotenv import load_dotenv
 
@@ -89,6 +90,8 @@ def _build_retriever(*, use_qdrant: bool) -> tuple[RetrievalService, str]:
 def create_app(retriever=None, *, use_qdrant: bool | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app):
+        app.state.articles = {record.record_id: record for record in
+                              load_corpus(PROJECT / "data/processed/corpus.jsonl")}
         if retriever is not None:
             app.state.retriever = retriever
             app.state.retrieval_method = "bm25"
@@ -160,21 +163,43 @@ def create_app(retriever=None, *, use_qdrant: bool | None = None) -> FastAPI:
     def index():
         return FileResponse(Path(__file__).with_name("index.html"), headers={"Cache-Control": "no-cache"})
 
+    @app.get("/library.js", include_in_schema=False)
+    def library_script():
+        return FileResponse(Path(__file__).with_name("library.js"), media_type="text/javascript", headers={"Cache-Control": "no-cache"})
+
+    @app.get("/pixel.ttf", include_in_schema=False)
+    def pixel_font():
+        return FileResponse(Path(__file__).with_name("pixel.ttf"), media_type="font/ttf")
+
+    @app.get("/assets/midnight-library.png", include_in_schema=False)
+    def library_backdrop():
+        return FileResponse(Path(__file__).with_name("assets") / "midnight-library.png", media_type="image/png")
+
+    @app.get("/articles/{record_id}", include_in_schema=False)
+    def article(record_id: str, request: Request):
+        record = request.app.state.articles.get(record_id)
+        if record is None:
+            raise HTTPException(404, "Cet article ne figure pas dans les archives disponibles.")
+        return {key: getattr(record, key) for key in
+                ("record_id", "article", "text", "heading_path", "pdf_page", "source_url", "source_edition")}
+
     @app.get("/health")
     def health(request: Request):
         return {"status": "ok", "model": MODEL,
                 "paid_calls_allowed": os.getenv("ALLOW_PAID_CALLS", "").lower() == "true",
                 "configuration": request.app.state.configuration}
 
-    @app.post("/ask", response_model=Answer)
-    def ask(body: Question, request: Request):
+    def start_question(request: Request):
         if GENERATION_PROVIDER in {"openai", "groq"} and os.getenv("ALLOW_PAID_CALLS", "").lower() != "true":
             raise HTTPException(503, "Les appels au modèle payant sont désactivés pour préserver le crédit.")
         if not request.app.state.generation_lock.acquire(blocking=False):
             raise HTTPException(429, "Une question est déjà en cours. Réessayez après sa réponse.", headers={"Retry-After": "5"})
+
+    def answer_question(body: Question, request: Request, notify):
         started = perf_counter()
         try:
             if request.app.state.configuration["rewrite"]:
+                notify("rewrite")
                 plan, rewrite_usage = prepare_question(body.question, [t.model_dump() for t in body.history])
                 queries, clarification = plan.queries, plan.clarification
             else:
@@ -182,6 +207,7 @@ def create_app(retriever=None, *, use_qdrant: bool | None = None) -> FastAPI:
             rewritten = perf_counter()
             passages = []
             if not clarification:
+                notify("retrieval", method=request.app.state.retrieval_method, queries=queries)
                 batches = []
                 try:
                     for query in queries:
@@ -207,13 +233,19 @@ def create_app(retriever=None, *, use_qdrant: bool | None = None) -> FastAPI:
             if threshold > 0:
                 passages = [passage for passage in passages if passage.score >= threshold]
             retrieved = perf_counter()
+            if not clarification:
+                notify("evidence", passages=[{key: getattr(passage, key) for key in
+                    ("chunk_id", "record_id", "article", "heading_path", "pdf_page")} for passage in passages])
             try:
                 if clarification:
                     answer = abstention("clarification", clarification)
                 elif had_passages and not passages:
                     answer = abstention("below_threshold", "Les passages trouvés sont insuffisants pour répondre de façon fiable.")
                 else:
-                    answer = generate_answer(body.question, passages, search_queries=queries)
+                    if passages:
+                        notify("generation")
+                    answer = generate_answer(body.question, passages, search_queries=queries,
+                                             on_validation=lambda: notify("validation"))
             except TimeoutError as exc:
                 raise HTTPException(504, str(exc)) from exc
             except ConnectionError as exc:
@@ -242,6 +274,45 @@ def create_app(retriever=None, *, use_qdrant: bool | None = None) -> FastAPI:
             raise
         finally:
             request.app.state.generation_lock.release()
+
+    @app.post("/ask", response_model=Answer)
+    def ask(body: Question, request: Request):
+        start_question(request)
+        return answer_question(body, request, lambda *args, **kwargs: None)
+
+    @app.post("/ask/stream", include_in_schema=False)
+    def ask_stream(body: Question, request: Request):
+        start_question(request)
+        events = Queue()
+
+        def notify(event, **data):
+            events.put({"type": event, **data})
+
+        def run():
+            try:
+                answer = answer_question(body, request, notify)
+                notify("result", answer=answer.model_dump(mode="json"))
+            except HTTPException as exc:
+                notify("error", status=exc.status_code, detail=exc.detail)
+            except Exception:
+                LOGGER.error(json.dumps({"event": "stream_error", "status": 500}))
+                notify("error", status=500, detail="Le service est temporairement indisponible. Réessayez.")
+
+        try:
+            Thread(target=run, daemon=True).start()
+        except RuntimeError:
+            request.app.state.generation_lock.release()
+            raise HTTPException(503, "Le service est temporairement indisponible. Réessayez.") from None
+
+        def stream():
+            while True:
+                event = events.get()
+                yield json.dumps(event, ensure_ascii=False) + "\n"
+                if event["type"] in {"result", "error"}:
+                    return
+
+        return StreamingResponse(stream(), media_type="application/x-ndjson",
+            headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"})
 
     return app
 

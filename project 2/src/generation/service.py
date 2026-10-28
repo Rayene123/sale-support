@@ -396,7 +396,8 @@ def call_openai(system: str, prompt: str, schema: dict, *, timeout: float = 90,
             "message": {"content": content}, "prompt_eval_count": counts[0], "eval_count": counts[1]}
 
 
-def generate_answer(question: str, passages: list[RetrievalResult], *, search_queries: list[str] | None = None) -> Answer:
+def generate_answer(question: str, passages: list[RetrievalResult], *, search_queries: list[str] | None = None,
+                    on_validation=None) -> Answer:
     budget = 12000
     supplied = []
     for passage in passages:
@@ -453,6 +454,8 @@ def generate_answer(question: str, passages: list[RetrievalResult], *, search_qu
         })
     else:
         raise ValueError(f"Unsupported generation provider: {GENERATION_PROVIDER!r}.")
+    if on_validation:
+        on_validation()
     try:
         if not isinstance(result, dict) or result.get("done") is not True or result.get("done_reason") == "length":
             raise ValueError("Incomplete generation")
