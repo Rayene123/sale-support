@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 
-from indexing.chunking import ArticleChunk
+from indexing.chunking import ArticleChunk, chunk_metadata
 
 
 def filter_chunks(
@@ -39,11 +39,7 @@ def filter_chunks(
             "document_id": chunk.document_id,
             "language": chunk.language,
             "article_number": chunk.article_number,
-            "book": chunk.heading_path[0] if chunk.heading_path else None,
-            "titre": chunk.heading_path[1] if len(chunk.heading_path) > 1 else None,
-            "chapitre": chunk.heading_path[2] if len(chunk.heading_path) > 2 else None,
-            "section": chunk.heading_path[3] if len(chunk.heading_path) > 3 else None,
-            "sous_section": chunk.heading_path[4] if len(chunk.heading_path) > 4 else None,
+            **chunk_metadata(chunk),
             "pdf_page": chunk.pdf_page,
         }
         if all(

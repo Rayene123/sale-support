@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import unittest
+from dataclasses import replace
+from unittest.mock import patch
 
 import numpy as np
 
@@ -80,6 +82,26 @@ class QdrantConfigTests(unittest.TestCase):
 
 
 class QdrantIndexTests(unittest.TestCase):
+    def test_legacy_heading_and_suffix_filters_match_local_metadata(self):
+        chapter = "Chapitre I — Des éléments du fonds de commerce"
+        chunk = replace(make_chunk("code-commerce-tn:article-189-bis:chunk-0", 189, "fonds"),
+                        record_id="code-commerce-tn:article-189-bis", heading_path=("Livre II", chapter))
+        upload_chunks(self.client, [chunk], np.array([[1., .2, 0.]]), collection="legacy")
+        self.client.set_payload(collection_name="legacy", points=[point_id(chunk.chunk_id)],
+                                payload={"titre": chapter, "chapitre": None, "article_suffix": None})
+        retriever = self._retriever("legacy")
+        for filters in ({"chapitre": chapter}, {"titre": None}, {"article_suffix": "bis"},
+                        {"book": "Livre II", "article_suffix": ["bis", "ter"]}):
+            with self.subTest(filters=filters):
+                results = retriever.search("fonds de commerce", filters=filters)
+                self.assertEqual([r.chunk_id for r in results], [chunk.chunk_id])
+        self.assertEqual(retriever.search("fonds de commerce", filters={"titre": chapter}), [])
+        self.assertEqual(retriever.search("fonds de commerce", filters={"article_suffix": None}), [])
+        with patch.object(self.client, "scroll", side_effect=AssertionError("snapshot was reloaded")):
+            loaded = retriever.load_chunks()
+            loaded.clear()
+            self.assertEqual(retriever.load_chunks(), [chunk])
+
     def setUp(self):
         self.client = QdrantClient(location=":memory:")
         self.chunks = [

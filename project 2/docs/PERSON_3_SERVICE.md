@@ -62,6 +62,10 @@ The bundled Canvas scene, font and background are served by the API under the
 same authentication as `/ask`. Source books use `/articles/{record_id}` for
 trusted local corpus text and metadata; unknown articles return 404. Citation
 `heading_path` metadata selects the shelf without changing retrieval or ranking.
+The reader checks the full article's quotation, label, page, URL and headings
+against the citation. If Qdrant and the bundled article differ, it displays a
+source-version warning instead of presenting conflicting text; the validated
+quotation and published-source link remain available.
 No conversation is persisted to browser storage or a server database.
 
 The pixel view posts the same question/history body to `/ask/stream`. It runs
@@ -97,8 +101,8 @@ hashes and revision. These hashes are captured by the running server at startup.
 Clear standalone questions follow the direct search path. The short books
 retention phrase has a deterministic expansion. Vague follow-ups without
 context return `reason="clarification"`, without retrieval or generation.
-Contextual follow-ups and multi-part questions can make one bounded rewrite
-call (OpenAI when selected, otherwise local Ollama; 20-second timeout, at most
+Questions with conversation history and multi-part questions can make one bounded rewrite
+call through the selected provider (OpenAI, Groq or Ollama; 20-second timeout, at most
 three queries). Numbers and
 explicit negation/exception words are checked; intent preservation still needs
 human evaluation. A failed ambiguous rewrite requests clarification. A failed
@@ -309,3 +313,9 @@ Tests run without Ollama or downloading models:
 python -m pip install -r "project 2/requirements-dev.txt"
 python -m unittest discover -s "project 2/tests" -p "test_*.py"
 ```
+
+For the source-reader browser regression, open a local preview with Playwright
+CLI, then run `tests/pixel_source_review.js` using its `run-code --filename`
+command. The script intercepts generation and article requests with fixtures;
+it makes no model calls. It checks matching sources, whitespace variations,
+source-version mismatches and retention of the original citation/link.

@@ -44,11 +44,20 @@ Start the service:
 ```powershell
 $env:GENERATION_PROVIDER="ollama"
 $env:OLLAMA_MODEL="qwen3.5:9b"
+$env:RETRIEVAL_BACKEND="local"
 $env:ALLOW_PAID_CALLS="false"
+$env:CALIBRATION_FILE=""
 .\.venv\Scripts\python.exe -m uvicorn api.app:app --app-dir "project 2/src" --host 127.0.0.1 --port 8002
 ```
 
-Open `http://127.0.0.1:8002`, or call:
+Open `http://127.0.0.1:8002` in your browser.
+
+The browser opens the pixel-art library. Enter a French question and select
+**Consulter les archives**. Click a citation or **Ouvrir les livres** to inspect
+the source. **Continuer** keeps the conversation; **Nouvelle conversation**
+clears it. Keep the server terminal open while using the library.
+
+To ask the same service from PowerShell:
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8002/ask -Method Post `

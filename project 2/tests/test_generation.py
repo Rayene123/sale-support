@@ -36,6 +36,15 @@ def draft(**changes):
 
 
 class GenerationTests(unittest.TestCase):
+    def test_groq_rewrite_timeout_is_passed_to_the_transport(self):
+        reply = {"choices": [{"message": {"content": "{}"}, "finish_reason": "stop"}]}
+        response = MagicMock()
+        response.__enter__.return_value = io.BytesIO(json.dumps(reply).encode())
+        with patch.dict(os.environ, {"GROQ_API_KEY": "test-only-key"}), patch(
+                "generation.service.urllib.request.urlopen", return_value=response) as http:
+            call_groq({}, timeout=20)
+        self.assertEqual(http.call_args.kwargs, {"timeout": 20})
+
     def setUp(self):
         self.enterContext(patch.dict(os.environ, {"ALLOW_PAID_CALLS": "true"}))
 

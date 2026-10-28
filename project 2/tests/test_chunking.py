@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
 
 import _paths  # noqa: F401
 
-from indexing.chunking import chunk_article, chunk_records
+from indexing.chunking import chunk_article, chunk_metadata, chunk_records
+from indexing.corpus import load_corpus
 from ingestion.schema import ArticleRecord
+from retrieval.filters import filter_chunks
 
 
 def make_record(text: str = " ".join(f"word{i}" for i in range(10))) -> ArticleRecord:
@@ -42,6 +45,27 @@ def make_record(text: str = " ".join(f"word{i}" for i in range(10))) -> ArticleR
 
 
 class ChunkingTests(unittest.TestCase):
+    def test_named_metadata_matches_every_published_corpus_record(self):
+        records = load_corpus(Path(__file__).resolve().parents[1] / "data/processed/corpus.jsonl")
+        for record in records:
+            with self.subTest(record=record.record_id):
+                chunk = chunk_article(record)[0]
+                metadata = chunk_metadata(chunk)
+                self.assertEqual(metadata, {key: getattr(record, key) for key in metadata})
+                self.assertEqual(filter_chunks([chunk], metadata), [chunk])
+
+    def test_suffix_filters_distinguish_plain_bis_and_ter_articles(self):
+        chunks = []
+        for suffix in (None, "bis", "ter"):
+            record = make_record()
+            record.article_suffix = suffix
+            if suffix:
+                record.record_id += "-" + suffix
+            chunks.extend(chunk_article(record))
+        self.assertEqual(filter_chunks(chunks, {"article_suffix": None}), chunks[:1])
+        self.assertEqual(filter_chunks(chunks, {"article_suffix": ["bis", "ter"]}), chunks[1:])
+        self.assertEqual(filter_chunks(chunks, {"article_suffix": "quater"}), [])
+
     def test_article_strategy_keeps_an_article_as_one_chunk(self):
         chunks = chunk_article(make_record(), strategy="article")
         self.assertEqual(len(chunks), 1)

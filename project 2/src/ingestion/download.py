@@ -11,7 +11,7 @@ never trusts a partial download: the hash is verified after the write.
 from __future__ import annotations
 
 import hashlib
-import socket
+import tempfile
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -110,9 +110,8 @@ def download_source(
         return target
 
     request = urllib.request.Request(source.url, headers={"User-Agent": USER_AGENT})
-    socket.setdefaulttimeout(timeout)
     try:
-        with urllib.request.urlopen(request) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
             status = getattr(response, "status", 200)
             if status != 200:
                 raise SourceError(f"{source.url} returned HTTP {status}")
@@ -129,12 +128,16 @@ def download_source(
             "An error page or a login wall was served."
         )
 
-    target.write_bytes(payload)
+    pending = None
     try:
-        verify_source(source, target)
-    except SourceError:
-        target.unlink(missing_ok=True)
-        raise
+        with tempfile.NamedTemporaryFile(dir=raw_dir, suffix=".pdf", delete=False) as handle:
+            pending = Path(handle.name)
+            handle.write(payload)
+        verify_source(source, pending)
+        pending.replace(target)
+    finally:
+        if pending is not None:
+            pending.unlink(missing_ok=True)
     return target
 
 

@@ -8,6 +8,38 @@ explicitly marked as pending in that project report.
 
 This repository contains a FastAPI product-search application and a separate CS496 Project 0 sentiment benchmark. The benchmark classifies 75 short texts as `positive`, `negative`, `neutral`, or `mixed`. It does not use the product database or the earlier SQL evaluation questions.
 
+## Project 2 — Run the pixel-art library
+
+Clone or download this repository. Install Python 3.11+ and Ollama, and keep
+Ollama running. From the repository root, run these commands in PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r "project 2/requirements.txt"
+ollama pull qwen3.5:9b
+$env:GENERATION_PROVIDER="ollama"
+$env:OLLAMA_MODEL="qwen3.5:9b"
+$env:OLLAMA_URL="http://127.0.0.1:11434"
+$env:RETRIEVAL_BACKEND="local"
+$env:ALLOW_PAID_CALLS="false"
+$env:CALIBRATION_FILE=""
+$env:MIN_RETRIEVAL_SCORE="0"
+$env:DEMO_PASSWORD=""
+.\.venv\Scripts\python.exe -m uvicorn api.app:app --app-dir "project 2/src" --host 127.0.0.1 --port 8002
+```
+
+Open **http://127.0.0.1:8002/** to enter the pixel-art library. Ask a French
+question, such as **« Combien de temps conserver les livres de commerce ? »**,
+then click **Consulter les archives**. The librarian shows the processing stages
+and brings the cited books. Click a citation or **Ouvrir les livres** to read
+the evidence; **Continuer** keeps the conversation, and **Nouvelle conversation**
+clears it. Keep the terminal open; press `Ctrl+C` to stop the service.
+
+This local setup uses the bundled corpus and needs no API key, Qdrant account
+or raw PDF. The model download is required only once. On macOS/Linux, use
+`.venv/bin/python` and `export NAME=value` instead of PowerShell environment
+assignments. See [Project 2](project%202/README.md) for other configurations.
+
 ## Setup
 
 Use Python 3.10 or newer. From the repository root:

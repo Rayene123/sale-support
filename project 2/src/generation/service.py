@@ -226,7 +226,7 @@ def call_ollama(payload: dict, *, timeout: float = 90) -> dict:
         raise ConnectionError("Ollama est indisponible ou le modèle local est absent.") from exc
 
 
-def call_groq(payload: dict) -> dict:
+def call_groq(payload: dict, *, timeout: float = 90) -> dict:
     """Call Groq and adapt its OpenAI-compatible reply to the internal format."""
     if os.getenv("ALLOW_PAID_CALLS", "").lower() != "true":
         raise ConnectionError("Les appels API payants sont désactivés. Utilisez le modèle local.")
@@ -244,7 +244,7 @@ def call_groq(payload: dict) -> dict:
         method="POST",
     )
     try:
-        with urllib.request.urlopen(request, timeout=90) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
             result = json.load(response)
     except urllib.error.HTTPError as exc:
         status = exc.code

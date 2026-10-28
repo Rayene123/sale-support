@@ -23,8 +23,10 @@ from typing import Any
 
 import numpy as np
 
-from indexing.chunking import ArticleChunk
+from indexing.chunking import ArticleChunk, chunk_metadata
+from ingestion.schema import HEADING_FIELDS
 from models.retrieval import RetrievalResult
+from .filters import filter_chunks
 
 DEFAULT_COLLECTION = "librarian-chunks"
 DEFAULT_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
@@ -37,8 +39,7 @@ POINT_ID_NAMESPACE = uuid.uuid5(
 )
 
 # Payload fields that may be used as exact-match filters. They mirror
-# retrieval.filters.filter_chunks (except article_suffix, which ArticleChunk
-# does not carry).
+# retrieval.filters.filter_chunks, including suffixes derived from stable IDs.
 FILTERABLE_FIELDS = frozenset(
     {
         "chunk_id",
@@ -46,6 +47,7 @@ FILTERABLE_FIELDS = frozenset(
         "document_id",
         "language",
         "article_number",
+        "article_suffix",
         "pdf_page",
         "book",
         "titre",
@@ -134,11 +136,6 @@ def chunk_payload(chunk: ArticleChunk) -> dict[str, Any]:
     out of ``heading_path`` so Qdrant can filter on them without client-side
     post-processing.
     """
-    headings = list(chunk.heading_path)
-
-    def level(index: int) -> str | None:
-        return headings[index] if len(headings) > index else None
-
     return {
         "chunk_id": chunk.chunk_id,
         "record_id": chunk.record_id,
@@ -147,7 +144,7 @@ def chunk_payload(chunk: ArticleChunk) -> dict[str, Any]:
         "chunk_count": chunk.chunk_count,
         "article": chunk.article,
         "article_number": chunk.article_number,
-        "heading_path": headings,
+        "heading_path": list(chunk.heading_path),
         "document_id": chunk.document_id,
         "language": chunk.language,
         "pdf_page": chunk.pdf_page,
@@ -156,11 +153,7 @@ def chunk_payload(chunk: ArticleChunk) -> dict[str, Any]:
         "source_sha256": chunk.source_sha256,
         "source_date": chunk.source_date,
         "source_edition": chunk.source_edition,
-        "book": level(0),
-        "titre": level(1),
-        "chapitre": level(2),
-        "section": level(3),
-        "sous_section": level(4),
+        **chunk_metadata(chunk),
     }
 
 
@@ -345,9 +338,12 @@ class QdrantRetriever:
         self._client = client
         self._collection = collection
         self._embedder = embedder
+        self._chunks: tuple[ArticleChunk, ...] | None = None
 
     def load_chunks(self) -> list[ArticleChunk]:
         """Load payloads for the local BM25 leg of hybrid retrieval."""
+        if self._chunks is not None:
+            return list(self._chunks)
         chunks: list[ArticleChunk] = []
         offset = None
         while True:
@@ -399,6 +395,7 @@ class QdrantRetriever:
         chunks.sort(key=lambda chunk: chunk.chunk_id)
         if not chunks:
             raise ValueError(f"Qdrant collection {self._collection!r} is empty")
+        self._chunks = tuple(chunks)
         return chunks
 
     @property
@@ -417,6 +414,13 @@ class QdrantRetriever:
             raise ValueError("top_k must be at least 1")
         if not query.strip():
             return []
+        if filters and set(filters).intersection((*HEADING_FIELDS, "article_suffix")):
+            # Older collections flattened missing levels incorrectly. Use the
+            # same immutable payload snapshot as BM25, without rewriting vectors.
+            matches = filter_chunks(self.load_chunks(), filters)
+            if not matches:
+                return []
+            filters = {"chunk_id": [chunk.chunk_id for chunk in matches]}
         vector = np.asarray(
             self._embedder.encode([query], normalize_embeddings=True),
             dtype=np.float32,
