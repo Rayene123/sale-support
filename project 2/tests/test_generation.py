@@ -48,7 +48,7 @@ class GenerationTests(unittest.TestCase):
     def test_openai_paid_calls_disabled_even_when_a_key_is_present(self):
         with patch.dict(os.environ, {"ALLOW_PAID_CALLS": "false", "OPENAI_API_KEY": "test-only-key"}), patch("generation.service.urllib.request.urlopen") as http:
             with self.assertRaises(ConnectionError):
-                call_openai({})
+                call_openai("system", "question", Draft.model_json_schema())
         http.assert_not_called()
 
     def generate(self, response, passages=None):
@@ -215,25 +215,24 @@ class GenerationTests(unittest.TestCase):
             patch.dict(os.environ, {"OPENAI_API_KEY": ""}),
             patch("generation.service.urllib.request.urlopen") as http,
         ):
-            with self.assertRaisesRegex(ConnectionError, "OPENAI_API_KEY is required"):
-                call_openai({"model": "gpt-6-luna"})
+            with self.assertRaises(ConnectionError):
+                call_openai("system", "question", Draft.model_json_schema())
         http.assert_not_called()
 
-    def test_openai_chat_request_auth_schema_and_successful_response(self):
+    def test_openai_response_auth_schema_and_service_tier(self):
         api_response = {
-            "choices": [{
-                "message": {"role": "assistant", "content": draft()["message"]["content"]},
-                "finish_reason": "stop",
-            }],
-            "usage": {"prompt_tokens": 234, "completion_tokens": 38},
-            "service_tier": "default",
+            "status": "completed",
+            "output": [{"type": "message", "content": [
+                {"type": "output_text", "text": draft()["message"]["content"]}]}],
+            "usage": {"input_tokens": 234, "output_tokens": 38},
+            "service_tier": "flex",
         }
         context = MagicMock()
         context.__enter__.return_value = io.BytesIO(json.dumps(api_response).encode("utf-8"))
         with (
             patch("generation.service.GENERATION_PROVIDER", "openai"),
             patch("generation.service.OPENAI_MODEL", "gpt-6-luna"),
-            patch("generation.service.OPENAI_SERVICE_TIER", "default"),
+            patch("generation.service.OPENAI_SERVICE_TIER", "flex"),
             patch.dict(os.environ, {"OPENAI_API_KEY": "test-only-key"}),
             patch("generation.service.urllib.request.urlopen", return_value=context) as http,
         ):
@@ -241,19 +240,20 @@ class GenerationTests(unittest.TestCase):
 
         request = http.call_args.args[0]
         payload = json.loads(request.data.decode("utf-8"))
-        self.assertEqual(request.full_url, "https://api.openai.com/v1/chat/completions")
+        self.assertEqual(request.full_url, "https://api.openai.com/v1/responses")
         self.assertEqual(request.get_header("Authorization"), "Bearer test-only-key")
         self.assertEqual(payload["model"], "gpt-6-luna")
-        self.assertEqual(payload["response_format"]["type"], "json_schema")
-        self.assertTrue(payload["response_format"]["json_schema"]["strict"])
-        self.assertEqual(payload["reasoning_effort"], "none")
-        self.assertEqual(payload["service_tier"], "default")
-        self.assertEqual(payload["max_completion_tokens"], 640)
-        self.assertFalse(payload["stream"])
+        self.assertEqual(payload["text"]["format"]["type"], "json_schema")
+        self.assertTrue(payload["text"]["format"]["strict"])
+        self.assertEqual(payload["reasoning"]["effort"], "none")
+        self.assertEqual(payload["service_tier"], "flex")
+        self.assertEqual(payload["max_output_tokens"], 640)
+        self.assertFalse(payload["store"])
         self.assertFalse(answer.abstain)
         self.assertEqual(answer.citations[0].record_id, PASSAGE.record_id)
         self.assertEqual(answer.usage, {"prompt_tokens": 234, "completion_tokens": 38})
-        self.assertEqual(answer.configuration["openai_service_tier_actual"], "default")
+        self.assertEqual(answer.configuration["openai_service_tier_requested"], "flex")
+        self.assertEqual(answer.configuration["openai_service_tier_actual"], "flex")
 
     def test_groq_timeout_and_http_errors_are_sanitized(self):
         with patch.dict(os.environ, {"GROQ_API_KEY": "test-only-key"}):

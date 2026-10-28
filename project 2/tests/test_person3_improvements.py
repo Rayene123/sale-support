@@ -193,9 +193,11 @@ class PipelineTests(unittest.TestCase):
 
     def test_demo_password_protects_ui_api_and_docs(self):
         with patch.dict(os.environ, {"DEMO_PASSWORD": "test-only-password"}):
-            for path in ["/", "/docs", "/openapi.json"]:
+            for path in ["/", "/docs", "/openapi.json", "/library.js", "/pixel.ttf",
+                         "/assets/midnight-library.png", "/articles/code-commerce-tn:article-10"]:
                 self.assertEqual(self.client.get(path).status_code, 401)
-            self.assertEqual(self.client.post("/ask", json={"question": "Test"}).status_code, 401)
+            for path in ("/ask", "/ask/stream"):
+                self.assertEqual(self.client.post(path, json={"question": "Test"}).status_code, 401)
             self.assertEqual(self.client.get("/health").status_code, 200)
             token = base64.b64encode(b"librarian:test-only-password").decode()
             self.assertEqual(self.client.get("/", headers={"Authorization": "Basic " + token}).status_code, 200)
@@ -206,9 +208,10 @@ class PipelineTests(unittest.TestCase):
             with patch("api.app.GENERATION_PROVIDER", provider), patch.dict(
                     os.environ, {"ALLOW_PAID_CALLS": "false"}), patch(
                     "api.app.prepare_question") as rewrite, patch("api.app.generate_answer") as generate:
-                response = self.client.post("/ask", json={"question": "Combien de temps conserver les livres ?"})
-                self.assertEqual(response.status_code, 503)
-                self.assertIn("désactivés", response.json()["detail"])
+                for path in ("/ask", "/ask/stream"):
+                    response = self.client.post(path, json={"question": "Combien de temps conserver les livres ?"})
+                    self.assertEqual(response.status_code, 503)
+                    self.assertIn("désactivés", response.json()["detail"])
                 self.assertFalse(self.client.get("/health").json()["paid_calls_allowed"])
                 rewrite.assert_not_called()
                 generate.assert_not_called()

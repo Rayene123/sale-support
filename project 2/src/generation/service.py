@@ -34,7 +34,6 @@ MODEL = {
 }.get(GENERATION_PROVIDER, OLLAMA_MODEL)
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
 GROQ_CHAT_COMPLETIONS_URL = "https://api.groq.com/openai/v1/chat/completions"
-OPENAI_CHAT_COMPLETIONS_URL = "https://api.openai.com/v1/chat/completions"
 LOGGER = logging.getLogger(__name__)
 # Keep the provider's strict JSON Schema within Groq's supported subset. These
 # bounds remain enforced by Draft/Pydantic after the response is received.
@@ -307,82 +306,6 @@ def call_groq(payload: dict) -> dict:
     }
 
 
-def call_openai(payload: dict) -> dict:
-    """Call OpenAI Chat Completions and adapt its reply to the internal format."""
-    if os.getenv("ALLOW_PAID_CALLS", "").lower() != "true":
-        raise ConnectionError("Les appels API payants sont dÃ©sactivÃ©s. Utilisez le modÃ¨le local.")
-    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
-    if not api_key:
-        raise ConnectionError("OPENAI_API_KEY is required when GENERATION_PROVIDER=openai.")
-
-    request = urllib.request.Request(
-        OPENAI_CHAT_COMPLETIONS_URL,
-        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=90) as response:
-            result = json.load(response)
-    except urllib.error.HTTPError as exc:
-        status = exc.code
-        LOGGER.error(json.dumps({
-            "event": "openai_http_error",
-            "status": status,
-            "request": {
-                **_groq_request_diagnostic(payload),
-                "endpoint": OPENAI_CHAT_COMPLETIONS_URL,
-            },
-            "error_body": _groq_error_diagnostic(exc),
-        }))
-        if status == 429 or status >= 500:
-            raise ConnectionError(f"OpenAI API temporarily unavailable (HTTP {status}).") from None
-        raise ValueError(f"OpenAI API rejected the request (HTTP {status}).") from None
-    except TimeoutError as exc:
-        raise TimeoutError("OpenAI generation timed out.") from exc
-    except urllib.error.URLError as exc:
-        if isinstance(exc.reason, TimeoutError):
-            raise TimeoutError("OpenAI generation timed out.") from exc
-        raise ConnectionError("OpenAI API is unavailable.") from None
-    except OSError as exc:
-        raise ConnectionError("OpenAI API is unavailable.") from None
-    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
-        _log_openai_parse_error("response_json", exc, "Response body was not valid JSON.")
-        raise ValueError("OpenAI API returned malformed JSON.") from exc
-
-    try:
-        choice = result["choices"][0]
-        message = choice["message"]
-        content = message["content"]
-        finish_reason = choice["finish_reason"]
-        usage = result.get("usage") or {}
-        if not isinstance(content, str) or not isinstance(finish_reason, str) or not isinstance(usage, dict):
-            raise TypeError
-        prompt_tokens = usage.get("prompt_tokens")
-        completion_tokens = usage.get("completion_tokens")
-        if any(value is not None and (not isinstance(value, int) or isinstance(value, bool))
-               for value in (prompt_tokens, completion_tokens)):
-            raise TypeError
-    except (KeyError, IndexError, TypeError) as exc:
-        _log_openai_parse_error(
-            "completion_envelope", exc,
-            "Required chat completion fields were missing or invalid.",
-        )
-        raise ValueError("OpenAI API returned an incomplete chat completion.") from exc
-
-    return {
-        "done": True,
-        "done_reason": "length" if finish_reason == "length" else finish_reason,
-        "message": {"content": content},
-        "prompt_eval_count": prompt_tokens,
-        "eval_count": completion_tokens,
-        "service_tier": result.get("service_tier"),
-    }
-
-
 def _groq_schema(schema: dict) -> dict:
     """Remove schema bounds Groq strict mode does not support.
 
@@ -445,6 +368,7 @@ def call_openai(system: str, prompt: str, schema: dict, *, timeout: float = 90,
 
     payload = {"model": OPENAI_MODEL, "instructions": system, "input": prompt,
                "store": False, "max_output_tokens": max_output_tokens,
+               "service_tier": OPENAI_SERVICE_TIER,
                "reasoning": {"effort": os.getenv("OPENAI_REASONING_EFFORT", "none")},
                "text": {"format": {"type": "json_schema", "name": "grounded_result",
                                    "strict": True, "schema": strict(_groq_schema(schema))}}}
@@ -489,10 +413,12 @@ def call_openai(system: str, prompt: str, schema: dict, *, timeout: float = 90,
         except sqlite3.Error:
             pass  # Keep the full reservation if accounting cannot be settled.
     return {"done": status == "completed", "done_reason": "length" if status == "incomplete" else status,
-            "message": {"content": content}, "prompt_eval_count": counts[0], "eval_count": counts[1]}
+            "message": {"content": content}, "prompt_eval_count": counts[0], "eval_count": counts[1],
+            "service_tier": result.get("service_tier")}
 
 
-def generate_answer(question: str, passages: list[RetrievalResult], *, search_queries: list[str] | None = None) -> Answer:
+def generate_answer(question: str, passages: list[RetrievalResult], *, search_queries: list[str] | None = None,
+                    on_validation=None) -> Answer:
     budget = GENERATION_CONTEXT_CHARS
     supplied = []
     for passage in passages:
@@ -547,26 +473,10 @@ def generate_answer(question: str, passages: list[RetrievalResult], *, search_qu
             "temperature": 0,
             "max_completion_tokens": 640,
         })
-    elif GENERATION_PROVIDER == "openai":
-        result = call_openai({
-            "model": OPENAI_MODEL,
-            "messages": messages,
-            "response_format": {
-                "type": "json_schema",
-                "json_schema": {
-                    "name": "generation_draft",
-                    "strict": True,
-                    "schema": schema,
-                },
-            },
-            "stream": False,
-            "temperature": 0,
-            "reasoning_effort": "none",
-            "max_completion_tokens": 640,
-            "service_tier": OPENAI_SERVICE_TIER,
-        })
     else:
         raise ValueError(f"Unsupported generation provider: {GENERATION_PROVIDER!r}.")
+    if on_validation:
+        on_validation()
     try:
         if not isinstance(result, dict) or result.get("done") is not True or result.get("done_reason") == "length":
             raise ValueError("Incomplete generation")

@@ -50,7 +50,38 @@ Open `http://127.0.0.1:8002` for the French interface, or `/docs` for the API.
 Optional `history` holds up to four `{role: "user"|"assistant", content: "..."}`
 turns, each at most 2000 characters and 6000 characters combined. The browser
 keeps this context only in memory and offers a new-conversation button.
-It returns `answer_fr`, `abstain`, `citations`, `reason`, `model`, `timings_ms`
+
+The pixel interface uses the same `/ask` contract and bounded history as the
+standard service. Continuer clears the input while retaining the last two
+completed exchanges. Nouvelle conversation clears that history, answers,
+citation books and animation state, and closes any source book. Reset aborts
+the browser wait and ignores late replies; an already-started server/model
+call may still finish. Failed requests are not added to history.
+
+The bundled Canvas scene, font and background are served by the API under the
+same authentication as `/ask`. Source books use `/articles/{record_id}` for
+trusted local corpus text and metadata; unknown articles return 404. Citation
+`heading_path` metadata selects the shelf without changing retrieval or ranking.
+No conversation is persisted to browser storage or a server database.
+
+The pixel view posts the same question/history body to `/ask/stream`. It runs
+the same generation path as `/ask` and returns newline-delimited JSON events:
+`rewrite`, `retrieval`, `evidence`, `generation`, `validation`, then `result`
+containing the existing answer object. Stages that do not run are omitted.
+The evidence event contains retrieved chunk/article metadata; no draft model
+answer is displayed before validation. Validation means the existing schema,
+chunk-ID and quotation checks, not legal or semantic approval.
+
+French status bubbles use authored messages triggered by those events. Retrieved
+books arrive on the research table, grouped by article. After the final result,
+uncited candidates dim and only cited books are delivered to the reader's desk.
+Reset clears progress and candidate books and ignores late events. Reduced
+motion shows the same actual evidence without flight or walking animations.
+Both request routes share the paid-call guard, budget and concurrency lock.
+Preflight errors use normal HTTP statuses; errors after streaming starts end
+with an `error` event. An interrupted stream is not retried automatically.
+
+`POST /ask` returns `answer_fr`, `abstain`, `citations`, `reason`, `model`, `timings_ms`
 and `usage`. Each answer point is numbered `[1]`, `[2]`, etc., corresponding to
 its citation, which includes the point text, chunk/record IDs, article, exact
 quote, PDF page and publisher URL. URLs come from the corpus; a publisher
