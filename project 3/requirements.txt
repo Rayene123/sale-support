@@ -1,0 +1,7 @@
+langgraph>=0.2,<2
+langfuse>=2,<4
+langchain-openai>=0.2,<2
+pydantic>=2,<3
+python-dotenv>=1,<2
+supabase>=2,<3
+pytest>=8,<9
