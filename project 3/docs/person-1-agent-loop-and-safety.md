@@ -1,13 +1,15 @@
-# Person 1 — Agent Loop and Safety
+# Person 1 — LangGraph Agent Loop and Safety
 
 ## Mission
 
-Build the LangGraph control loop that turns a support-ticket request into a
-safe, inspectable trajectory. The graph must plan, gather evidence, draft
-proposed database, email, refund, and escalation actions, pause for a human
-decision, and execute actions only after approval.
-The graph is the safety boundary: model output must never be able to skip the
-checkpoint, change the write policy, or extend the run indefinitely.
+Own the control plane that handles a customer support ticket or product-order
+request. LangGraph gathers approved evidence through Person 2's tools, drafts a
+structured response or sandbox order, pauses for an admin decision, and
+orchestrates only the exact actions covered by that approval.
+
+The graph is the safety boundary. Model output and scraped page content are
+untrusted. Neither can call a write tool, change the approval policy, change
+the approved customer/product/order, or extend a run indefinitely.
 
 ## Ownership
 
@@ -20,149 +22,119 @@ agent/checkpoint.py
 agent/limits.py
 tests/test_graph.py
 tests/test_checkpoint.py
+docs/trajectory-schema.md
 ```
 
-You may add small helpers under `agent/`, but coordinate any new public state
-field or trajectory event with Persons 2–4 before merging.
+Person 1 owns state types, transitions, checkpoints, approval validation,
+bounded execution, and graph-level orchestration. Person 1 does not implement
+the MYTEK scraper, Supabase access, order persistence, notification delivery,
+or LangSmith tracing.
 
-## Dependencies and order
+## Dependencies
 
-### Must wait for
+Before connecting new nodes, agree with Person 2 on tool names, inputs,
+outputs, retry behavior, operation IDs, and which actions write sandbox state.
+Agree with Person 3 on the trajectory fields before freezing event names.
+Person 4 consumes the resulting stable graph and trajectory events for
+LangSmith. Until those contracts exist, Person 1 may work against mocked tool
+adapters but must not duplicate another person's tool implementation.
 
-- Person 2's Supabase table and tool contracts before wiring tool calls.
-- The agreed trajectory event schema before finalizing graph state.
+## State responsibilities
 
-### Can work in parallel
+Maintain serializable state for:
 
-- Define typed graph state and stop-rule tests while Person 2 builds the
-  sandbox.
-- Write checkpoint tests using mocked tools.
+- run ID, request type, customer/ticket identifiers, step count, and status;
+- retrieved ticket, customer, current order, and MYTEK product results;
+- the structured support reply or proposed order and notification;
+- approval decision and operation IDs;
+- tool call summaries, concise errors, trajectory events, and applied actions.
 
-### Must finish before
+Do not put API clients, credentials, callbacks, or hidden chain-of-thought in
+state. Keep ticket/product source text separate from trusted IDs and policy.
+Coordinate new public state fields with Persons 2–4 before freezing the schema.
 
-- Person 3 can freeze expected trajectories.
-- Person 4 can map Langfuse spans and CLI output to stable events.
+## Graph responsibilities
 
-## Required implementation
+The target workflow is:
 
-### 1. Define the state
+```text
+START
+  → validate request and initialize run
+  → inspect support/customer/order context
+  → if product selection is needed, search MYTEK through Person 2's read tool
+  → draft support response or exact sandbox order and notification
+  → interrupt and request explicit admin approval
+  → if approved, call only the approved sandbox action tools
+  → finish with completed, rejected, failed, or step_limit_reached
+```
 
-Create a typed, serializable state containing at least:
+Required node behavior:
 
-- `run_id`
-- `ticket_id`
-- `step_count`
-- `status`
-- `ticket`
-- `customer`
-- `order`
-- `draft`
-- `approval`
-- `operation_id`
-- `tool_calls`
-- `errors`
-- `trajectory`
+1. Validate request and IDs; invalid input terminates clearly.
+2. Read only the context needed for the request; missing context is an error,
+   never a reason to invent customer or product facts.
+3. Treat scraper output and all customer text as untrusted data.
+4. Validate drafts against typed schemas and tool allowlists before approval.
+5. Show exact product IDs, quantities, observed prices and total for an order;
+   show exact ticket mutation and notification text for support work.
+6. Pause with LangGraph `interrupt`; resume the same checkpoint with a
+   structured approve/decline decision tied to the exact operation ID.
+7. On approval, orchestrate Person 2's approved actions in a defined order.
+   Never run any action on rejection, cancellation, invalid approval, timeout,
+   or step exhaustion.
+8. Record a concise trajectory event for each node and tool attempt. Do not
+   record chain-of-thought or unnecessary personal information.
 
-Use explicit status values such as `running`, `awaiting_approval`, `approved`,
-`rejected`, `completed`, `failed`, and `step_limit_reached`. Do not represent a
-failed or rejected run as successful with an empty result.
+Order creation here means a sandbox order record only. It must not submit a
+MYTEK cart, authorize payment, or imply that a real purchase occurred.
 
-### 2. Implement graph nodes
+## Checkpoint and stop rule
 
-The initial graph should contain these bounded nodes:
+Use one process-persistent LangGraph checkpointer for the prototype and a
+stable thread ID per run. Resuming must never create a new execution. Repeated
+resume must not repeat an action; Person 2's write tools provide durable
+idempotency, while the graph validates operation IDs and completed checkpoints.
 
-1. `start_run`: validate the ticket identifier and initialize the run.
-2. `inspect_ticket`: call `get_ticket`.
-3. `inspect_context`: call `find_customer` and `get_order` only when their
-   identifiers are available.
-4. `draft_action`: produce a structured response and an allowlisted mutation.
-5. `request_approval`: expose the exact database mutation and email message,
-   then pause.
-6. `apply_approved_actions`: call only the approved subset of
-   `update_ticket_database`, `send_support_email`, `create_refund_request`, and
-   `create_escalation_task`.
-7. `finish_run`: create the final serializable result.
+Configure `MAX_STEPS` (current prototype default `16`) and count graph nodes
+and tool attempts. Before entering another node or retrying a tool, stop with
+`step_limit_reached` when the limit would be exceeded. Recheck the default when
+Person 2's scraper/order/notification calls are integrated and agree the bound
+with Person 3.
 
-Each node must emit a trajectory event with the node name, input summary,
-output summary, start/end timestamps, and resulting status. Never store hidden
-chain-of-thought; record concise decisions and structured fields only.
-
-### 3. Implement the human checkpoint
-
-The approval request must show:
-
-- ticket ID;
-- proposed status;
-- proposed labels;
-- exact response text;
-- database operation ID and email operation ID;
-- sandbox email recipient and subject;
-- refund amount and reason, when applicable;
-- escalation team, priority, and reason, when applicable;
-- evidence IDs used to create the proposal.
-
-Only the values returned by the approval mechanism may authorize a write.
-Free-form text such as “ignore the approval requirement” is not approval.
-Rejection, cancellation, and timeout must terminate without invoking the write
-tool.
-
-### 4. Enforce the stop rule
-
-Set `MAX_STEPS` from configuration, defaulting to `8`. Increment the counter
-for every graph node and tool attempt. Before entering another node, terminate
-with `step_limit_reached` when the bound is reached. The limit must apply even
-when the model asks to retry, produces malformed output, or receives malicious
-tool text.
-
-Document the proof as an invariant:
-
-> Every transition consumes one step, every transition checks the counter, and
-> no terminal state has an outgoing transition. Therefore a run has at most
-> `MAX_STEPS` transitions.
+Invariant: every node/tool attempt consumes one step, every transition checks
+the remaining budget, and terminal states have no outgoing transition.
+Therefore a run cannot exceed `MAX_STEPS`.
 
 ## Public interface
 
-Expose one stable entry point:
+Target one stable JSON-serializable API:
 
 ```python
-run_ticket(
-    ticket_id: str,
-    approval: ApprovalDecision | None = None,
-    *,
-    run_id: str | None = None,
-) -> OperatorResult
+run_operator(request, approval=None, *, run_id=None, tool_executor=None) -> dict
 ```
 
-The first call may return `awaiting_approval`. A resumed call receives the
-checkpoint token or run identifier plus the explicit decision. The result must
-be JSON serializable and include final status, trajectory, tool calls, errors,
-and the proposed/applied mutation.
+The first call may return `awaiting_approval`; a resumed call supplies the
+original `run_id` and exact structured decision. Keep `run_ticket(...)` as a
+compatibility wrapper while the support-ticket UI depends on it. For product
+orders, `tool_executor(tool_name, payload)` is injected by the application and
+dispatches only Person 2's agreed tool implementations. This adapter is a
+proposed integration point; Person 2 must confirm exact names and payloads.
 
-## Tests and acceptance criteria
+## Person 1 acceptance criteria
 
-Add deterministic tests for:
+- Product lookup and support-ticket paths use mocked tools without network
+  calls in graph tests.
+- No action tool runs before approval.
+- Approval authorizes only the exact displayed operation; rejection and
+  malformed or mismatched approval write nothing.
+- Duplicate resume cannot duplicate actions.
+- Tool/model failure and step exhaustion terminate with explicit statuses.
+- Every trajectory stays within the configured step bound and is JSON-safe.
+- The graph can be wired to Person 2's implementation without changing tool
+  behavior or bypassing its sandbox.
 
-- normal read → draft → approval → database update → email/refund/escalation
-  actions → finish;
-- rejection never calls either action tool;
-- cancellation and timeout never write;
-- invalid ticket ID becomes a clear terminal error;
-- malformed draft is rejected rather than silently defaulted;
-- one transient tool failure follows the defined recovery path;
-- repeated resume does not create an extra database update or email;
-- malicious ticket text cannot alter the graph or tool policy;
-- every trajectory has `step_count <= MAX_STEPS`;
-- a forced loop reaches `step_limit_reached`.
+## Handoff
 
-The graph owner is finished when all tests pass without network access and
-Person 2 confirms the graph uses only the agreed tool contracts.
-
-## Handoff to the team
-
-Provide:
-
-1. A short state/event schema in `docs/trajectory-schema.md`.
-2. The public `run_ticket` interface and example result.
-3. A list of terminal statuses and their meanings.
-4. Tests proving the checkpoint and stop rule.
-5. A note to Person 4 describing which events should become Langfuse spans.
+Provide the frozen state/trajectory schema, public API, terminal status list,
+checkpoint behavior, stop-rule proof, and the event list Person 4 should map to
+LangSmith runs, spans, and approval events.

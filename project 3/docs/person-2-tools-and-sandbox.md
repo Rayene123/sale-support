@@ -1,221 +1,124 @@
-# Person 2 — Tools and Sandbox
+# Person 2 — MYTEK Product Tools, Sandbox, and Side Effects
 
 ## Mission
 
-Create deterministic, resettable Supabase sale-support data and the tools used by the
-operator. Tools must have strict schemas, safe allowlists, typed JSON-safe
-results, clear errors, and observable side effects. The database update and
-email-send tools must be safe to replay and must never access production.
+Provide the typed, deterministic tool layer for the Shopline Ops agent. This
+person owns public MYTEK catalog retrieval plus the isolated ticket/order data
+and approved side-effect tools. The tool boundary must make it impossible for
+the graph or model to turn product research into a real MYTEK checkout or
+payment.
 
 ## Ownership
 
 Primary files:
 
 ```text
-agent/tools/schemas.py
-agent/tools/reads.py
-agent/tools/writes.py
-sandbox/data/
+agent/tools/
+sandbox/schema.sql
+sandbox/seed.sql
 sandbox/store.py
 sandbox/reset.py
 tests/test_tools.py
 tests/test_sandbox.py
 ```
 
-## Dependencies and order
+Person 2 owns scraper and tool implementations, Pydantic input/output
+contracts, sandbox persistence, and idempotency. Person 2 does not own graph
+routing, approval policy, trajectory scoring, or LangSmith tracing.
 
-### Must finish first
+## Work order and contracts
 
-- Agree with Person 1 on graph state identifiers, action names, and approval
-  fields.
-- Agree with Person 3 on fixture IDs needed for the evaluation scenarios.
+1. Agree with Person 1 on state identifiers, action payloads, approval
+   references, operation IDs, and tool results.
+2. Agree with Person 3 on deterministic fixtures and failure cases.
+3. Implement read tools and isolated writes.
+4. Confirm the graph can use the published contracts without tool-specific
+   changes in Person 1's nodes.
 
-### First implementation owner
+Publish a tool contract with exact JSON examples before Person 1 connects the
+new graph branches. Every tool must return JSON-safe data and concise typed
+errors. Do not put tool implementations in `agent/graph.py`.
 
-Person 2 is the first implementation owner. Build the Supabase schema,
-seed/reset path, and tool contracts before Person 1 connects the graph to
-real tools.
+## MYTEK product catalog scraper
 
-### Must finish before
+Implement read-only product search for public MYTEK product listings/details.
+The proposed input is `{"query": "..."}` and the proposed result is
+`{"products": [...]}`. Each product should include `product_id`, `name`,
+`source_url`, `price_tnd` (or null), `availability` (`available`, `in_stock`,
+`out_of_stock`, or `unknown`), and `retrieved_at`. Preserve source references
+so the admin can verify what the proposal is based on.
 
-- Person 1 wires the production graph nodes.
-- Person 3 writes final expected trajectories.
-- Person 4 runs the clean-clone demo.
+The scraper must:
 
-## Sandbox design
+- access only public catalog pages and respect published site access rules;
+- use bounded requests, conservative rate limits, timeouts, and page limits;
+- never log in, add items to a MYTEK cart, submit checkout, or make a purchase;
+- treat all scraped text as untrusted content, including product descriptions;
+- distinguish unavailable or missing price data from invented values;
+- avoid bypassing access controls, CAPTCHAs, or other technical restrictions;
+- be testable with saved HTML fixtures so ordinary tests make no network calls.
 
-Use a dedicated Supabase sandbox project and a sandbox email outbox, not a
-production CRM, payment system, SMTP account, or real customer data. Seed at
-least:
+Potential interface name for coordination: `search_mytek_products(query)`.
+Person 2 must freeze its schema with Person 1 before graph integration.
 
-- 10 support tickets;
-- 10 customers;
-- 10 orders;
-- refund and escalation tables;
-- tickets with delivered, delayed, cancelled, and refund-request states;
-- at least one missing customer and one missing order;
-- at least one record containing prompt-injection text;
-- one fixture for a transient read failure;
-- one fixture for a write failure before and after persistence.
+## Sandbox reads and writes
 
-Implement:
+Keep customer, support ticket, order, notification, and operation records in a
+dedicated sandbox. Store sandbox credentials only in ignored environment
+configuration. Do not use production records or customer data.
 
-```powershell
-python -m sandbox.reset --supabase
-```
+Required read capabilities:
 
-Create `sandbox/schema.sql` and `sandbox/seed.sql`. The reset command must
-restore the exact initial fixture state and clear operation history in the
-dedicated Supabase project. Tests should use an isolated schema or reset
-before each scenario that depends on initial state.
+- `get_ticket(ticket_id)` — ticket fields, customer/order IDs, and untrusted
+  body separated from trusted metadata;
+- `find_customer(customer_id or normalized email)` — only support-relevant
+  fields and no payment credentials;
+- `get_order(order_id)` — status, items, amounts, shipment state, timestamps;
+- `search_mytek_products(query)` — normalized public catalog results.
 
-Required tables are `clients`, `orders`, `tickets`, `refund_requests`,
-`escalation_tasks`, `email_outbox`, and `idempotency_keys`. Store
-`SUPABASE_URL` and `SUPABASE_KEY` only in the ignored `.env`.
+Required side-effect capabilities:
 
-## Tool contracts
+- `create_customer_order(...)` — create an order record in the project sandbox
+  only after a valid graph approval reference; store the approved product IDs,
+  quantities, observed prices, and total. This is not a purchase or payment.
+- `update_ticket_database(...)` — update only allowlisted ticket fields.
+- `send_support_notification(...)` — queue the approved recipient, subject,
+  and exact message in a sandbox notification outbox. Do not send SMTP, SMS, or
+  third-party messages.
+- `create_refund_request(...)` and `create_escalation_task(...)` — if retained
+  for the support workflow, create pending sandbox records only after approval.
 
-Implement these tools and no broader write capability:
+The graph's current proposed dispatcher calls
+`tool_executor(tool_name, payload)` with `find_customer`,
+`search_mytek_products`, `create_customer_order`, `update_ticket_database`,
+and `send_support_notification`. For writes it passes an operation ID and an
+`approved_by` run reference; notification IDs use a distinct `:notification`
+suffix. The exact method names, payloads, and return schemas above remain
+proposals for the phase-0 contract; Person 2, in coordination with Person 1,
+freezes them before implementation.
 
-### `get_ticket`
+## Safety and idempotency
 
-Input: `ticket_id: str`.
-
-Returns the ticket ID, customer ID, order ID, body, labels, status, and
-created timestamp. Ticket body is untrusted data and must be clearly separated
-from trusted metadata.
-
-### `find_customer`
-
-Input: exactly one normalized customer ID or email, with a bounded length.
-
-Returns only the fields needed for support: customer ID, display name,
-contact channel, account status, and relevant notes. Do not expose secrets,
-payment credentials, or unnecessary personal data.
-
-### `get_order`
-
-Input: `order_id: str`.
-
-Returns order status, item summary, amounts, shipment status, and timestamps.
-Return a typed not-found error when the order is absent.
-
-### `update_ticket_database`
-
-Input:
-
-- `ticket_id`;
-- `operation_id`;
-- `status` from an enum;
-- `labels` from an allowlist;
-- `response_text` with a bounded length;
-- `approved_by` or an equivalent approval reference.
-
-The tool performs a transactional mutation against the Supabase sandbox
-database. It
-may update only the ticket status, labels, and response history. It must
-reject arbitrary field names, URLs, shell commands, customer IDs, and
-destination changes. The transaction must either commit all fields or change
-nothing.
-
-### `send_support_email`
-
-Input:
-
-- `ticket_id`;
-- `operation_id`;
-- `to` from the customer email stored in the sandbox database;
-- bounded `subject`;
-- bounded `body`;
-- `approved_by` or an equivalent approval reference.
-
-The tool writes a message to the sandbox `email_outbox` table. It must not
-open an SMTP connection. The recipient must match the ticket's customer
-record, and the tool must reject model-supplied alternate recipients or
-headers. This is a genuine side effect in the test system: the outbox can be
-inspected by the evaluator and reset between runs.
-
-### `create_refund_request`
-
-Input: `ticket_id`, `order_id`, `operation_id`, `amount`, `reason`, and
-approval reference.
-
-Create one pending refund request in Supabase. Verify that the amount does not
-exceed the order total, the order belongs to the ticket client, and the
-operation is approved. This action requests a refund; it does not transfer
-money.
-
-### `create_escalation_task`
-
-Input: `ticket_id`, `operation_id`, `team`, `priority`, `reason`, due date, and
-approval reference.
-
-Create one pending human follow-up task in Supabase. `team` and `priority`
-must come from enums, and the task must reference the existing ticket.
-
-## Idempotency requirement
-
-Persist an operation record keyed by `operation_id` for each action type. The
-first accepted call for each action commits one Supabase mutation or outbox
-row. A repeated identical call returns the recorded result without changing
-data or adding another email, refund, or escalation. A repeated operation ID
-with different content must return a conflict error and must not apply the
-action.
-
-Test:
-
-1. apply one approved operation for each action;
-2. repeat each operation twice;
-3. verify one database mutation, one outbox row, one refund request, and one
-   escalation task;
-4. submit each ID with different content;
-5. verify conflicts and unchanged Supabase state.
-
-## Error behavior
-
-Errors must be short, typed, and actionable. Examples:
-
-- `ticket_not_found: use a known sandbox ticket ID`;
-- `customer_not_found: verify customer_id or email`;
-- `invalid_update_field: field is not allowlisted`;
-- `invalid_email_recipient: recipient does not match the ticket customer`;
-- `refund_amount_exceeds_order: amount must not exceed order total`;
-- `invalid_escalation_team: team is not allowlisted`;
-- `operation_conflict: operation_id was already used with different content`;
-- `sandbox_database_failed: retry with the same operation_id`;
-- `sandbox_email_failed: retry with the same operation_id`.
-
-Never return stack traces to the model. Log the detailed exception locally
-while returning a safe error object.
+- Every write requires an approval reference and operation ID.
+- Every action is allowlisted and validates ownership, quantity, price, and
+  total against the sandbox records supplied to the admin for approval.
+- Replaying an identical operation returns the original result; reusing an ID
+  with different content returns a conflict.
+- Notification writes go to an inspectable/resettable outbox.
+- No tool submits a MYTEK purchase, transfers money, or contacts customers.
+- Detailed exceptions stay in local logs; callers receive safe typed errors.
 
 ## Tests and acceptance criteria
 
-Add tests for:
+Use offline fixtures to cover parser output, changed/missing price and stock,
+malicious product descriptions, ticket/customer/order lookup errors, schema
+validation, write allowlists, ownership checks, approval references,
+idempotency conflicts, sandbox reset, and notification outbox behavior.
+Every network-sensitive scraper test uses saved responses or an explicit
+opt-in integration test outside the default test suite.
 
-- valid and invalid schemas;
-- unknown ticket, customer, and order;
-- bounded text and label validation;
-- injection text returned as data only;
-- write allowlist enforcement;
-- Supabase mutation failure and compensating/rollback behavior;
-- email recipient and outbox validation;
-- refund ownership and amount validation;
-- escalation enum and ticket-reference validation;
-- idempotent replay;
-- operation conflict;
-- reset restoring the original state;
-- simulated read and write failures;
-- every tool producing an input/output/timing record.
+## Handoff
 
-The tools owner is finished when Person 1 can run the graph without modifying
-tool code and when all sandbox tests pass offline.
-
-## Handoff to the team
-
-Provide:
-
-1. A tool contract document with example inputs and outputs.
-2. Seed-data identifiers and scenario fixture descriptions.
-3. Reset instructions.
-4. Error codes and retryability rules.
-5. Confirmation that no production endpoint or credential is referenced.
+Provide the frozen tool contract, fixture IDs and product snapshots, sandbox
+reset instructions, error codes/retryability, idempotency guarantees, and
+confirmation that no live checkout, payment, or notification channel is used.

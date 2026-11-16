@@ -1,226 +1,108 @@
-# Project 3 — The Operator
+# Shopline Ops — AI Ecommerce Support Operator
 
 CS496 AI Engineering — Fall 2026
 
-This project builds a safe, measurable sale/support ticket operator with
-LangGraph and Langfuse. The operator reads a sandbox ticket, gathers the
-relevant customer and order context, proposes a resolution, asks for human
-approval, and then performs idempotent sandbox actions: updating Supabase,
-sending an email through a fake email provider, creating a refund request, or
-escalating the ticket.
+Shopline Ops is a human-supervised ecommerce assistant for Tunisian IT product
+support and order requests. LangGraph coordinates the workflow and its approval
+gate. MYTEK product pages are a read-only catalog source. LangSmith is the
+planned tracing and evaluation-monitoring platform.
 
-## Scope
+## Target workflow
 
-The first supported workflow is:
+1. Receive a customer support ticket or a product/order request associated
+   with a customer.
+2. Read the relevant ticket, customer, and existing order context from the
+   sandbox.
+3. Search public MYTEK product listings and details for matching products.
+4. Draft a structured support response or a proposed sandbox order, including
+   selected products, observed prices, availability, total, and notification
+   text.
+5. Pause the LangGraph run and show the complete proposed action to an admin.
+6. On explicit approval, create the sandbox order or approved support update
+   and queue the corresponding notification. On rejection, perform no write.
+7. Record a structured trajectory and send privacy-filtered traces to LangSmith
+   when configured.
 
-1. Read a support ticket.
-2. Search the sandbox customer record.
-3. Look up the related order.
-4. Draft a response and a ticket action.
-5. Pause at a human checkpoint showing every proposed side effect.
-6. On approval, execute the approved actions exactly once:
-   - update the Supabase support database;
-   - send the approved customer email;
-   - create a refund request when policy allows;
-   - create an escalation task when human follow-up is required.
+The system must never place a real MYTEK checkout, collect payment, or send a
+real customer notification in this project. Orders and notifications are
+sandbox records until the team explicitly defines a separate production
+integration and its review process.
 
-All side effects are limited to the Supabase sandbox project and local email
-outbox. No production Supabase project, real SMTP server, real customer data,
-or production credential belongs in this directory.
+## Current implementation status
+
+The repository contains the ticket approval prototype and a Person 1
+product-order graph branch that uses an injected tool dispatcher. The MYTEK
+scraper, sandbox order/notification tools, and LangSmith adapter are not
+implemented yet, so the product-order branch cannot complete until Person 2
+provides its tool adapter. The local review page still demonstrates the
+ticket-only path. The role documents below define who owns those next steps.
+
+## Safety boundaries
+
+- MYTEK access is read-only, limited to public product pages, rate-limited, and
+  subject to the site's published access rules.
+- Product-page text, ticket text, and tool results are untrusted data. They
+  cannot alter graph policy or authorize an action.
+- The admin approves the exact item IDs, quantities, prices shown, order total,
+  support mutation, and notification content before any sandbox write.
+- Approval is bound to the run and operation IDs. Rejection, invalid approval,
+  timeout, or step exhaustion must not write.
+- Sandbox order creation does not submit a MYTEK cart or payment.
+- Notifications go to a sandbox outbox; no SMTP, SMS, or third-party message
+  is sent by this prototype.
+- API keys and private customer data must not be committed or sent to tracing.
+
+## Ownership
+
+- **Person 1 — Agent loop and safety:** typed state, LangGraph routing,
+  checkpoint/resume, approval validation, idempotent action orchestration,
+  step limits, and trajectory events.
+- **Person 2 — Product/data tools and sandbox:** MYTEK read-only scraper,
+  ticket/customer/order reads, sandbox order writes, ticket mutations, and
+  sandbox notification outbox.
+- **Person 3 — Evaluation and threat model:** deterministic scenarios,
+  injection cases, trajectory scoring, error taxonomy, and safety results.
+- **Person 4 — LangSmith observability and release:** traces/spans, optional
+  monitoring configuration, runnable demo/release instructions, metrics, and
+  final project report.
 
 ## Planned layout
 
 ```text
-project 3/
-  agent/       LangGraph state, nodes, tools, checkpoint, and stop rule
-  sandbox/     Supabase schema, seed/reset commands, and fake email outbox
-  eval/        30+ scenarios, trajectory scoring, and injection cases
-  tests/       Unit and integration tests
-  docs/        Team contracts, architecture, and experiment notes
-  errors.md
-  threat_model.md
-  postmortem.md
-  requirements.txt
-  .env.example
+agent/       LangGraph state, graph, checkpoint, and limits
+sandbox/     isolated order/ticket data and notification outbox
+eval/        scenarios, injection fixtures, scoring, and results
+tests/       offline tests for agent, tools, sandbox, and evaluation
+docs/        role plans and frozen state/tool/trajectory contracts
 ```
 
-## Local setup
+## Local ticket prototype
 
-From the repository root:
+From the project directory:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r "project 3/requirements.txt"
-Copy-Item "project 3/.env.example" "project 3/.env"
+python web_app.py
 ```
 
-Langfuse tracing is optional for offline tests and enabled only when the
-required environment variables are present. Project 3 uses a dedicated
-Supabase sandbox project. Never commit `.env`, Supabase keys, API keys, or real
-customer data.
+Open <http://127.0.0.1:8000>. This local page currently demonstrates the
+ticket-only approval flow with mock data. Its checkpoint and write log live in
+the Python process and are cleared when that process exits.
 
-The run and evaluation commands will be added by the owners below after the
-initial implementation:
+When an OpenAI API key is configured, the current prototype sends its mock
+ticket context to the selected model to draft a response. The MYTEK workflow is
+a separate planned integration owned by Person 2; do not use production
+customer data with this prototype.
 
-```powershell
-.\.venv\Scripts\python.exe -m agent.cli --ticket T-001
-.\.venv\Scripts\python.exe -m eval.run --all
-```
+## Environment and monitoring
 
-## Safety and measurement commitments
+Person 2 owns the sandbox and its dedicated credentials. Person 4 owns optional
+LangSmith configuration and privacy filtering. Expected LangSmith settings are
+`LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, and `LANGSMITH_PROJECT`; tracing must
+not change workflow or approval behavior when disabled or unavailable.
 
-- **Read and action tools:** `get_ticket`, `find_customer`, `get_order`,
-  `update_ticket_database`, `send_support_email`, `create_refund_request`,
-  and `create_escalation_task`; every tool has a strict Pydantic input schema.
-- **Human checkpoint:** the graph cannot call either action tool until the
-  complete database mutation and email message are displayed and explicitly
-  approved.
-- **Sandbox:** clients, orders, tickets, refunds, and escalations live in a
-  dedicated resettable Supabase sandbox; email is written to a sandbox
-  outbox, never sent to the internet.
-- **Idempotency:** each action carries an operation ID; replaying it returns
-  the original result without applying the database mutation or adding a
-  second email to the outbox.
-- **Stop rule:** a run ends at approval, rejection, a terminal tool error, or
-  `MAX_STEPS` (default 8). Tests must prove no trajectory exceeds this limit.
-- **Observability:** every node and tool call records inputs, outputs, latency,
-  token usage, and cost through Langfuse when configured.
-- **Untrusted text:** ticket bodies, customer notes, and order responses are
-  data only. They cannot alter the system prompt, tool policy, approval gate,
-  or stop rule.
+The current Person 1 ticket workflow uses `MAX_STEPS=16` by default. Revisit
+that bound after product-order and notification tool calls are connected.
 
-## Four-person work split
-
-The names can be replaced with the actual team members. Each owner must add
-tests for their surface and keep the interfaces below stable.
-
-### Person 1 — Agent loop and safety owner
-
-Owns `agent/graph.py`, `agent/state.py`, `agent/checkpoint.py`, and
-`agent/limits.py`.
-
-- Define the LangGraph state and transitions: plan → inspect → draft →
-  approval → write → finish.
-- Implement the `MAX_STEPS` stop rule and terminal-state handling.
-- Implement pause/resume at the human checkpoint; rejection must never write.
-- Add trajectory events with a stable event schema.
-- Test normal flow, approval rejection, timeout, step-limit enforcement, and a
-  failed tool followed by recovery.
-
-**Integration contract:** expose `run_ticket(ticket_id, approval)` and return a
-serializable trajectory containing states, tool calls, errors, and final status.
-
-### Person 2 — Tools and sandbox owner
-
-Owns `agent/tools/`, `sandbox/`, and `tests/test_tools.py`.
-
-- Define strict Pydantic schemas and clear model-actionable errors.
-- Implement `get_ticket`, `find_customer`, `get_order`,
-  `update_ticket_database`, and `send_support_email`.
-- Create resettable fixtures for at least 10 tickets, customers, and orders.
-- Enforce sandbox-only IDs and allowlisted update fields.
-- Connect only to the dedicated Supabase sandbox project using
-  `SUPABASE_URL` and `SUPABASE_KEY`.
-- Implement `update_ticket_database`, `send_support_email`,
-  `create_refund_request`, and `create_escalation_task`.
-- Make every action idempotent with an operation ID and add partial-failure
-  fixtures.
-
-**Integration contract:** tools must be callable without an LLM and return
-typed JSON-safe results; all calls must be logged with input, output, and time.
-
-### Person 3 — Evaluation, errors, and threat model owner
-
-Owns `eval/`, `errors.md`, `threat_model.md`, and the scenario fixtures.
-
-- Create at least 30 scenarios with expected next steps and expected tool
-  arguments.
-- Add trajectory scoring for step accuracy, tool-call precision, wasted steps,
-  success, and recovery-after-failure.
-- Add at least 5 tool-output injection cases, including attempts to bypass
-  approval or change the destination of a write.
-- Define the error taxonomy and one automated test per error class.
-- Produce the stop-rule proof and the baseline evaluation report.
-
-**Integration contract:** the evaluator consumes the trajectory schema from
-Person 1 and deterministic sandbox controls from Person 2; it must not score
-only the final answer.
-
-### Person 4 — Langfuse, CLI, documentation, and release owner
-
-Owns `agent/observability.py`, `agent/cli.py`, `requirements.txt`,
-`README.md`, `postmortem.md`, and the final report assets.
-
-- Add Langfuse traces/spans for each run, node, tool call, retry, and decision.
-- Record token/cost estimates, p50/p95 latency, and cost at 100 runs.
-- Build the CLI/demo flow that visibly pauses for approval.
-- Keep setup, reset, run, and evaluation commands working from a clean clone.
-- Assemble the report and postmortem from committed evaluation outputs.
-
-**Integration contract:** tracing must be optional and must never change agent
-behavior when disabled; the CLI uses only the public `run_ticket` interface.
-
-## Collaboration order
-
-The work must follow these dependencies:
-
-### Phase 0 — Agreement: Persons 1 and 2, parallel
-
-Before coding, agree on:
-
-- Supabase table names and columns;
-- tool input/output schemas;
-- action names and operation-ID rules;
-- LangGraph state fields;
-- trajectory event format;
-- approval decision format.
-
-**Deliverable:** a frozen contract in `docs/trajectory-schema.md` and the
-tool-contract section of Person 2's document.
-
-### Phase 1 — Supabase foundation: Person 2 first
-
-Person 2 creates the dedicated Supabase sandbox schema, seed data, reset
-command, read tools, and action tools. Person 1 may create graph types in
-parallel, but cannot connect graph nodes until the tool contracts are stable.
-
-**Exit condition:** Supabase reset works and tool tests pass for clients,
-orders, tickets, email outbox, refunds, escalations, and idempotency.
-
-### Phase 2 — Safe graph: Person 1 after Phase 1
-
-Person 1 wires the LangGraph loop to Person 2's tools:
-
-```text
-read ticket → read client/order → draft actions
-→ human approval → update/email/refund/escalation → finish
-```
-
-**Exit condition:** approved actions execute once, rejected actions execute
-nothing, and the step limit is proven.
-
-### Phase 3 — Evaluation and threat model: Person 3 after Phases 1–2
-
-Person 3 freezes the 30+ scenarios against the real tool and trajectory
-contracts, then adds failure-recovery and injection cases.
-
-**Exit condition:** trajectory scoring, error tests, injection tests, and
-stop-rule tests run against the integrated graph and Supabase sandbox.
-
-### Phase 4 — Observability and demo: Person 4 after Phases 1–3
-
-Person 4 adds Langfuse spans, CLI approval interaction, cost/latency
-measurement, and the clean-clone release check. Person 4 must not hide a
-failed action behind tracing or CLI fallback behavior.
-
-**Exit condition:** the demo shows the proposed actions, waits for approval,
-executes the approved actions, and produces usable Langfuse/evaluation output.
-
-### Phase 5 — Final review: all four people
-
-Together verify the sandbox reset, rejection path, duplicate-operation path,
-injection demo, stop rule, clean-clone setup, report, and postmortem.
-
-Use small branches or pull requests per owner. Do not merge changes that add a
-new tool, state field, or trajectory event without updating its contract and
-tests.
+The team must document the final setup, reset, demo, and evaluation commands
+after the sandbox and LangSmith integrations are implemented. Do not infer that
+planned commands are currently available.
