@@ -234,6 +234,7 @@ def test_graph_dispatcher_resolves_trusted_approval_and_adapts_order_payload(tmp
     assert client.calls[0]["p_approval_id"] == "approval-row-1"
     assert client.calls[0]["p_run_id"] == "run-1"
     assert client.calls[0]["p_payload"]["total_tnd"] == "2.50"
+    assert lookups[0][3] == client.calls[0]["p_payload"]
 
 
 def test_graph_dispatcher_rejects_missing_trusted_approval():
@@ -275,33 +276,23 @@ def test_graph_dispatcher_forwards_structured_catalog_criteria(monkeypatch):
     assert received == [("air conditioner", criteria)]
 
 
-class _ApprovalQuery:
-    def __init__(self, client): self.client = client
-    def select(self, columns):
-        assert columns == "approval_id"
-        return self
-    def eq(self, column, value):
-        self.client.filters[column] = value
-        return self
-    def limit(self, count):
-        assert count == 2
+class _ApprovalClient:
+    def __init__(self, result): self.result, self.calls = result, []
+    def rpc(self, name, payload):
+        assert name == "resolve_action_approval"
+        self.calls.append(payload)
         return self
     def execute(self):
-        return type("Response", (), {"data": self.client.records})()
+        return type("Response", (), {"data": self.result})()
 
 
-class _ApprovalClient:
-    def __init__(self, records): self.records, self.filters = records, {}
-    def table(self, name):
-        assert name == "approval_records"
-        return _ApprovalQuery(self)
-
-
-def test_sandbox_approval_lookup_only_returns_one_preexisting_row():
-    client = _ApprovalClient([{"approval_id":"approved-row"}])
+def test_sandbox_approval_lookup_calls_receipt_aware_resolver():
+    client = _ApprovalClient("approved-row")
     store = SandboxStore(supabase_client=client, faults_file=ROOT / "sandbox/data/empty-faults.json")
     lookup = make_sandbox_approval_lookup(store)
-    assert lookup("create_customer_order", "operation-123", "run-1", {}) == "approved-row"
-    assert client.filters == {"action_type":"create_customer_order", "operation_id":"operation-123", "run_id":"run-1", "status":"approved"}
-    client.records = [{"approval_id":"one"}, {"approval_id":"two"}]
-    assert lookup("create_customer_order", "operation-123", "run-1", {}) is None
+    payload = {"ticket_id": "T-001", "channel": "sandbox_outbox", "message": "Approved"}
+    assert lookup("send_support_notification", "operation-123", "run-1", payload) == "approved-row"
+    assert client.calls[0]["p_run_id"] == "run-1"
+    assert client.calls[0]["p_payload"]["subject"] is None
+    client.result = None
+    assert lookup("send_support_notification", "operation-123", "run-1", payload) is None

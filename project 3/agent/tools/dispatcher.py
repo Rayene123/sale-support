@@ -17,6 +17,7 @@ from agent.tools.writes import (
     update_ticket_database,
 )
 from sandbox.store import SandboxStore
+from agent.tools.payloads import canonical_action_payload
 
 
 ApprovalLookup = Callable[[str, str, str, dict[str, Any]], str | None]
@@ -39,21 +40,12 @@ def make_sandbox_approval_lookup(
 
     def lookup(action: str, operation_id: str, run_id: str, _payload: dict[str, Any]) -> str | None:
         try:
-            response = (
-                store.client.table("approval_records")
-                .select("approval_id")
-                .eq("action_type", action)
-                .eq("operation_id", operation_id)
-                .eq("run_id", run_id)
-                .eq("status", "approved")
-                .limit(2)
-                .execute()
-            )
-            records = response.data or []
-            if len(records) != 1:
-                return None
-            approval_id = records[0].get("approval_id")
-            return approval_id if isinstance(approval_id, str) and approval_id else None
+            response = store.client.rpc("resolve_action_approval", {
+                "p_action_type": action, "p_operation_id": operation_id,
+                "p_run_id": run_id, "p_payload": canonical_action_payload(action, _payload),
+            }).execute()
+            result = response.data
+            return result if isinstance(result, str) and result.strip() else None
         except Exception:
             # Do not turn lookup failure into approval or expose database detail.
             return None
@@ -117,6 +109,10 @@ def make_tool_executor(
                 approval_payload = {key: payload.get(key) for key in (
                     "ticket_id", "status", "labels", "response_text")
                 }
+            try:
+                approval_payload = canonical_action_payload(tool_name, approval_payload)
+            except ValueError as exc:
+                raise ToolDispatchError("invalid_action_payload") from exc
             approval_id = approval_lookup(tool_name, operation_id, run_id, approval_payload)
             if not isinstance(approval_id, str) or not approval_id.strip():
                 raise ToolDispatchError("No matching trusted approval record exists.")

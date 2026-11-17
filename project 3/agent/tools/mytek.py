@@ -22,19 +22,62 @@ _FETCH_LOCK = threading.Lock()
 _LAST_FETCH = 0.0
 
 
+_HOSTS = {"www.tunisianet.com.tn", "tunisianet.com.tn"}
+_MAX_BYTES = 3_000_000
+
+
 def _bounded_get(url: str, *, timeout: float) -> requests.Response:
-    """Use a transparent demo user-agent and keep at least 1s between requests."""
+    """Stream a bounded body and validate each redirect before requesting it."""
     global _LAST_FETCH
-    with _FETCH_LOCK:
-        delay = 1.0 - (time.monotonic() - _LAST_FETCH)
-        if delay > 0:
-            time.sleep(delay)
-        response = requests.get(url, timeout=timeout, headers={
-            "User-Agent": "ShoplineDemo/1.0 (read-only product search)",
-            "Accept": "text/html,application/xhtml+xml,text/plain",
-        })
-        _LAST_FETCH = time.monotonic()
-        return response
+    for hop in range(4):
+        try:
+            parsed = urlparse(url)
+            port = parsed.port
+        except ValueError as exc:
+            raise requests.RequestException("Malformed catalog URL") from exc
+        if (parsed.scheme != "https" or parsed.hostname not in _HOSTS
+                or parsed.username or parsed.password or port not in (None, 443)):
+            raise requests.RequestException("Catalog URL outside the HTTPS allowlist")
+        with _FETCH_LOCK:
+            delay = 1.0 - (time.monotonic() - _LAST_FETCH)
+            if delay > 0:
+                time.sleep(delay)
+            try:
+                response = requests.get(url, timeout=timeout, stream=True, allow_redirects=False,
+                    headers={"User-Agent": "ShoplineDemo/1.0 (read-only product search)",
+                             "Accept": "text/html,application/xhtml+xml,text/plain"})
+            finally:
+                _LAST_FETCH = time.monotonic()
+        try:
+            if response.status_code in (301, 302, 303, 307, 308):
+                location = response.headers.get("Location")
+                if not location:
+                    raise requests.RequestException("Redirect without destination")
+                url = urljoin(url, location)
+                continue
+            chunks, size = [], 0
+            for chunk in response.iter_content(chunk_size=65536):
+                size += len(chunk)
+                if size > _MAX_BYTES:
+                    raise requests.RequestException("Catalog response exceeded size limit")
+                chunks.append(chunk)
+            response._content = b"".join(chunks)
+            response._content_consumed = True
+            return response
+        finally:
+            response.close()
+    raise requests.TooManyRedirects("Catalog redirect limit exceeded")
+
+
+def _availability(text: str) -> str:
+    normalized = text.casefold().replace("-", " ").replace("_", " ")
+    if any(term in normalized for term in ("unavailable", "indisponible", "out of stock", "rupture", "not available")):
+        return "out_of_stock"
+    if any(term in normalized for term in ("in stock", "en stock", "disponible", "available")):
+        return "in_stock"
+    if "later stock" in normalized:
+        return "available"
+    return "unknown"
 
 
 class ProductResult(StrictSchema):
@@ -205,13 +248,9 @@ class _CatalogCards(HTMLParser):
                 self.current["price_raw"] = data["content"]
             else:
                 self.capture = (itemprop, self.depth)
-        classes = data.get("class") or ""
-        if "in-stock" in classes or "available" in classes:
-            self.current["availability"] = "in_stock"
-        elif "later-stock" in classes:
-            self.current["availability"] = "available"
-        elif "out-of-stock" in classes or "unavailable" in classes:
-            self.current["availability"] = "out_of_stock"
+        availability = _availability(data.get("class") or "")
+        if availability != "unknown" and self.current["availability"] != "out_of_stock":
+            self.current["availability"] = availability
 
     def handle_data(self, data: str) -> None:
         if not self.current:
@@ -223,11 +262,9 @@ class _CatalogCards(HTMLParser):
             elif field == "price":
                 self.current["price_raw"] += data
             elif field == "availability":
-                text = data.casefold()
-                if "stock" in text or "disponible" in text:
-                    self.current["availability"] = "in_stock"
-                elif "rupture" in text or "indisponible" in text:
-                    self.current["availability"] = "out_of_stock"
+                availability = _availability(data)
+                if availability != "unknown" and self.current["availability"] != "out_of_stock":
+                    self.current["availability"] = availability
 
     def handle_endtag(self, tag: str) -> None:
         if self.current is None:
@@ -362,7 +399,8 @@ def search_tunisianet_products(query: str, *, criteria: dict[str, Any] | None = 
                         if key.casefold() in {"couleur", "color", "colour"}:
                             product["color"] = value
                         elif key.casefold() in {"poids", "weight", "poids du produit"}:
-                            product["weight_kg"] = _product_weight(value)
+                            weight = _product_weight(value)
+                            product["weight_kg"] = str(weight) if weight is not None else None
         return {"success": True, "data": {"products": rows, "source": "tunisianet", "query": query}}
     except requests.Timeout:
         return {"success": False, "error": "source_timeout", "message": "Tunisianet search timed out.", "retryable": True}

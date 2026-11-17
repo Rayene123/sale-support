@@ -87,21 +87,21 @@ class _ResetClient:
     def rpc(self, function): return _ResetRPC(self, function)
 
 
-def test_reset_calls_legacy_fixture_reset_then_commerce_cleanup(monkeypatch, tmp_path, capsys):
+def test_reset_uses_one_atomic_rpc(monkeypatch, tmp_path, capsys):
     client = _ResetClient()
     monkeypatch.setattr(reset, "ENV_FILE", tmp_path / "no-env-file")
     monkeypatch.setenv("SUPABASE_URL", "https://sandbox.invalid")
     monkeypatch.setenv("SUPABASE_SANDBOX_URL", "https://sandbox.invalid")
     monkeypatch.setattr(reset.SandboxStore, "from_env", lambda: SandboxStore(supabase_client=client, faults_file=tmp_path / "no-faults.json"))
     reset.reset_supabase()
-    assert client.calls == ["reset_approved_commerce_state", "reset_sale_support_sandbox"]
+    assert client.calls == ["reset_sale_support_sandbox"]
     assert "Sandbox reset completed successfully" in capsys.readouterr().out
 
 
 def test_reset_refuses_before_fixture_reset_if_migration_rpc_is_missing(monkeypatch, tmp_path):
     class MissingMigrationClient(_ResetClient):
         def rpc(self, function):
-            if function == "reset_approved_commerce_state":
+            if function == "reset_sale_support_sandbox":
                 raise RuntimeError("function is missing")
             return super().rpc(function)
     client = MissingMigrationClient()
@@ -109,6 +109,6 @@ def test_reset_refuses_before_fixture_reset_if_migration_rpc_is_missing(monkeypa
     monkeypatch.setenv("SUPABASE_URL", "https://sandbox.invalid")
     monkeypatch.setenv("SUPABASE_SANDBOX_URL", "https://sandbox.invalid")
     monkeypatch.setattr(reset.SandboxStore, "from_env", lambda: SandboxStore(supabase_client=client, faults_file=tmp_path / "no-faults.json"))
-    with pytest.raises(RuntimeError, match="Reset stopped before fixture restoration"):
+    with pytest.raises(RuntimeError, match="Sandbox reset failed"):
         reset.reset_supabase()
     assert client.calls == []

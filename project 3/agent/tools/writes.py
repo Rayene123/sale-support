@@ -9,6 +9,7 @@ from pydantic import ValidationError
 
 from sandbox.store import SandboxStore, StoreError, DatabaseFailure
 
+from agent.tools.payloads import canonical_action_payload
 from agent.tools.schemas import (
     UpdateTicketInput,
     SendSupportNotificationInput,
@@ -309,6 +310,7 @@ def send_support_notification(
         payload = validated.model_dump(mode="json", exclude_unset=True)
         for trusted_field in ("operation_id", "approval_id", "run_id"):
             payload.pop(trusted_field, None)
+        payload = canonical_action_payload("send_support_notification", payload)
         return _execute_commerce_write("send_support_notification", validated.operation_id,
             validated.approval_id, validated.run_id, payload, store)
     except Exception as exc:
@@ -343,6 +345,7 @@ def create_customer_order(
         payload["total_tnd"] = str(calculated_total)
         for trusted_field in ("operation_id", "approval_id", "run_id"):
             payload.pop(trusted_field, None)
+        payload = canonical_action_payload("create_customer_order", payload)
         return _execute_commerce_write("create_customer_order", validated.operation_id,
             validated.approval_id, validated.run_id, payload, store)
     except Exception as exc:
