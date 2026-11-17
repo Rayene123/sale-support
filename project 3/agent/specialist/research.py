@@ -53,6 +53,14 @@ class Researcher:
                 candidates.setdefault(listing.product_id, listing)
         return sorted(candidates.values(), key=lambda item: (item.price_tnd is None, item.price_tnd or 0))
 
+    def queries_for(self, line):
+        # A category page is a useful second pass when the model's search phrase
+        # is narrow. Exact-model requests keep their model-specific searches.
+        if self.general_search and not line.exact_model and line.kind in SEARCH:
+            first = line.queries[0]
+            return (first, next(query for query in SEARCH[line.kind] if query != first))
+        return line.queries
+
     def search_line(self, line, query, call):
         from .setup_research import matches_line
         search = self.general_search or self.search

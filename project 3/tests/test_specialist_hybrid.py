@@ -10,7 +10,7 @@ from agent.specialist.research import Researcher
 from agent.specialist.setup import SetupPlan
 from agent.specialist.setup_research import ground_plan, read_plan_findings
 from agent.specialist.store import CaseStore
-from eval.specialist_fixtures import product
+from eval.specialist_fixtures import Catalog, product
 
 
 PROMPT = "Find a desktop, two keyboards, and a mouse under 1,500 TND."
@@ -334,3 +334,23 @@ def test_usb_c_connector_shape_does_not_prove_data_support(runner):
     case = service.start("C-001", PROMPT)
     assert case["status"] == "verification_blocked"
     assert any("No shared connection" in f["reason"] for f in case["findings"])
+
+
+def test_live_catalog_retries_a_narrow_model_query_on_the_bounded_category(runner):
+    class NarrowSearch(Catalog):
+        def general(self, query, *, max_results):
+            self.lookups.append(("search", query))
+            return {"success": True, "data": {"products": []}}
+
+        def researcher(self):
+            return Researcher(self.search, self.inspect, self.general)
+
+    plan = {"budget_tnd": 2900, "items": [
+        line("pc", "laptop", "portable 8 Go en promotion"),
+        line("screen", "monitor", "moniteur Full HD noir"),
+    ], "links": [{"source": "pc", "target": "screen", "kind": "video"}]}
+    service, source, _ = runner(plan, NarrowSearch())
+    case = service.start("C-001", "Find a laptop and a compatible monitor under 2900 TND.")
+    assert case["status"] == "awaiting_approval"
+    assert ("search", "pc portable") in source.lookups
+    assert ("search", "écran pc") in source.lookups

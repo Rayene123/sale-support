@@ -92,11 +92,12 @@ export. Network export runs on a bounded background queue.
 
 | Check | Observed result |
 | --- | --- |
-| Python suite | 159 passed, including role isolation and the HTTP recovery flow backed by local SQL. |
+| Python suite | 160 passed, including role isolation and the HTTP recovery flow backed by local SQL. |
 | SQL suite | 12 checks passed against the project's schema and migrations. |
 | Secondary support and order workflow | 45 offline scenarios passed. |
 | Fixed / adaptive / adaptive plus verifier | 14/30, 11/30 and 30/30 correct. The verifier mode produced zero false positives. |
 | Local Ministral model | [8/8 scenarios](../eval/results/specialist-local-model.json), zero false positives, p50 6.51 s and p95 34.53 s. |
+| Browser workbench | Customer request, reviewer approval, sandbox order and notification, and both confirmed receipts observed in Chromium. |
 | Live catalog | A bounded Tunisianet read returned two current laptop listings. |
 
 The model sample covers display, USB, Ethernet, cross-product dimensions,
@@ -109,8 +110,12 @@ sample. The comparative rules benchmark covers a separate 30-case set.
 The first model runs exposed invented default specs and a translated network
 switch label that the verifier could not recognize. The planner now grounds
 hard spec values in the request and preserves previously stated requirements.
-The canonical type accepts the translated label. Unknown measurements and
-incompatible dimensions still stop a proposal in the benchmark.
+The canonical type accepts the translated label. An exploratory browser
+request saw the model associate dimensions with the wrong products and ask
+for PCIe facts the listings did not supply. Verification stopped the order
+and showed both gaps. A separate browser case completed with two receipts.
+Unknown measurements and incompatible dimensions also stopped proposals in
+the benchmark.
 
 The hosted sandbox adapter and LangSmith exporter are configurable. A live
 hosted acceptance run requires the team's dedicated Supabase credentials and

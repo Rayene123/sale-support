@@ -327,6 +327,7 @@ class Specialist:
         call = lambda actor, action, info, fn: _call(case, actor, action, info, fn)
         available = {line.id: cached_matches(line, case["evidence"].get(line.id, []), _is_fresh)
                      for line in plan.items}
+        queries = {line.id: self.researcher.queries_for(line) for line in plan.items}
         seen = {line_id: {item.product_id for item in items} for line_id, items in available.items()}
         evaluated = set()
         rejected = []
@@ -342,9 +343,10 @@ class Specialist:
                     if attempt == 0 and available[line.id]:
                         _event(case, "researcher", "reuse_evidence", {"line": line.id})
                         continue
-                    if attempt >= len(line.queries) or (attempt and blocked_lines and line.id not in blocked_lines):
+                    line_queries = queries[line.id]
+                    if attempt >= len(line_queries) or (attempt and blocked_lines and line.id not in blocked_lines):
                         continue
-                    seeds = self.researcher.search_line(line, line.queries[attempt], call)
+                    seeds = self.researcher.search_line(line, line_queries[attempt], call)
                     for seed in [item for item in seeds if item.product_id not in seen[line.id]][:2]:
                         seen[line.id].add(seed.product_id)
                         detail = self.researcher.detail(seed, call)
