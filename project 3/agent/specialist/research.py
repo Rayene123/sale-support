@@ -5,7 +5,7 @@ from typing import Callable
 
 from pydantic import ValidationError
 
-from agent.tools.mytek import inspect_tunisianet_product, search_specialist_catalog
+from agent.tools.mytek import inspect_tunisianet_product, search_specialist_catalog, search_tunisianet_products
 from .contracts import Listing, Role
 
 PRODUCT_TYPES = {
@@ -30,10 +30,11 @@ SEARCH = {
 class Researcher:
     search: Callable
     inspect: Callable
+    general_search: Callable | None = None
 
     @classmethod
     def tunisianet(cls):
-        return cls(search_specialist_catalog, inspect_tunisianet_product)
+        return cls(search_specialist_catalog, inspect_tunisianet_product, search_tunisianet_products)
 
     def candidates(self, role: Role, attempt: int, call: Callable) -> list[Listing]:
         query = SEARCH[role][attempt]
@@ -51,6 +52,24 @@ class Researcher:
             if listing is not None and matches_role(listing, role):
                 candidates.setdefault(listing.product_id, listing)
         return sorted(candidates.values(), key=lambda item: (item.price_tnd is None, item.price_tnd or 0))
+
+    def search_line(self, line, query, call):
+        from .setup_research import matches_line
+        search = self.general_search or self.search
+        if query in {name for options in SEARCH.values() for name in options}:
+            search = self.search
+        response = call("researcher", "search_catalog", {"line": line.id},
+                        lambda: search(query, max_results=6))
+        data = response.get("data") if response.get("success") is True else None
+        products = data.get("products") if isinstance(data, dict) else None
+        if not isinstance(products, list):
+            return []
+        found = {}
+        for row in products[:6]:
+            listing = normalize_listing(row)
+            if listing is not None and matches_line(listing, line):
+                found.setdefault(listing.product_id, listing)
+        return sorted(found.values(), key=lambda row: (row.price_tnd is None, row.price_tnd or 0))
 
     def detail(self, listing: Listing, call: Callable) -> Listing | None:
         response = call("researcher", "inspect_listing", {"product_id": listing.product_id},

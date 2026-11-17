@@ -9,7 +9,10 @@ planned tracing and evaluation-monitoring platform.
 
 ## The Specialist purchase workflow
 
-The [team plan](docs/specialist-plan.md) targets a complete, verified IT setup.
+The [November 16 enhanced brief](docs/monday-2026-11-16/README.md) defines
+the target. The [implementation comparison and hybrid API](docs/specialist-hybrid.md)
+describe what is currently working. The optional OpenAI planning layer handles
+multi-item requests alongside the deterministic research and approval rules.
 The server-side [Specialist core](docs/specialist-core.md) now handles laptop
 and monitor cases, sourcing exact product facts, testing direct display
 compatibility, and preserving revisions and sandbox receipts. It runs

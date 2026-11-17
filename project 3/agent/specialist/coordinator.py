@@ -16,6 +16,10 @@ from .contracts import Finding, Listing, Mode, Requirements, read_requirements
 from .research import Researcher, matches_role
 from .store import CaseStore
 from .verify import verify_bundle
+from .setup import SetupPlan
+from .setup_research import candidates_in_price_order, cached_matches, matches_line, read_plan_findings
+from .setup_verify import total as setup_total, verify_setup
+from .planner import ModelUnavailable
 
 MODES = {"fixed", "adaptive", "adaptive_verifier"}
 ORDER = "create_customer_order"
@@ -99,7 +103,7 @@ def _call(case, actor, action, info, invoke):
 
 def _verify(case, items):
     _charge(case)
-    findings = verify_bundle(_requirements(case), items)
+    findings = verify_setup(SetupPlan.model_validate(case["setup"]), items) if case.get("setup") else verify_bundle(_requirements(case), items)
     stale = [item.product_id for item in items.values() if not _is_fresh(item)]
     if stale:
         findings.append(Finding(code="evidence_freshness", verdict="unknown",
@@ -122,7 +126,7 @@ class Specialist:
     """Call with authenticated server identities. Does not authenticate users itself."""
 
     def __init__(self, store: CaseStore, researcher: Researcher | None = None, *,
-                 writer=None, step_limit: int = 96, mode: Mode = "adaptive_verifier"):
+                 writer=None, step_limit: int = 96, mode: Mode = "adaptive_verifier", planner=None):
         if mode not in MODES or not 1 <= step_limit <= 256:
             raise ValueError("Unsupported mode or step limit")
         self.store = store
@@ -130,10 +134,13 @@ class Specialist:
         self.writer = writer
         self.step_limit = step_limit
         self.mode = mode
+        self.planner = planner
 
     def start(self, customer_id: str, text: str) -> dict:
         validate_identifier(customer_id)
-        requirements = read_requirements(text)
+        if self.planner and self.mode != "adaptive_verifier":
+            raise ValueError("The hybrid planner requires independent verification")
+        requirements = Requirements() if self.planner else read_requirements(text)
         case = {
             "case_id": str(uuid4()), "run_id": str(uuid4()), "customer_id": customer_id,
             "revision": 1, "status": "research_pending", "mode": self.mode,
@@ -143,8 +150,13 @@ class Specialist:
             "alternatives": [], "approval": None, "receipts": {}, "attempted": [],
             "changes": [],
         }
+        if self.planner:
+            case["planner_kind"] = "hybrid"
+            self._interpret(case, text)
         self.store.insert(case)
-        return self.research(case["case_id"], customer_id)
+        if case["status"] == "research_pending":
+            return self.research(case["case_id"], customer_id)
+        return case
 
     def research(self, case_id, customer_id):
         with self.store.update(case_id, customer_id) as case:
@@ -158,22 +170,59 @@ class Specialist:
             if (expected_revision != case["revision"] or case["receipts"] or case["attempted"]
                     or case["status"] in TERMINAL | {"approved", "partially_completed", "reconciliation_required"}):
                 raise CaseConflict("Case revision changed or execution already started")
-            requirements = read_requirements(text, _requirements(case))
-            self._advance(case)
-            case.update(requirements=requirements.model_dump(mode="json"), changes=[])
-            self._research(case)
+            if case.get("planner_kind") == "hybrid":
+                previous = SetupPlan.model_validate(case["setup"]) if case.get("setup") else None
+                self._advance(case)
+                case["changes"] = []
+                self._interpret(case, text, previous)
+                if case["status"] == "research_pending":
+                    self._research(case)
+            else:
+                requirements = read_requirements(text, _requirements(case))
+                self._advance(case)
+                case.update(requirements=requirements.model_dump(mode="json"), changes=[])
+                self._research(case)
             return case
+
+    def _interpret(self, case, text, previous=None):
+        if not isinstance(text, str) or not text.strip() or len(text) > 1200:
+            raise ValueError("Enter a purchasing request of 1 to 1200 characters")
+        started = time.perf_counter()
+        try:
+            _charge(case)
+            if self.planner is None:
+                raise ModelUnavailable("Planner not configured")
+            plan = SetupPlan.model_validate(self.planner.plan(text, previous))
+            problems = read_plan_findings(plan, text, previous)
+            # Retain the previous plan as the revision anchor if the model
+            # dropped a constraint. A malformed plan must not become memory.
+            if not problems:
+                case["setup"] = plan.model_dump(mode="json")
+            case["questions"] = plan.missing() + problems
+            status = "awaiting_clarification" if case["questions"] else "research_pending"
+            case["status"] = status
+            _event(case, "planner", "interpret_setup",
+                   {"items": len(plan.items), "relationships": len(plan.links), "status": status}, started=started)
+        except ModelUnavailable:
+            case.update(status="planner_unavailable", questions=["The purchasing model could not interpret this request."])
+            _event(case, "planner", "planner_unavailable", {}, started=started)
+        except BudgetExhausted:
+            case["status"] = "step_limit_reached"
+            _event(case, "coordinator", "stop_budget", {})
 
     @staticmethod
     def _advance(case):
         if case["revision"] >= MAX_REVISIONS:
             raise CaseConflict("Case reached its revision limit")
         case["history"].append({key: deepcopy(case[key]) for key in
-                                ("revision", "run_id", "requirements", "proposal", "approval", "status")})
+                                ("revision", "run_id", "requirements", "setup", "proposal", "approval", "status") if key in case})
         case.update(revision=case["revision"] + 1, run_id=str(uuid4()), status="research_pending",
                     proposal=None, approval=None, findings=[], alternatives=[], candidate=None)
 
     def _research(self, case):
+        if case.get("planner_kind") == "hybrid":
+            self._research_setup(case)
+            return
         requirements = _requirements(case)
         try:
             _charge(case)
@@ -264,14 +313,79 @@ class Specialist:
             case["status"] = "step_limit_reached"
             _event(case, "coordinator", "stop_budget", {})
 
+    def _research_setup(self, case):
+        plan = SetupPlan.model_validate(case["setup"])
+        call = lambda actor, action, info, fn: _call(case, actor, action, info, fn)
+        available = {line.id: cached_matches(line, case["evidence"].get(line.id, []), _is_fresh)
+                     for line in plan.items}
+        seen = {line_id: {item.product_id for item in items} for line_id, items in available.items()}
+        evaluated = set()
+        rejected = []
+        try:
+            _charge(case)
+            for attempt in range(2):
+                if attempt:
+                    _charge(case)
+                    _event(case, "coordinator", "broaden_research",
+                           {"reason": "The first results did not verify the complete setup"})
+                blocked_lines = {key for key, items in available.items() if not items}
+                for line in plan.items:
+                    if attempt == 0 and available[line.id]:
+                        _event(case, "researcher", "reuse_evidence", {"line": line.id})
+                        continue
+                    if attempt >= len(line.queries) or (attempt and blocked_lines and line.id not in blocked_lines):
+                        continue
+                    seeds = self.researcher.search_line(line, line.queries[attempt], call)
+                    for seed in [item for item in seeds if item.product_id not in seen[line.id]][:2]:
+                        seen[line.id].add(seed.product_id)
+                        detail = self.researcher.detail(seed, call)
+                        if detail is not None and matches_line(detail, line):
+                            available[line.id].append(detail)
+                    case["evidence"][line.id] = [row.model_dump(mode="json") for row in available[line.id]]
+                if not all(available.values()):
+                    continue
+                # Keep room to inspect alternatives after a failed first round.
+                for items in candidates_in_price_order(plan, available, limit=MAX_VERIFICATIONS):
+                    if len(evaluated) >= MAX_VERIFICATIONS or (attempt == 0 and len(evaluated) >= 8):
+                        break
+                    key = tuple(item.product_id for item in items.values())
+                    if key in evaluated:
+                        continue
+                    evaluated.add(key)
+                    findings = _verify(case, items)
+                    if all(f.verdict == "pass" for f in findings):
+                        case["alternatives"] = rejected
+                        self._propose(case, items, findings, "awaiting_approval")
+                        return
+                    rejected.append({"items": _snapshot(items), "verdict": "fail" if any(
+                        f.verdict == "fail" for f in findings) else "unknown",
+                        "findings": [f.model_dump() for f in findings]})
+            missing = [line for line, rows in available.items() if not rows]
+            case["findings"] = rejected[0]["findings"] if rejected else [
+                Finding(code="listing_unverified", verdict="unknown",
+                        reason=f"Could not verify an exact catalog listing for {line}").model_dump()
+                for line in missing
+            ]
+            case.update(status="verification_blocked", alternatives=rejected)
+            _event(case, "coordinator", "stop_unverified", {"missing_lines": missing})
+        except SourceBlocked:
+            case["status"] = "source_unavailable"
+            _event(case, "coordinator", "stop_source_blocked", {})
+        except BudgetExhausted:
+            case["status"] = "step_limit_reached"
+            _event(case, "coordinator", "stop_budget", {})
+
     @staticmethod
     def _propose(case, items, findings, status):
+        plan = SetupPlan.model_validate(case["setup"]) if case.get("setup") else None
+        quantities = {line.id: line.quantity for line in plan.items if not line.owned} if plan else dict.fromkeys(items, 1)
         order = canonical_action_payload(ORDER, {
             "customer_id": case["customer_id"],
             "items": [{"product_id": item.product_id, "name": item.name,
-                       "quantity": 1, "source_url": item.source_url, "unit_price_tnd": item.price_tnd}
-                      for item in items.values()],
-            "total_tnd": _total(items), "source_evidence_ids": [item.product_id for item in items.values()],
+                       "quantity": quantities[key], "source_url": item.source_url, "unit_price_tnd": item.price_tnd}
+                      for key, item in items.items() if key in quantities],
+            "total_tnd": setup_total(plan, items) if plan else _total(items),
+            "source_evidence_ids": [items[key].product_id for key in quantities],
         })
         notice = canonical_action_payload(NOTIFICATION, {
             "customer_id": case["customer_id"], "channel": "sandbox_outbox",
@@ -286,6 +400,8 @@ class Specialist:
                 {"action": NOTIFICATION, "operation_id": operation + ":notification", "payload": notice},
             ],
         }
+        if plan:
+            proposal["setup"] = plan.model_dump(mode="json")
         proposal["hash"] = _hash(proposal)
         case.update(status=status, proposal=proposal, findings=proposal["findings"], approval=None)
         _event(case, "coordinator", "prepare_proposal", {"hash": proposal["hash"], "status": status})
@@ -390,15 +506,17 @@ class Specialist:
 
     def _refresh(self, case):
         old = _items(case["proposal"]["evidence"])
+        lines = {line.id: line for line in SetupPlan.model_validate(case["setup"]).items} if case.get("setup") else {}
         fresh = {}
         changes = []
         for role, item in old.items():
             value = self.researcher.detail(item, lambda actor, action, info, fn: _call(case, actor, action, info, fn))
-            if value is None or not matches_role(value, role):
+            if not value or not (matches_line(value, lines[role]) if lines else matches_role(value, role)):
                 changes.append({"product_id": item.product_id, "field": "source", "before": "verified", "after": "unavailable"})
                 continue
             fresh[role] = value
-            for field in ("price_tnd", "availability", "specs", "name"):
+            fields = ("specs", "name") if lines and lines[role].owned else ("price_tnd", "availability", "specs", "name")
+            for field in fields:
                 prior, current = getattr(item, field), getattr(value, field)
                 if prior != current:
                     changes.append({"product_id": item.product_id, "field": field,
