@@ -46,22 +46,7 @@ def reset_supabase() -> None:
         raise RuntimeError("Reset requires a Supabase connection.")
 
     print("Connected to the approved sandbox.")
-    # Preflight and clear the new commerce records before calling the legacy
-    # reset. If the additive migration is absent, no fixture data is touched.
-    try:
-        commerce_response = store.client.rpc(
-            "reset_approved_commerce_state"
-        ).execute()
-        commerce_result = commerce_response.data
-    except Exception:
-        logger.exception("Commerce sandbox reset RPC failed")
-        raise RuntimeError(
-            "Reset stopped before fixture restoration. Apply "
-            "sandbox/migrations/002_approved_commerce_writes.sql first."
-        ) from None
-    if not isinstance(commerce_result, dict) or commerce_result.get("success") is not True:
-        raise RuntimeError("The commerce reset did not confirm success; fixture data was not reset.")
-
+    # Migration 004 restores all fixtures and clears effects in one transaction.
     print("Calling the PostgreSQL reset function...")
 
     try:

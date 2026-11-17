@@ -183,7 +183,7 @@ def _render_result(result: dict, notice: str = "") -> str:
           <div class="order-head"><span class="order-number">{_e(order.get('order_id'))}</span><span class="order-state">{_e(order.get('status'))}</span></div>
           {products}<div class="mini-row total-row"><span class="field-label">Order total</span><span class="field-value">{_e(order.get('total'))} {_e(order.get('currency'))}</span></div>
           </div></section></aside>"""
-    if status == "awaiting_approval":
+    if status in {"awaiting_approval", "partially_completed"}:
         common = f"""<input type="hidden" name="run_id" value="{_e(result.get('run_id'))}">
           <input type="hidden" name="ticket_id" value="{_e(result.get('ticket_id'))}">
           <input type="hidden" name="operation_id" value="{_e(draft.get('operation_id') if draft else '')}">"""

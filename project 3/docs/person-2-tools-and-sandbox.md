@@ -109,7 +109,7 @@ not interchangeable approval credentials. `agent.tools.dispatcher` adapts the
 graph payloads through a trusted approval lookup. The graph passes notification
 IDs with the `:notification` suffix, which the tool preserves unchanged. The
 additive SQL function and reset extension are in
-`sandbox/migrations/002_approved_commerce_writes.sql`.
+`sandbox/migrations/002_approved_commerce_writes.sql`, followed by 003 and 004.
 
 ## Safety and idempotency
 
@@ -137,4 +137,4 @@ opt-in integration test outside the default test suite.
 See `docs/tool-contracts.md` for the current contract and integration limits.
 The graph contract is integrated and covered by offline fake-dispatcher tests.
 Tunisianet search is enabled for the demo. Approved writes still require the
-trusted approval service and checked-in sandbox RPC definitions.
+authenticated approval service and deployment of the checked-in sandbox RPC definitions. See `person-2-fixes-handoff.md` for the reviewed fixes and verification.

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from html import escape
 from typing import Any
 
@@ -15,13 +16,31 @@ def _e(value: Any) -> str:
     return escape(str(value if value is not None else ""), quote=True)
 
 
+_DEMO_RECEIPTS: dict[str, dict[str, Any]] = {}
+
+
 def _customer_executor(name: str, payload: dict[str, Any]) -> dict[str, Any]:
     if name == "find_customer":
         customer = tools.find_customer(payload.get("customer_id", ""))
         return {"customer_id": customer["customer_id"], "name": customer["name"]}
     if name == "search_tunisianet_products":
         return search_tunisianet_products(payload.get("query", ""), criteria=payload.get("criteria"))
-    raise RuntimeError("Trusted sandbox order approval service is not configured for this local demo")
+    if name in {"create_customer_order", "send_support_notification"}:
+        # This adapter is a process-local simulation, never the Supabase approval service.
+        operation_id = payload.get("operation_id")
+        if not isinstance(operation_id, str) or not operation_id or not payload.get("approved_by"):
+            raise ValueError("Missing demo operation/run reference")
+        record = {"action": name, "payload": deepcopy(payload)}
+        if operation_id in _DEMO_RECEIPTS:
+            previous = _DEMO_RECEIPTS[operation_id]
+            if previous["record"] != record:
+                raise ValueError("Demo operation ID conflicts with a different payload")
+            return deepcopy(previous["result"])
+        result = {"success": True, "simulated": True, "operation_id": operation_id,
+                  "status": "pending" if name == "create_customer_order" else "queued"}
+        _DEMO_RECEIPTS[operation_id] = {"record": record, "result": result}
+        return deepcopy(result)
+    raise RuntimeError("Unknown demo tool")
 
 
 def _criteria(form: dict[str, list[str]]) -> dict[str, Any]:
@@ -75,7 +94,7 @@ button{{border:0;border-radius:9px;padding:11px 16px;font:inherit;font-size:12px
 @media(max-width:700px){{main{{padding:28px 15px}}header{{padding:0 15px}}h1{{font-size:27px}}.products{{grid-template-columns:1fr}}.bottom{{align-items:flex-start;flex-direction:column}}}}
 </style></head><body><header><div class="brand"><span class="mark">S</span>Shopline <span class="tag">CUSTOMER SHOP</span></div><span class="tag">Product orders</span></header>
 <main><div class="eyebrow">Tunisianet catalog · Customer orders</div><h1>Find the right product</h1><p class="intro">Describe what you need in your own words. The shop will identify product details and filters, then show matching items for you to choose.</p>
-{f'<div class="notice{notice_class}">{_e(notice)}</div>' if notice else ''}{content}<p class="muted" style="margin-top:20px">Local demo only. No retailer checkout, payment, or customer message is performed.</p></main></body></html>"""
+{f'<div class="notice{notice_class}">{_e(notice)}</div>' if notice else ''}{content}<p class="muted" style="margin-top:20px">In-memory simulation only: orders and notifications disappear on restart. No Supabase write, retailer checkout, payment, or customer message is performed.</p></main></body></html>"""
 
 
 def _search_form(prompt: str = "") -> str:
@@ -123,7 +142,18 @@ def _render(result: dict, request: dict) -> str:
         prompt = _e(result.get("request_text") or request.get("request_text", ""))
         query = _e(result.get("product_query") or request.get("product_query", ""))
         hidden = f"<input type='hidden' name='run_id' value='{_e(result.get('run_id'))}'><input type='hidden' name='customer_id' value='{_e(request['customer_id'])}'><input type='hidden' name='product_query' value='{query}'><input type='hidden' name='request_text' value='{prompt}'><input type='hidden' name='criteria_json' value='{criteria}'><input type='hidden' name='product_prompt_parser' value='{_e(parser_mode)}'><input type='hidden' name='operation_id' value='{_e(draft.get('operation_id'))}'>"
-        content += f"<section class='card'><div class='head'><div><div class='eyebrow'>Order review</div><strong>Confirm the exact sandbox order</strong></div><span class='tag'>Your confirmation is required</span></div><div class='body'>{lines}<div class='bottom'><strong>Total: {_e(draft.get('total_tnd'))} TND</strong><div><form method='post' action='/shop' style='display:inline'>{hidden}<input type='hidden' name='action' value='decline'><button type='submit' class='secondary'>Decline</button></form> <form method='post' action='/shop' style='display:inline'>{hidden}<input type='hidden' name='action' value='confirm'><button type='submit'>Confirm sandbox order</button></form></div></div></div></section>"
+        content += f"<section class='card'><div class='head'><div><div class='eyebrow'>Order review</div><strong>Confirm the exact sandbox order</strong></div><span class='tag'>Your confirmation is required within 15 minutes</span></div><div class='body'>{lines}<div class='bottom'><strong>Total: {_e(draft.get('total_tnd'))} TND</strong><div><form method='post' action='/shop' style='display:inline'>{hidden}<input type='hidden' name='action' value='decline'><button type='submit' class='secondary'>Decline</button></form> <form method='post' action='/shop' style='display:inline'>{hidden}<input type='hidden' name='action' value='confirm'><button type='submit'>Confirm sandbox order</button></form></div></div></div></section>"
+    elif status == "partially_completed":
+        hidden = "".join(f"<input type='hidden' name='{_e(k)}' value='{_e(v)}'>" for k, v in {
+            "run_id": result["run_id"], "customer_id": result["customer_id"],
+            "product_query": result["product_query"], "request_text": result.get("request_text", ""),
+            "criteria_json": json.dumps(result.get("product_criteria", {})),
+            "product_prompt_parser": result.get("product_prompt_parser", "provided"),
+            "operation_id": result["operation_id"],
+        }.items())
+        content += f"<section class='card'><div class='body'><strong>Partly completed</strong><p>{len(result.get('applied_actions', []))} action receipt(s) preserved. Retry only unfinished actions, or stop. Stopping does not undo prior actions.</p><form method='post' action='/shop'>{hidden}<button name='action' value='confirm'>Retry unfinished actions</button> <button name='action' value='decline'>Stop here</button></form></div></section>"
+    elif status == "completed":
+        content += "<section class='card'><div class='body'><strong>Simulation completed</strong><p>One local order receipt and notification receipt were recorded. Nothing was sent or purchased.</p></div></section>"
     elif status not in {None, ""}:
         content += _error_card(result)
     return _layout(content)

@@ -1,6 +1,6 @@
 # Person 2 tool contracts (current implementation)
 
-All tools return JSON-safe dictionaries. Errors have `{success:false,error,message,retryable}`. Validation failures are non-retryable (`invalid_input`); unknown records use `*_not_found`; transient sandbox failures use `sandbox_database_failed` and may be retried with the same operation ID. Writes use the `execute_support_write` RPC and must be run only against the configured sandbox.
+All tools return JSON-safe dictionaries. Errors have `{success:false,error,message,retryable}`. Validation failures are non-retryable (`invalid_input`); unknown records use `*_not_found`; transient sandbox failures use `sandbox_database_failed` and may be retried with the same operation ID. Support updates use `execute_support_write`; orders and notifications use `execute_approved_commerce_write`. Writes and must be run only against the configured sandbox.
 
 ## Reads
 
@@ -37,7 +37,7 @@ Example result:
 
 ## Person 1 integration decision
 
-`agent.tools.dispatcher.make_tool_executor` adapts Person 1's `(tool_name, payload)` contract. It takes an `approval_lookup` callback owned by trusted application code; `make_sandbox_approval_lookup(store)` provides a read-only lookup by action, operation ID, run ID, and approved status. For writes it reads `approved_by` only as a run reference, locates an already-created approval row, and passes the returned `approval_id` separately. The callback never creates approval. The trusted human approval application can call the service-role-only `record_commerce_approval` RPC after authenticating the human and canonicalizing the exact action payload. SQL then checks action, operation ID, run, expiry, status, and full payload. The graph's notification action already uses `operation_id + ":notification"`; the adapter passes that ID unchanged.
+`agent.tools.dispatcher.make_tool_executor` adapts Person 1's `(tool_name, payload)` contract. It takes an `approval_lookup` callback owned by trusted application code; `make_sandbox_approval_lookup(store)` provides a read-only lookup by exact action, operation ID, run ID and canonical payload through `resolve_action_approval` (including consumed approvals with matching receipts). For writes it reads `approved_by` only as a run reference, locates an already-created approval row, and passes the returned `approval_id` separately. The callback never creates approval. The trusted human approval application can call the service-role-only `record_commerce_approval` RPC after authenticating the human and canonicalizing the exact action payload. SQL then checks action, operation ID, run, expiry, status, and full payload. The graph's notification action already uses `operation_id + ":notification"`; the adapter passes that ID unchanged.
 
 One human decision covers the graph's order plus its notification. The trusted approval service therefore persists distinct records for `create_customer_order` and `send_support_notification`, each bound to its action-specific operation ID and canonical payload. The same approval endpoint may persist an `update_ticket_database` record for the legacy `execute_support_write` function. It must create records only after the authenticated human decision and derive `approved_by` from that authenticated operator, never from graph input.
 
@@ -53,4 +53,10 @@ Person 2's adapter never returns email from customer reads and drops any `recipi
 
 ## Sandbox and limitations
 
-`python -m sandbox.reset --supabase` explicitly resets the approved Supabase sandbox and clears its operation history; do not run this casually. Apply `sandbox/migrations/002_approved_commerce_writes.sql` to the dedicated sandbox before using new order/notification writes or running the extended reset. This additive migration leaves the existing `execute_support_write` unchanged, adds `execute_approved_commerce_write`, stores generic notifications, and provides `reset_approved_commerce_state`. It grants execution only to `service_role`. The repository still does not contain definitions for the legacy `execute_support_write` or `reset_sale_support_sandbox`; migration alone does not deploy those. Ordinary tests use in-memory fixtures and mocked RPC calls and make no network/database calls. Never provide production credentials or point the reset command at production.
+Apply `sandbox/schema.sql`, `sandbox/seed.sql`, then migrations `002`, `003`, and `004` in order to a fresh dedicated Supabase sandbox. Existing sandboxes on 003 need 004. Migration 004 supplies the missing support-write and atomic-reset definitions and the receipt-aware approval resolver. It does not deploy itself.
+
+Trusted server code can use `sandbox.approvals.record_approval` after authenticating and authorizing the human decision. It shares `canonical_action_payload` with execution, including fixed two-decimal money strings. It supports the graph's order, notification and ticket-update actions. Retained refund/escalation writers are outside the current graph and approval helper; they require separately trusted approval records.
+
+`python -m sandbox.reset --supabase` calls one transactional reset RPC, restoring fixtures and clearing all sandbox effects together. It still requires matching `SUPABASE_URL` and `SUPABASE_SANDBOX_URL`. No reset or migration was run against hosted Supabase during this patch.
+
+Default Python tests are offline. `tests/sql/verify.mjs` additionally executes the checked-in SQL against isolated PGlite PostgreSQL. This covers bootstrap, replay, rollback, approval rejection and reset, but does not prove hosted Supabase authentication, PostgREST integration or concurrent connections. See `person-2-fixes-handoff.md` for commands and remaining integration work.

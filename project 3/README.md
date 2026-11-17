@@ -129,9 +129,16 @@ LangSmith configuration and privacy filtering. Expected LangSmith settings are
 `LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, and `LANGSMITH_PROJECT`; tracing must
 not change workflow or approval behavior when disabled or unavailable.
 
-The current Person 1 workflows use `MAX_STEPS=16` by default. Revisit that
+The current Person 1 workflows use `MAX_STEPS=20` by default. Revisit that
 bound when a verified product source and trusted approval service are wired.
 
 The team must document the final setup, reset, demo, and evaluation commands
 after the sandbox and LangSmith integrations are implemented. Do not infer that
 planned commands are currently available.
+
+## Person 1 reliability patch
+
+See [fixes and explanation](docs/person-1-fixes-handoff.md) for validation,
+basket budgets, pre-write catalog refresh, 15-minute proposals, bounded partial
+retries and the explicitly simulated local order demo. The graph default is
+now `MAX_STEPS=20`; environment overrides remain in effect.
