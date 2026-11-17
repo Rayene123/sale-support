@@ -339,6 +339,8 @@ def test_usb_c_connector_shape_does_not_prove_data_support(runner):
 def test_live_catalog_retries_a_narrow_model_query_on_the_bounded_category(runner):
     class NarrowSearch(Catalog):
         def general(self, query, *, max_results):
+            if "moniteur" in query:
+                return self.search("first monitor", max_results=max_results)
             self.lookups.append(("search", query))
             return {"success": True, "data": {"products": []}}
 
@@ -349,7 +351,9 @@ def test_live_catalog_retries_a_narrow_model_query_on_the_bounded_category(runne
         line("pc", "laptop", "portable 8 Go en promotion"),
         line("screen", "monitor", "moniteur Full HD noir"),
     ], "links": [{"source": "pc", "target": "screen", "kind": "video"}]}
-    service, source, _ = runner(plan, NarrowSearch())
+    catalog = NarrowSearch()
+    catalog.queries["first monitor"] = ["M0"]  # VGA cannot connect to the available laptop.
+    service, source, _ = runner(plan, catalog)
     case = service.start("C-001", "Find a laptop and a compatible monitor under 2900 TND.")
     assert case["status"] == "awaiting_approval"
     assert ("search", "pc portable") in source.lookups

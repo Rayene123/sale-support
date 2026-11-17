@@ -98,7 +98,8 @@ export. Network export runs on a bounded background queue.
 | Fixed / adaptive / adaptive plus verifier | 14/30, 11/30 and 30/30 correct. The verifier mode produced zero false positives. |
 | Local Ministral model | [8/8 scenarios](../eval/results/specialist-local-model.json), zero false positives, p50 6.51 s and p95 34.53 s. |
 | Browser workbench | Customer request, reviewer approval, sandbox order and notification, and both confirmed receipts observed in Chromium. |
-| Live catalog | A bounded Tunisianet read returned two current laptop listings. |
+| Live catalog | The workbench inspected one laptop and three monitors from Tunisianet. The listings did not establish a shared connection, so the case stopped before approval. |
+| Clean checkout | Fresh Python and Node installs, the Python and SQL checks, and a local reset succeeded. |
 
 The model sample covers display, USB, Ethernet, cross-product dimensions,
 missing specifications, an over-budget setup and a clarification. Its timing
@@ -116,6 +117,10 @@ for PCIe facts the listings did not supply. Verification stopped the order
 and showed both gaps. A separate browser case completed with two receipts.
 Unknown measurements and incompatible dimensions also stopped proposals in
 the benchmark.
+
+The live model's first search was too narrow to find a laptop. The second
+research pass now uses bounded category searches for known laptop and monitor
+types and can broaden both ends before trying another pairing.
 
 The hosted sandbox adapter and LangSmith exporter are configurable. A live
 hosted acceptance run requires the team's dedicated Supabase credentials and

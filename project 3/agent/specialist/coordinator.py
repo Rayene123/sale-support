@@ -338,13 +338,12 @@ class Specialist:
                     _charge(case)
                     _event(case, "coordinator", "broaden_research",
                            {"reason": "The first results did not verify the complete setup"})
-                blocked_lines = {key for key, items in available.items() if not items}
                 for line in plan.items:
                     if attempt == 0 and available[line.id]:
                         _event(case, "researcher", "reuse_evidence", {"line": line.id})
                         continue
                     line_queries = queries[line.id]
-                    if attempt >= len(line_queries) or (attempt and blocked_lines and line.id not in blocked_lines):
+                    if attempt >= len(line_queries):
                         continue
                     seeds = self.researcher.search_line(line, line_queries[attempt], call)
                     for seed in [item for item in seeds if item.product_id not in seen[line.id]][:2]:
