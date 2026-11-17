@@ -53,9 +53,15 @@ def test_product_parser_invalid_html_and_no_products():
         parse_product_html("x", page_url="https://evil.test/a")
 
 
-def test_scraper_is_explicitly_unverified_and_does_not_make_requests():
-    assert search_mytek_products("laptop")["error"] == "scraper_unverified"
-    assert search_mytek_products("air conditioner", criteria={"color":"white", "price_min_tnd":"1000"})["error"] == "scraper_unverified"
+def test_scraper_legacy_alias_uses_offline_adapter(monkeypatch):
+    from agent.tools import mytek
+    calls = []
+    def fake(query, **kwargs):
+        calls.append((query, kwargs))
+        return {"success": True, "data": {"products": []}}
+    monkeypatch.setattr(mytek, "search_tunisianet_products", fake)
+    assert search_mytek_products("laptop")["success"]
+    assert calls[0][0] == "laptop"
     assert search_mytek_products(" ")["error"] == "invalid_input"
 
 
