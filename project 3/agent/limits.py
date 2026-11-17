@@ -6,7 +6,7 @@ import os
 
 
 def _configured_max_steps() -> int:
-    raw = os.environ.get("MAX_STEPS", "16").strip()
+    raw = os.environ.get("MAX_STEPS", "20").strip()
     try:
         value = int(raw)
     except ValueError as exc:

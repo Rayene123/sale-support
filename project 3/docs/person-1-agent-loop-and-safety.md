@@ -135,7 +135,7 @@ stable thread ID per run. Resuming must never create a new execution. Repeated
 resume must not repeat an action; Person 2's write tools provide durable
 idempotency, while the graph validates operation IDs and completed checkpoints.
 
-Configure `MAX_STEPS` (current prototype default `16`) and count graph nodes
+Configure `MAX_STEPS` (current prototype default `20`) and count graph nodes
 and tool attempts. Include the customer-selection interrupt in the budget.
 Before entering another node or retrying a tool, stop with
 `step_limit_reached` when the limit would be exceeded. Recheck the default when
@@ -180,3 +180,5 @@ dispatches only Person 2's published implementations.
 Provide the frozen state/trajectory schema, public API, terminal status list,
 checkpoint behavior, stop-rule proof, and the event list Person 4 should map to
 LangSmith runs, spans, and approval events.
+
+Reliability changes and remaining boundaries: [Person 1 handoff](person-1-fixes-handoff.md).

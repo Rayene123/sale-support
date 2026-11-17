@@ -12,6 +12,7 @@ RunStatus = Literal[
     "rejected",
     "completed",
     "failed",
+    "partially_completed",
     "timed_out",
     "step_limit_reached",
 ]

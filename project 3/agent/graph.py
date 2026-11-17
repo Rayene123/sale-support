@@ -220,7 +220,7 @@ def _llm_product_prompt(text: str) -> tuple[str, dict[str, Any]] | None:
     ]
     try:
         try:
-            model = ChatOpenAI(model=model_name, api_key=api_key).with_structured_output(_ProductPromptIntent)
+            model = ChatOpenAI(model=model_name, api_key=api_key, timeout=30, max_retries=0, max_completion_tokens=512).with_structured_output(_ProductPromptIntent)
             parsed = model.invoke(messages)
         except Exception as exc:
             # A configured model name from a local demo can be unsupported by
@@ -228,7 +228,7 @@ def _llm_product_prompt(text: str) -> tuple[str, dict[str, Any]] | None:
             # request error; do not retry network or rate-limit failures.
             if model_name == "gpt-4o-mini" or type(exc).__name__ != "BadRequestError":
                 return None
-            model = ChatOpenAI(model="gpt-4o-mini", api_key=api_key).with_structured_output(_ProductPromptIntent)
+            model = ChatOpenAI(model="gpt-4o-mini", api_key=api_key, timeout=30, max_retries=0, max_completion_tokens=512).with_structured_output(_ProductPromptIntent)
             parsed = model.invoke(messages)
         intent = parsed if isinstance(parsed, _ProductPromptIntent) else _ProductPromptIntent.model_validate(parsed)
         query = _prompt_product_query(intent.search_query)
@@ -362,7 +362,7 @@ def _generate_proposal(ticket: dict[str, Any], customer: dict[str, Any], order: 
     model_name = os.environ.get("OPENAI_MODEL", "").strip() or "gpt-4o-mini"
     # Leave sampling parameters at the model default. Some reasoning models
     # reject an explicit temperature value, even temperature=0.
-    model = ChatOpenAI(model=model_name, api_key=api_key)
+    model = ChatOpenAI(model=model_name, api_key=api_key, timeout=30, max_retries=0, max_completion_tokens=512)
     # Default function-call structured parsing works across the project's
     # declared langchain-openai >=0.2 range.
     structured_model = model.with_structured_output(_ModelDraft)
@@ -428,6 +428,9 @@ def _generate_order_proposal(state: AgentState) -> tuple[dict[str, Any], str]:
             "line_total_tnd": float(line_total),
             "source_url": str(product.get("source_url", "")),
         })
+    budget = state.get("price_max_tnd")
+    if budget is not None and total > Decimal(str(budget)):
+        raise ValueError("Selected quantities exceed the total order budget; select fewer items")
     draft = {
         "customer_id": (state.get("customer") or {}).get("customer_id"),
         "items": order_items,
@@ -526,6 +529,13 @@ def _order_tool_executor(config: RunnableConfig):
 def start_order_run(state: AgentState) -> dict[str, Any]:
     started, clock = _begin()
     customer_id = state.get("customer_id")
+    raw_query = state.get("product_query") or state.get("request_text")
+    if (not isinstance(customer_id, str) or not customer_id.strip() or len(customer_id) > 120
+            or not isinstance(raw_query, str) or not raw_query.strip() or len(raw_query) > 1000
+            or not isinstance(state.get("product_criteria") or {}, dict) or MAX_STEPS < 13):
+        return {"status": "step_limit_reached" if MAX_STEPS < 13 else "failed", "step_count": 1,
+                "errors": ["Invalid customer/query/criteria or insufficient step budget"],
+                "trajectory": [], "tool_calls": [], "applied_actions": []}
     raw_criteria = dict(state.get("product_criteria") or {})
     query = state.get("product_query") or raw_criteria.get("name") or state.get("request_text")
     prompt_text = state.get("request_text") or query
@@ -708,6 +718,7 @@ def draft_order(state: AgentState) -> dict[str, Any]:
             {"tool": "send_support_notification", "operation_id": f"{operation_id}:notification",
              "notification": draft["notification"]},
         ]
+        draft["expires_at"] = time.time() + 900
         status, errors = "awaiting_approval", []
         summary = f"Sandbox order proposal created using {source}"
     except Exception as exc:
@@ -825,6 +836,7 @@ def draft_action(state: AgentState) -> dict[str, Any]:
         if (draft["ticket_id"] != state["ticket_id"] or not draft["evidence_ids"]
                 or not draft["response"].strip()):
             raise ValueError("Generated proposal failed validation")
+        draft["expires_at"] = time.time() + 900
         status, errors = "awaiting_approval", []
         summary = f"Structured proposal created using {draft_source}"
     except Exception as exc:
@@ -881,7 +893,9 @@ def request_approval(state: AgentState) -> dict[str, Any]:
         }
     decision = interrupt(approval_view)
     errors: list[str] = []
-    if not isinstance(decision, dict) or set(decision) != {"decision", "operation_id"}:
+    if time.time() > draft.get("expires_at", 0):
+        status, errors, normalized = "timed_out", ["Proposal expired; start a fresh review"], {}
+    elif not isinstance(decision, dict) or set(decision) != {"decision", "operation_id"}:
         status, errors = "failed", ["Approval must contain exactly decision and operation_id"]
         normalized = decision if isinstance(decision, dict) else {"decision": "invalid", "operation_id": None}
     elif decision.get("decision") not in {"approve", "reject", "decline", "timeout"}:
@@ -915,10 +929,17 @@ def apply_approved_actions(state: AgentState, config: RunnableConfig) -> dict[st
     approval, draft = state.get("approval") or {}, state.get("draft") or {}
     attempts: list[dict[str, Any]] = []
     actions = list(state.get("applied_actions", []))
+    pending = max(0, 2 - len(actions)) if callable(config.get("configurable", {}).get("tool_executor")) else 1
+    refresh = state.get("request_type") == "product_order" and not actions
+    if state.get("step_count", 0) + 1 + pending + int(refresh) + 1 > MAX_STEPS:
+        return _step_result(state, "apply_approved_actions", started, clock, "Check budget",
+                            "No further actions: step budget exhausted", "step_limit_reached", 1)
     if (state.get("status") != "approved" or approval.get("decision") != "approve"
             or approval.get("operation_id") != draft.get("operation_id")
             or draft.get("operation_id") != state.get("operation_id")):
         status, errors, summary = "failed", ["Write blocked: approval did not match the proposal"], "Write blocked"
+    elif time.time() > draft.get("expires_at", 0):
+        status, errors, summary = "timed_out", ["Approval expired; prior receipts remain recorded"], "Expired approval blocked"
     elif state.get("request_type") == "product_order":
         executor = None
         try:
@@ -928,6 +949,19 @@ def apply_approved_actions(state: AgentState, config: RunnableConfig) -> dict[st
             order_receipt = next((item for item in actions if item.get("action") == "create_customer_order" and item.get("operation_id") == order_action_id), None)
             notification_receipt = next((item for item in actions if item.get("action") == "send_support_notification" and item.get("operation_id") == notify_action_id), None)
             if order_receipt is None:
+                attempts.append({"tool": "search_tunisianet_products", "identifier": state["product_query"],
+                                 "timestamp": _timestamp(), "result_summary": "Pre-write catalog revalidation"})
+                fresh = executor("search_tunisianet_products", {"query": state["product_query"], "criteria": state.get("product_criteria", {})})
+                if not isinstance(fresh, dict) or fresh.get("success") is False:
+                    raise ValueError("Catalog refresh failed; no order created")
+                indexed = {row["product_id"]: row for row in fresh.get("data", fresh).get("products", [])}
+                for item in draft["items"]:
+                    row = indexed.get(item["product_id"], {})
+                    if (not _product_matches_criteria(row, state.get("product_criteria", {}))
+                            or row.get("source_url") != item.get("source_url")
+                            or row.get("availability") not in {"available", "in_stock", "in stock"}
+                            or _amount(row.get("price_tnd")) != _amount(item["unit_price_tnd"])):
+                        raise ValueError("Price or stock changed; restart and obtain fresh approval")
                 order_payload = {
                     "operation_id": order_action_id,
                     "approved_by": state.get("run_id"),
@@ -958,8 +992,8 @@ def apply_approved_actions(state: AgentState, config: RunnableConfig) -> dict[st
                                 "result": notification_result})
             status, errors, summary = "completed", [], "Approved sandbox order and notification recorded"
         except Exception as exc:
-            status = "failed"
-            errors = [f"Approved commerce action failed ({type(exc).__name__})"]
+            status = "partially_completed" if actions else "failed"
+            errors = [str(exc) if isinstance(exc, ValueError) else f"Approved commerce action failed ({type(exc).__name__})"]
             summary = errors[0]
             attempts.append({"tool": "commerce_action", "identifier": draft.get("operation_id"),
                              "timestamp": _timestamp(), "error": type(exc).__name__})
@@ -1002,7 +1036,7 @@ def apply_approved_actions(state: AgentState, config: RunnableConfig) -> dict[st
                                 "result": notification_result})
             status, errors, summary = "completed", [], "Approved ticket update and notification recorded"
         except Exception as exc:
-            status = "failed"
+            status = "partially_completed" if actions else "failed"
             errors = [f"Approved support action failed ({type(exc).__name__})"]
             summary = errors[0]
             attempts.append({"tool": "support_action", "identifier": draft.get("operation_id"),
@@ -1104,7 +1138,18 @@ def _after_approval(state: AgentState) -> str:
 def _after_apply(state: AgentState) -> str:
     if state.get("status") == "step_limit_reached" or state.get("step_count", 0) >= MAX_STEPS:
         return END
-    return "finish_run"
+    return "request_retry" if state.get("status") == "partially_completed" else "finish_run"
+
+
+def request_retry(state: AgentState) -> dict[str, Any]:
+    """Retry only unfinished actions, preserving receipts and operation IDs."""
+    started, clock = _begin()
+    decision = interrupt({"status": "partially_completed", "applied_actions": state.get("applied_actions", []),
+                          "operation_id": state.get("operation_id"), "message": "Retry unfinished actions only?"})
+    valid = decision == {"decision": "approve", "operation_id": state.get("operation_id")}
+    return _step_result(state, "request_retry", started, clock, "Partial receipt preserved",
+                        "Retry approved" if valid else "Stopped; prior effects remain recorded",
+                        "approved" if valid else "failed", 1, required_after=3 if valid else 1)
 
 
 def _build_graph():
@@ -1116,7 +1161,7 @@ def _build_graph():
         ("search_tunisianet_products", search_tunisianet_products),
         ("request_product_selection", request_product_selection), ("draft_order", draft_order),
         ("request_approval", request_approval), ("apply_approved_actions", apply_approved_actions),
-        ("finish_run", finish_run),
+        ("finish_run", finish_run), ("request_retry", request_retry),
     ):
         builder.add_node(name, node)
     builder.add_conditional_edges(START, _entry_route)
@@ -1131,6 +1176,7 @@ def _build_graph():
     builder.add_conditional_edges("draft_order", _after_draft)
     builder.add_conditional_edges("request_approval", _after_approval)
     builder.add_conditional_edges("apply_approved_actions", _after_apply)
+    builder.add_conditional_edges("request_retry", _after_approval)
     builder.add_edge("finish_run", END)
     return builder.compile(checkpointer=CHECKPOINTER)
 

@@ -274,3 +274,113 @@ def test_support_ticket_uses_person_two_reads_and_privacy_safe_writes():
     assert "customer_id" not in notification_write
     assert "recipient" not in notification_write
     assert ticket_write["approved_by"] == notification_write["approved_by"] == paused["run_id"]
+
+
+def test_invalid_customer_never_calls_model(monkeypatch):
+    from agent import graph
+    def forbidden(*args):
+        raise AssertionError("Paid model must not run for invalid input")
+    monkeypatch.setattr(graph, "_llm_product_prompt", forbidden)
+    result = run_operator({"request_type": "product_order", "customer_id": "", "product_query": "laptop"})
+    assert result["status"] == "failed"
+
+
+def test_quantities_cannot_exceed_total_budget():
+    calls = []
+    listed = start_order(calls)
+    result = select_order_products(listed, calls, {"items": [{"product_id": "MYTEK-001", "quantity": 10}]})
+    assert result["status"] == "failed"
+    assert "total order budget" in result["errors"][-1]
+
+
+def test_changed_price_blocks_all_writes():
+    calls = []
+    paused = select_order_products(start_order(calls), calls)
+    base = fake_commerce_adapter(calls)
+    def changed(name, payload):
+        result = base(name, payload)
+        if name == "search_tunisianet_products":
+            result["products"][0]["price_tnd"] = 121
+        return result
+    result = run_operator(ORDER_REQUEST, {"decision": "approve", "operation_id": paused["operation_id"]},
+                          run_id=paused["run_id"], tool_executor=changed)
+    assert result["status"] == "failed"
+    assert result["applied_actions"] == []
+    assert not any(n.startswith("create_") for n, _ in calls)
+
+
+def test_partial_retry_preserves_order_and_only_retries_notification():
+    calls = []
+    paused = select_order_products(start_order(calls), calls)
+    base = fake_commerce_adapter(calls)
+    def failure(name, payload):
+        if name == "send_support_notification":
+            raise RuntimeError("Transient failure")
+        return base(name, payload)
+    decision = {"decision": "approve", "operation_id": paused["operation_id"]}
+    failed = run_operator(ORDER_REQUEST, decision, run_id=paused["run_id"], tool_executor=failure)
+    assert failed["status"] == "partially_completed"
+    assert len(failed["applied_actions"]) == 1
+    result = run_operator(ORDER_REQUEST, decision, run_id=paused["run_id"], tool_executor=base)
+    assert result["status"] == "completed"
+    assert [n for n, _ in calls].count("create_customer_order") == 1
+    assert result["step_count"] <= 20
+
+
+def test_expired_proposal_writes_nothing(monkeypatch):
+    from agent import graph
+    calls = []
+    paused = select_order_products(start_order(calls), calls)
+    monkeypatch.setattr(graph.time, "time", lambda: paused["draft"]["expires_at"] + 1)
+    result = approve_order(paused, calls)
+    assert result["status"] == "timed_out"
+    assert result["applied_actions"] == []
+
+
+def test_demo_receipts_are_idempotent_and_conflicts_fail():
+    from customer_ui import _customer_executor, _DEMO_RECEIPTS
+    _DEMO_RECEIPTS.clear()
+    payload = {"operation_id": "test-demo", "approved_by": "run-demo", "total_tnd": 120}
+    first = _customer_executor("create_customer_order", payload)
+    assert _customer_executor("create_customer_order", payload) == first
+    assert len(_DEMO_RECEIPTS) == 1 and first["simulated"] is True
+    with pytest.raises(ValueError):
+        _customer_executor("create_customer_order", {**payload, "total_tnd": 1})
+
+
+def test_repeated_partial_failures_stop_within_budget():
+    calls = []
+    paused = select_order_products(start_order(calls), calls)
+    base = fake_commerce_adapter(calls)
+    def failing(name, payload):
+        if name == "send_support_notification":
+            raise RuntimeError("Still unavailable")
+        return base(name, payload)
+    decision = {"decision": "approve", "operation_id": paused["operation_id"]}
+    result = paused
+    for _ in range(10):
+        result = run_operator(ORDER_REQUEST, decision, run_id=paused["run_id"], tool_executor=failing)
+        assert result["step_count"] <= 20
+        if result["status"] != "partially_completed":
+            break
+    assert result["status"] == "step_limit_reached"
+    assert len(result["applied_actions"]) == 1
+    assert [n for n, _ in calls].count("create_customer_order") == 1
+
+
+def test_customer_demo_completes_without_real_services(monkeypatch):
+    import customer_ui
+    from agent import graph
+    customer_ui._DEMO_RECEIPTS.clear()
+    base = fake_commerce_adapter([])
+    monkeypatch.setattr(customer_ui, "search_tunisianet_products",
+                        lambda *a, **k: base("search_tunisianet_products", {}))
+    listed = run_operator(ORDER_REQUEST, tool_executor=customer_ui._customer_executor)
+    selected = run_operator(ORDER_REQUEST, run_id=listed["run_id"],
+                            selection={"items": [{"product_id": "MYTEK-001", "quantity": 1}]},
+                            tool_executor=customer_ui._customer_executor)
+    done = run_operator(ORDER_REQUEST, {"decision": "approve", "operation_id": selected["operation_id"]},
+                        run_id=listed["run_id"], tool_executor=customer_ui._customer_executor)
+    assert done["status"] == "completed"
+    assert len(customer_ui._DEMO_RECEIPTS) == 2
+    assert "Simulation completed" in customer_ui._render(done, ORDER_REQUEST)
