@@ -34,6 +34,26 @@ class CaseStore:
             raise LookupError("Case not found")
         return json.loads(row[0])
 
+    def recent(self, customer_id=None):
+        with self._connect() as db:
+            if customer_id is None:
+                rows = db.execute("SELECT state FROM specialist_cases ORDER BY rowid DESC LIMIT 25").fetchall()
+            else:
+                rows = db.execute("SELECT state FROM specialist_cases WHERE owner=? ORDER BY rowid DESC LIMIT 25",
+                                  (customer_id,)).fetchall()
+        return [json.loads(row[0]) for row in rows]
+
+    def owner_for_review(self, case_id):
+        with self._connect() as db:
+            row = db.execute("SELECT owner FROM specialist_cases WHERE id=?", (case_id,)).fetchone()
+        if row is None:
+            raise LookupError("Case not found")
+        return row[0]
+
+    def clear(self):
+        with self._connect() as db:
+            db.execute("DELETE FROM specialist_cases")
+
     @contextmanager
     def update(self, case_id, customer_id):
         with self._connect() as db:

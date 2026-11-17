@@ -12,8 +12,8 @@ Use this page to track implementation against that brief.
 | Independently verify complete setups | The verifier tests model-selected field comparisons against both products' published specifications. It also checks direct display, USB and Ethernet modes, shared port use, stock, prices and evidence freshness. A generic relationship needs an explicit declaration naming the other model to establish overall compatibility. Missing or conflicting evidence blocks proposals. |
 | Revise cases without losing useful work | Cases retain typed plans and saved evidence. The new revision checks the model's changes, preserves unaffected evidence, and supersedes the exact proposal. |
 | Require fresh approval and recover safely | Both workflows share the durable case, exact-revision approval, listing recheck, sandbox writes and receipt recovery. Hybrid order totals include quantities and exclude owned items. |
-| Compare configurations and verify failures | The original 30-fixture comparison still covers fixed, adaptive and independent-verifier configurations of the rules engine. Hybrid tests cover multi-item requests, model-selected checks, unknowns, revisions and replay using exact product fixtures. The local smoke tests exercise the installed model. |
-| Customer/admin integration, LangSmith and release | Phase 4 consumes the backend. The new website concept still uses simulated data. Hosted Supabase authorization/writes and tracing remain integration work. |
+| Compare configurations and verify failures | The original 30-fixture comparison covers fixed, adaptive and independent-verifier configurations of the rules engine. The separate local-model benchmark tests several product families and reports results and measurements against fixture ground truth. |
+| Customer/admin integration, LangSmith and release | The Phase 4 workbench provides separate customer and reviewer sessions, approval and recovery controls, local traces and optional LangSmith export. See the [release guide](person-4-release.md) for the verification status. |
 
 ## Run the hybrid planner
 

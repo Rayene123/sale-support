@@ -1,0 +1,401 @@
+{
+  "model": "ministral-3:8b",
+  "catalog": "fictional fixtures",
+  "cases": [
+    {
+      "case": "direct_display",
+      "expected_status": "awaiting_approval",
+      "status": "awaiting_approval",
+      "expected_items": [
+        [
+          "L1",
+          1
+        ],
+        [
+          "M1",
+          1
+        ]
+      ],
+      "items": [
+        [
+          "L1",
+          1
+        ],
+        [
+          "M1",
+          1
+        ]
+      ],
+      "correct": true,
+      "false_positive": false,
+      "questions": [],
+      "findings": [
+        [
+          "total_budget",
+          "pass"
+        ],
+        [
+          "laptop_1_stock",
+          "pass"
+        ],
+        [
+          "monitor_1_stock",
+          "pass"
+        ],
+        [
+          "laptop_1->monitor_1:video",
+          "pass"
+        ]
+      ],
+      "latency_ms": 8952.97,
+      "model_calls": 1,
+      "catalog_calls": 6,
+      "model_usage": [
+        {
+          "input_tokens": 725,
+          "output_tokens": 366
+        }
+      ]
+    },
+    {
+      "case": "three_types_and_quantities",
+      "expected_status": "awaiting_approval",
+      "status": "awaiting_approval",
+      "expected_items": [
+        [
+          "D1",
+          1
+        ],
+        [
+          "K1",
+          2
+        ],
+        [
+          "P1",
+          1
+        ]
+      ],
+      "items": [
+        [
+          "D1",
+          1
+        ],
+        [
+          "K1",
+          2
+        ],
+        [
+          "P1",
+          1
+        ]
+      ],
+      "correct": true,
+      "false_positive": false,
+      "questions": [],
+      "findings": [
+        [
+          "total_budget",
+          "pass"
+        ],
+        [
+          "desktop_1_stock",
+          "pass"
+        ],
+        [
+          "keyboard_1_stock",
+          "pass"
+        ],
+        [
+          "mouse_1_stock",
+          "pass"
+        ],
+        [
+          "desktop_1->keyboard_1:usb",
+          "pass"
+        ],
+        [
+          "desktop_1->mouse_1:usb",
+          "pass"
+        ]
+      ],
+      "latency_ms": 7304.61,
+      "model_calls": 1,
+      "catalog_calls": 7,
+      "model_usage": [
+        {
+          "input_tokens": 747,
+          "output_tokens": 294
+        }
+      ]
+    },
+    {
+      "case": "network_pair",
+      "expected_status": "awaiting_approval",
+      "status": "awaiting_approval",
+      "expected_items": [
+        [
+          "R1",
+          1
+        ],
+        [
+          "S1",
+          1
+        ]
+      ],
+      "items": [
+        [
+          "R1",
+          1
+        ],
+        [
+          "S1",
+          1
+        ]
+      ],
+      "correct": true,
+      "false_positive": false,
+      "questions": [],
+      "findings": [
+        [
+          "total_budget",
+          "pass"
+        ],
+        [
+          "router_stock",
+          "pass"
+        ],
+        [
+          "switch_stock",
+          "pass"
+        ],
+        [
+          "router->switch:ethernet",
+          "pass"
+        ]
+      ],
+      "latency_ms": 5535.46,
+      "model_calls": 1,
+      "catalog_calls": 4,
+      "model_usage": [
+        {
+          "input_tokens": 728,
+          "output_tokens": 223
+        }
+      ]
+    },
+    {
+      "case": "physical_fit",
+      "expected_status": "awaiting_approval",
+      "status": "awaiting_approval",
+      "expected_items": [
+        [
+          "C100",
+          1
+        ],
+        [
+          "G300",
+          1
+        ]
+      ],
+      "items": [
+        [
+          "C100",
+          1
+        ],
+        [
+          "G300",
+          1
+        ]
+      ],
+      "correct": true,
+      "false_positive": false,
+      "questions": [],
+      "findings": [
+        [
+          "total_budget",
+          "pass"
+        ],
+        [
+          "pc_case_1_stock",
+          "pass"
+        ],
+        [
+          "gpu_1_stock",
+          "pass"
+        ],
+        [
+          "pc_case_1->gpu_1:gpu_socket:check:1",
+          "pass"
+        ],
+        [
+          "pc_case_1->gpu_1:gpu_socket:check:2",
+          "pass"
+        ],
+        [
+          "pc_case_1->gpu_1:gpu_socket",
+          "pass"
+        ]
+      ],
+      "latency_ms": 6718.07,
+      "model_calls": 1,
+      "catalog_calls": 4,
+      "model_usage": [
+        {
+          "input_tokens": 729,
+          "output_tokens": 274
+        }
+      ]
+    },
+    {
+      "case": "card_too_long",
+      "expected_status": "verification_blocked",
+      "status": "verification_blocked",
+      "expected_items": [],
+      "items": [],
+      "correct": true,
+      "false_positive": false,
+      "questions": [],
+      "findings": [
+        [
+          "total_budget",
+          "pass"
+        ],
+        [
+          "case_stock",
+          "pass"
+        ],
+        [
+          "gpu_stock",
+          "pass"
+        ],
+        [
+          "case->gpu:gpu_socket:check:1",
+          "fail"
+        ],
+        [
+          "case->gpu:gpu_socket:check:2",
+          "pass"
+        ],
+        [
+          "case->gpu:gpu_socket",
+          "pass"
+        ]
+      ],
+      "latency_ms": 6463.12,
+      "model_calls": 1,
+      "catalog_calls": 4,
+      "model_usage": [
+        {
+          "input_tokens": 729,
+          "output_tokens": 264
+        }
+      ]
+    },
+    {
+      "case": "unknown_card_length",
+      "expected_status": "verification_blocked",
+      "status": "verification_blocked",
+      "expected_items": [],
+      "items": [],
+      "correct": true,
+      "false_positive": false,
+      "questions": [],
+      "findings": [
+        [
+          "total_budget",
+          "pass"
+        ],
+        [
+          "case_stock",
+          "pass"
+        ],
+        [
+          "gpu_stock",
+          "pass"
+        ],
+        [
+          "case->gpu:gpu_socket:check:1",
+          "unknown"
+        ],
+        [
+          "case->gpu:gpu_socket:check:2",
+          "pass"
+        ],
+        [
+          "case->gpu:gpu_socket",
+          "pass"
+        ]
+      ],
+      "latency_ms": 6505.57,
+      "model_calls": 1,
+      "catalog_calls": 4,
+      "model_usage": [
+        {
+          "input_tokens": 729,
+          "output_tokens": 264
+        }
+      ]
+    },
+    {
+      "case": "over_budget",
+      "expected_status": "verification_blocked",
+      "status": "verification_blocked",
+      "expected_items": [],
+      "items": [],
+      "correct": true,
+      "false_positive": false,
+      "questions": [],
+      "findings": [
+        [
+          "listing_unverified",
+          "unknown"
+        ]
+      ],
+      "latency_ms": 5217.93,
+      "model_calls": 1,
+      "catalog_calls": 3,
+      "model_usage": [
+        {
+          "input_tokens": 726,
+          "output_tokens": 206
+        }
+      ]
+    },
+    {
+      "case": "clarify_budget",
+      "expected_status": "awaiting_clarification",
+      "status": "awaiting_clarification",
+      "expected_items": [],
+      "items": [],
+      "correct": true,
+      "false_positive": false,
+      "questions": [
+        "Le bo\u00eetier doit-il supporter une carte graphique jusqu'\u00e0 300 mm de longueur ?",
+        "Pr\u00e9f\u00e9rez-vous un \u00e9cran avec ou sans bord inf\u00e9rieurs (bezel) pour un usage bureautique ?",
+        "L'alimentation doit-elle \u00eatre certifi\u00e9e 80+ Gold ou Bronze suffit ?",
+        "Le clavier doit-il \u00eatre m\u00e9canique ou membrane ?",
+        "What is your total budget in TND?",
+        "I may have missed an item. Please confirm the items and quantities for this setup."
+      ],
+      "findings": [],
+      "latency_ms": 34528.34,
+      "model_calls": 1,
+      "catalog_calls": 0,
+      "model_usage": [
+        {
+          "input_tokens": 711,
+          "output_tokens": 1372
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "correct": 8,
+    "cases": 8,
+    "false_positives": 0,
+    "p50_ms": 6505.57,
+    "p95_ms": 34528.34,
+    "provider_fee_per_100_runs": 0,
+    "local_hardware_and_electricity_cost": null
+  }
+}

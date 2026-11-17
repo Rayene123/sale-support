@@ -2,10 +2,32 @@
 
 CS496 AI Engineering — Fall 2026
 
-Shopline Ops is a human-supervised ecommerce assistant for Tunisian IT product
-support and order requests. LangGraph coordinates the workflow and its approval
-gate. Tunisianet product pages are a read-only catalog source. LangSmith is the
-planned tracing and evaluation-monitoring platform.
+The Specialist is a human-supervised IT purchasing assistant. It researches
+product listings, verifies compatibility and prepares a sandbox order for
+review. The original LangGraph support-ticket workflow remains available
+separately.
+
+## Run the Phase 4 workbench
+
+From Project 3 with Python 3.12, Node.js, and Ollama installed:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Push-Location tests/sql
+npm ci
+Pop-Location
+ollama pull ministral-3:8b
+.\.venv\Scripts\python.exe specialist_web.py
+```
+
+Open [Customer](http://127.0.0.1:8767/customer/) to enter a free-form request
+and [Reviewer](http://127.0.0.1:8767/admin/) to approve and execute sandbox
+actions. The server prints separate passcodes. The default uses fictional
+listings and the project's real sandbox SQL on a local database. Use
+`--catalog live` for read-only Tunisianet research. See the
+[release and testing guide](docs/person-4-release.md) for reset, data modes,
+tracing and evaluation.
 
 ## The Specialist purchase workflow
 
@@ -17,8 +39,8 @@ research, verification, and approval rules check the plan against listing eviden
 The server-side [Specialist core](docs/specialist-core.md) now handles laptop
 and monitor cases, sourcing exact product facts, testing direct display
 compatibility, and preserving revisions and sandbox receipts. It runs
-alongside the original Shopline Ops graph. The existing local web pages still
-use the original graph and simulation until Phase 4 connects the new case API.
+alongside the original Shopline Ops graph. The Phase 4 workbench exposes the
+case API through separate customer and reviewer views.
 
 ## Original Shopline Ops workflow
 
@@ -133,17 +155,15 @@ The run writes `eval/results/trajectories.jsonl`, `summary.json`, and
 
 ## Environment and monitoring
 
-Person 2 owns the sandbox and its dedicated credentials. Person 4 owns optional
-LangSmith configuration and privacy filtering. Expected LangSmith settings are
-`LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, and `LANGSMITH_PROJECT`; tracing must
-not change workflow or approval behavior when disabled or unavailable.
+Optional LangSmith tracing for the Phase 4 workbench uses
+`LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, and `LANGSMITH_PROJECT`.
+The local trace and sandbox are available without a LangSmith account.
 
 The current Person 1 workflows use `MAX_STEPS=20` by default. Revisit that
 bound when a verified product source and trusted approval service are wired.
 
-The team must document the final setup, reset, demo, and evaluation commands
-after the sandbox and LangSmith integrations are implemented. Do not infer that
-planned commands are currently available.
+The [release and testing guide](docs/person-4-release.md) documents the setup,
+reset, evaluation, and remaining live integration checks.
 
 ## Person 1 reliability patch
 

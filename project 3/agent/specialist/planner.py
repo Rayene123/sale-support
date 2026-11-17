@@ -7,7 +7,9 @@ from urllib.parse import urlsplit
 
 import requests
 
+from agent.observability import model_tokens
 from .setup import SetupPlan
+from .setup_research import ground_plan
 
 
 DEFAULT_URL = "http://127.0.0.1:11434"
@@ -84,8 +86,9 @@ class OllamaPlanner:
     def plan(self, text, previous=None):
         if not isinstance(text, str) or not text.strip() or len(text) > 1200:
             raise ValueError("Enter a purchasing request of 1 to 1200 characters")
-        return self.structured(SetupPlan, SYSTEM, {"request": text, "previous_requirements":
+        plan = self.structured(SetupPlan, SYSTEM, {"request": text, "previous_requirements":
                                previous.model_dump(mode="json") if previous else None})
+        return ground_plan(plan, text, previous)
 
     def structured(self, contract, instructions, payload, *, max_tokens=1500):
         request = json.dumps(payload, ensure_ascii=False)
@@ -106,6 +109,7 @@ class OllamaPlanner:
                 if response.status_code != 200:
                     raise ModelUnavailable(f"Ollama returned HTTP {response.status_code}")
                 data = response.json()
+            model_tokens(data)
             if data.get("done_reason") == "length":
                 raise ModelUnavailable("Ollama reached the response limit")
             return contract.model_validate_json(data["message"]["content"])

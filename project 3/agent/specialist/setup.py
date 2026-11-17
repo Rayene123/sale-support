@@ -14,8 +14,8 @@ KIND_NAMES = {
     "desktop": r"pc de bureau|ordinateur de bureau|desktop",
     "keyboard": r"clavier|keyboard",
     "mouse": r"souris|mouse",
-    "router": r"routeur|router",
-    "switch": r"switch|commutateur",
+    "router": r"routeur|router|network router",
+    "switch": r"switch|commutateur|network switch|ethernet switch|switch reseau|commutateur reseau",
     "dock": r"dock|station d.accueil",
 }
 

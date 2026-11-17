@@ -10,6 +10,7 @@ import json
 import time
 from uuid import uuid4
 
+from agent.observability import capture_event, model_attempt
 from agent.tools.payloads import canonical_action_payload
 from agent.tools.schemas import validate_identifier
 from .contracts import Finding, Listing, Mode, Requirements, read_requirements
@@ -75,6 +76,7 @@ def _event(case, actor, name, detail, *, started=None):
         "elapsed_ms": round((time.perf_counter() - started) * 1000, 2) if started is not None else 0,
         "remaining_steps": case["step_limit"] - case["steps"],
     })
+    capture_event(case["trajectory"][-1])
 
 
 def _charge(case):
@@ -103,6 +105,7 @@ def _call(case, actor, action, info, invoke):
 
 def _verify(case, items):
     _charge(case)
+    started = time.perf_counter()
     findings = verify_setup(SetupPlan.model_validate(case["setup"]), items) if case.get("setup") else verify_bundle(_requirements(case), items)
     stale = [item.product_id for item in items.values() if not _is_fresh(item)]
     if stale:
@@ -110,7 +113,7 @@ def _verify(case, items):
                                 reason="An exact listing is stale or lacks a valid timestamp"))
     _event(case, "verifier", "check_candidate",
            {"products": [p.product_id for p in items.values()],
-            "findings": [{"code": f.code, "verdict": f.verdict} for f in findings]})
+            "findings": [{"code": f.code, "verdict": f.verdict} for f in findings]}, started=started)
     return findings
 
 
@@ -197,6 +200,7 @@ class Specialist:
             _charge(case)
             if self.planner is None:
                 raise ModelUnavailable("Planner not configured")
+            model_attempt()
             plan = SetupPlan.model_validate(self.planner.plan(text, previous))
             problems = read_plan_findings(plan, text, previous)
             # Retain the previous plan as the revision anchor if the model
@@ -429,16 +433,20 @@ class Specialist:
             _event(case, "reviewer", "record_decision", {"decision": decision, "hash": proposal_hash})
             return case
 
-    def execute_next(self, case_id, customer_id):
+    def execute_next(self, case_id, customer_id, *, expected_revision=None, expected_hash=None):
         """Resume one approved action. The writer must supply durable receipt lookup."""
         if self.writer is None:
             raise CaseConflict("No trusted sandbox writer is configured")
         with self.store.update(case_id, customer_id) as case:
+            proposal = case["proposal"]
+            if expected_revision is not None and (case["revision"] != expected_revision
+                    or not proposal or proposal["hash"] != expected_hash):
+                raise CaseConflict("Execution is not for the current exact proposal")
             if case["status"] == "completed":
                 return case
             if case["status"] not in {"approved", "partially_completed", "reconciliation_required"}:
                 raise CaseConflict("Execution requires current approval")
-            proposal, approval = case["proposal"], case["approval"]
+            approval = case["approval"]
             if (not proposal or not approval or approval["revision"] != case["revision"]
                     or approval["hash"] != proposal["hash"]
                     or _hash({k: v for k, v in proposal.items() if k != "hash"}) != approval["hash"]):

@@ -8,6 +8,7 @@ from agent.specialist.coordinator import CaseConflict, Specialist
 from agent.specialist.planner import ModelUnavailable, OllamaPlanner
 from agent.specialist.research import Researcher
 from agent.specialist.setup import SetupPlan
+from agent.specialist.setup_research import ground_plan, read_plan_findings
 from agent.specialist.store import CaseStore
 from eval.specialist_fixtures import product
 
@@ -27,6 +28,25 @@ def expected_plan():
         line("pointer", "mouse", "souris usb"),
     ], "links": [{"source": "pc", "target": "keys", "kind": "usb"},
                  {"source": "pc", "target": "pointer", "kind": "usb"}]}
+
+
+def test_standard_link_omits_inferred_defaults_but_keeps_requested_display_mode():
+    model = SetupPlan.model_validate({
+        "budget_tnd": 4000,
+        "items": [line("pc", "laptop", "pc portable", specs=[
+            {"field": "RAM", "value": "16 GB", "comparison": "at_least"},
+            {"field": "storage", "value": "512 GB", "comparison": "at_least"},
+        ]), line("screen", "monitor", "ecran pc")],
+        "links": [{"source": "pc", "target": "screen", "kind": "video", "transport": "hdmi",
+                   "resolution": "2560x1440", "refresh_hz": 120}],
+    })
+    text = "Find a laptop with 16 Go of RAM and a 1440p monitor under 4000 TND."
+    grounded = ground_plan(model, text, None)
+    assert [spec.field for spec in grounded.items[0].specs] == ["RAM"]
+    assert grounded.links[0].resolution == "2560x1440"
+    assert grounded.links[0].transport is grounded.links[0].refresh_hz is None
+    assert read_plan_findings(grounded, text) == []
+    assert any("resolution" in note for note in read_plan_findings(grounded, text.replace("1440p", "4K")))
 
 
 class StubModel:
