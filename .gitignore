@@ -19,3 +19,14 @@ project 2/data/raw/*.pdf
 project 2/data/indexes/
 project 2/data/eval/retrieval_results.json
 project 2/docs/PROJECT_FINAL_REPORT.md
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Environment variables
+.env
+.env.*
+!.env.example
