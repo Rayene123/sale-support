@@ -93,9 +93,13 @@ The graph's current proposed dispatcher calls
 `search_mytek_products`, `create_customer_order`, `update_ticket_database`,
 and `send_support_notification`. For writes it passes an operation ID and an
 `approved_by` run reference; notification IDs use a distinct `:notification`
-suffix. The exact method names, payloads, and return schemas above remain
-proposals for the phase-0 contract; Person 2, in coordination with Person 1,
-freezes them before implementation.
+suffix. The method names and payloads are published in `docs/tool-contracts.md`.
+Writes require a database-backed `approval_id`; `run_id` and `approved_by` are
+not interchangeable approval credentials. `agent.tools.dispatcher` adapts the
+graph payloads through a trusted approval lookup. The graph passes notification
+IDs with the `:notification` suffix, which the tool preserves unchanged. The
+additive SQL function and reset extension are in
+`sandbox/migrations/002_approved_commerce_writes.sql`.
 
 ## Safety and idempotency
 
@@ -104,7 +108,8 @@ freezes them before implementation.
   total against the sandbox records supplied to the admin for approval.
 - Replaying an identical operation returns the original result; reusing an ID
   with different content returns a conflict.
-- Notification writes go to an inspectable/resettable outbox.
+- Notification writes go to an inspectable/resettable `notification_outbox`.
+  The previous `email_outbox` table remains only for compatibility.
 - No tool submits a MYTEK purchase, transfers money, or contacts customers.
 - Detailed exceptions stay in local logs; callers receive safe typed errors.
 
@@ -119,6 +124,6 @@ opt-in integration test outside the default test suite.
 
 ## Handoff
 
-Provide the frozen tool contract, fixture IDs and product snapshots, sandbox
-reset instructions, error codes/retryability, idempotency guarantees, and
-confirmation that no live checkout, payment, or notification channel is used.
+See `docs/tool-contracts.md` for the current contract and integration limits.
+Live MYTEK search and database writes require verified public page markup and
+checked-in sandbox RPC definitions, respectively.

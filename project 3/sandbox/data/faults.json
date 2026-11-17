@@ -1,0 +1,30 @@
+
+{
+  "version": 1,
+  "read_failures": [
+    {
+      "fixture_id": "READ-TRANSIENT-001",
+      "action": "get_ticket",
+      "ticket_id": "T-001",
+      "mode": "fail_once",
+      "error_code": "sandbox_database_failed",
+      "description": "Simulates a temporary database read failure."
+    }
+  ],
+  "write_failures": [
+    {
+      "fixture_id": "WRITE-BEFORE-001",
+      "operation_id": "OP-FAIL-BEFORE-001",
+      "mode": "before_persistence",
+      "error_code": "sandbox_database_failed",
+      "description": "Fails before any database mutation."
+    },
+    {
+      "fixture_id": "WRITE-AFTER-001",
+      "operation_id": "OP-FAIL-AFTER-001",
+      "mode": "after_persistence",
+      "error_code": "sandbox_database_failed",
+      "description": "Commits the mutation but simulates a lost response."
+    }
+  ]
+}
