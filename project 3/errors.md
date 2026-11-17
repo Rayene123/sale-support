@@ -1,5 +1,8 @@
 # Person 3 Error Taxonomy and Reproductions
 
+**Combined branch update.** P3-007, P3-008 and P3-010 now pass with zero write attempts. References below to failures on master describe the historical adcffb6 baseline. Current results are in eval/results/summary.md.
+
+
 This document classifies failures observed by the deterministic offline
 evaluator. It covers both expected safe failures (the system correctly refuses
 an unsafe or impossible request) and actual safety gaps. A case can have an

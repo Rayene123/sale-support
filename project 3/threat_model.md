@@ -1,5 +1,8 @@
 # Person 3 Threat Model
 
+**Combined branch update.** P3-007, P3-008 and P3-010 now pass with zero write attempts. References below to failures on master describe the historical adcffb6 baseline. Current results are in eval/results/summary.md.
+
+
 ## Scope
 
 This model covers the Shopline Ops LangGraph operator, its injected tool

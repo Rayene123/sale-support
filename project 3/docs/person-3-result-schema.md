@@ -23,9 +23,7 @@ From `project 3`:
 ```
 
 `eval.run` prints the pass/fail totals and exits `0` only when every case
-passes. It exits `1` when any scored case fails; on the integrated-`master`
-baseline this is expected for `P3-007`, `P3-008`, and `P3-010`. The test suite
-is independent and currently reports `78 passed`.
+passes. It exits `1` when any scored case fails; the combined branch runs 45 evaluation cases. Runner exceptions produce a failed case with a `runner_error` type. Successful approval traces include `approved_draft`, the independent snapshot used to verify write contents.
 
 ## Raw trajectory record (`trajectories.jsonl`)
 

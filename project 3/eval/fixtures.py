@@ -489,6 +489,7 @@ def make_eval_executor(
     triggered: set[str] = set()
     counts: dict[str, int] = {}
     recorder = ToolRecorder()
+    receipts = {}
 
     def execute(tool_name: str, payload: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(payload, dict):
@@ -501,6 +502,15 @@ def make_eval_executor(
             recorder.add(tool_name, payload, error=error)
             raise EvalToolError(error)
 
+        key = (tool_name, payload.get("operation_id"))
+        if key in receipts:
+            original, receipt = receipts[key]
+            if original != payload:
+                recorder.add(tool_name, payload, error="operation_conflict")
+                raise EvalToolError("operation_conflict")
+            recorder.add(tool_name, payload, result=receipt)
+            return deepcopy(receipt)
+        lose_response = False
         for fault in faults:
             if fault.fixture_id != fixture_id or not fault.applies(tool_name, payload):
                 continue
@@ -515,14 +525,10 @@ def make_eval_executor(
                 if fault.fixture_id not in triggered:
                     triggered.add(fault.fixture_id)
                     if fault.mode == "after_persistence":
-                        recorder.add(
-                            tool_name,
-                            payload,
-                            result={"success": True, "sandbox_only": True, "operation_id": payload.get("operation_id")},
-                        )
+                        lose_response = True
                     else:
                         recorder.add(tool_name, payload, error=fault.error)
-                    raise EvalToolError(fault.error)
+                        raise EvalToolError(fault.error)
 
         if tool_name == "get_ticket":
             result = {"success": True, "data": deepcopy(fixture.tickets[payload["ticket_id"]])}
@@ -560,6 +566,11 @@ def make_eval_executor(
             if mutation.tool == tool_name and mutation.after_call <= count:
                 _set_path(result, mutation.path, mutation.value)
 
+        if tool_name in WRITE_TOOLS:
+            receipts[key] = deepcopy(payload), deepcopy(result)
+            if lose_response:
+                recorder.add(tool_name, payload, result=result, error=fault.error)
+                raise EvalToolError(fault.error)
         recorder.add(tool_name, payload, result=result)
         if tool_name in READ_TOOLS:
             return result.get("data", result)

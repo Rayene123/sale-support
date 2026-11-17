@@ -21,13 +21,12 @@ from contextlib import contextmanager
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Iterator
+from unittest.mock import patch
 
 # graph.py loads dotenv at import time. Do this before importing agent.graph so
 # a developer's key can never turn an offline evaluation into a model call.
-os.environ["PYTHON_DOTENV_DISABLED"] = "1"
-os.environ.pop("OPENAI_API_KEY", None)
-
-from agent import graph  # noqa: E402  (environment must be isolated first)
+with patch.dict(os.environ, {"PYTHON_DOTENV_DISABLED": "1"}):
+    from agent import graph
 
 from eval import score  # noqa: E402
 from eval.fixtures import make_eval_executor  # noqa: E402
@@ -115,6 +114,22 @@ def bounded_steps(value: int | None) -> Iterator[None]:
         graph.MAX_STEPS = previous
 
 
+@contextmanager
+def offline_model(case):
+    """Keep provider calls local, including when exercising structured model parsing."""
+    with patch.dict(os.environ, {"OPENAI_API_KEY": ""}):
+        if "model_response" not in case:
+            yield
+            return
+        with patch.object(graph, "ChatOpenAI") as provider:
+            os.environ["OPENAI_API_KEY"] = "offline-fixture"
+            invoke = provider.return_value.with_structured_output.return_value.invoke
+            invoke.return_value = deepcopy(case["model_response"])
+            yield
+            if not invoke.called:
+                raise EvaluationError("Scripted model response was never requested")
+
+
 def run_case(case: dict[str, Any], *, kind: str) -> dict[str, Any]:
     """Run one scenario or injection case and return its raw evaluation record."""
     if "fixture_id" not in case or "request" not in case:
@@ -129,18 +144,24 @@ def run_case(case: dict[str, Any], *, kind: str) -> dict[str, Any]:
     resume_plan = deepcopy(case.get("resume", []))
     approval_index: int | None = None
 
-    with bounded_steps(case.get("max_steps")):
+    approved_draft = None
+    with bounded_steps(case.get("max_steps")), offline_model(case):
         started = time.perf_counter()
         result = graph.run_operator(request, tool_executor=executor)
         for step in resume_plan:
             stage = step.get("stage")
             if stage not in {"selection", "approval"}:
                 raise EvaluationError(f"{case.get('id')}: unsupported resume stage {stage!r}")
+            if not step.get("replay") and result.get("status") not in {"awaiting_approval", "awaiting_customer_selection", "partially_completed"}:
+                break
             value = resolve_template(step.get("value"), result)
             if stage == "approval" and isinstance(value, dict) and value.get("decision") == "approve":
                 # Record the call boundary at which a valid-looking approval was
                 # supplied. The scorer uses it to detect writes made before it.
-                if approval_index is None:
+                draft = result.get("draft") or {}
+                if (approval_index is None and result.get("status") == "awaiting_approval"
+                        and draft.get("operation_id") and value == {"decision": "approve", "operation_id": draft["operation_id"]}):
+                    approved_draft = deepcopy(draft)
                     approval_index = len(recorder.calls)
             checkpoint_request = resume_request(request, result)
             if stage == "selection":
@@ -167,6 +188,7 @@ def run_case(case: dict[str, Any], *, kind: str) -> dict[str, Any]:
         "result": result,
         "tool_calls": recorder.to_json(),
         "approval_granted_at_call_index": approval_index,
+        "approved_draft": approved_draft,
         "latency_ms": latency_ms,
         "max_steps_in_effect": case.get("max_steps", graph.MAX_STEPS),
     }
@@ -185,8 +207,17 @@ def run_all(
     if limit is not None:
         scenarios = scenarios[:limit]
         injections = injections[:limit]
-    records = [run_case(case, kind="scenario") for case in scenarios]
-    records.extend(run_case(case, kind="injection") for case in injections)
+    records = []
+    for kind, cases in (("scenario", scenarios), ("injection", injections)):
+        for case in cases:
+            try:
+                records.append(run_case(case, kind=kind))
+            except Exception as exc:
+                # Preserve the rest of the report and fail this case explicitly.
+                records.append({"id": case.get("id"), "kind": kind,
+                                "category": case.get("category") or case.get("attack_type"),
+                                "fixture_id": case.get("fixture_id"),
+                                "runner_error": type(exc).__name__})
     return records
 
 

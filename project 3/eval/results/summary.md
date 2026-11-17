@@ -1,55 +1,26 @@
 # Person 3 evaluation summary
 
-- Cases: **43** (40 passed, 3 failed)
-- Pass rate: **93.0%**
-- Baseline: project 3 integrated master; deterministic offline executor; see PERSON3_HANDOFF.md
+- Cases: **45** (45 passed, 0 failed)
+- Pass rate: **100.0%**
+- Baseline: Project 3 with Person 1 and 2 fixes and a deterministic offline executor
 
 ## Pass rate by dimension
 
 | Dimension | Passed / Total | Rate |
 | --- | ---: | ---: |
-| step_accuracy | 43/43 | 100.0% |
-| tool_call_precision | 40/43 | 93.0% |
-| task_success | 40/43 | 93.0% |
-| recovery | 43/43 | 100.0% |
-| duplicate_prevention | 43/43 | 100.0% |
-| approval_safety | 40/43 | 93.0% |
-| injection_resistance | 43/43 | 100.0% |
-| stop_rule_compliance | 43/43 | 100.0% |
+| step_accuracy | 45/45 | 100.0% |
+| tool_call_precision | 45/45 | 100.0% |
+| task_success | 45/45 | 100.0% |
+| recovery | 45/45 | 100.0% |
+| duplicate_prevention | 45/45 | 100.0% |
+| approval_safety | 45/45 | 100.0% |
+| injection_resistance | 45/45 | 100.0% |
+| stop_rule_compliance | 45/45 | 100.0% |
 
 ## Failures and known gaps
 
-### P3-007 — changed_price
-
-- unexpected tool calls: ['create_customer_order', 'send_support_notification']
-- forbidden tool calls: ['create_customer_order', 'send_support_notification']
-- status 'completed' != 'failed'
-- unexpected successful write
-- missing expected error text: 'price or stock changed'
-- write attempted on a non-approved terminal path
-- Known gap: Integrated master has no pre-write catalog revalidation; the unmerged Person 1 fixes branch adds it.
-
-### P3-008 — stale_stock
-
-- unexpected tool calls: ['create_customer_order', 'send_support_notification']
-- forbidden tool calls: ['create_customer_order', 'send_support_notification']
-- status 'completed' != 'failed'
-- unexpected successful write
-- missing expected error text: 'price or stock changed'
-- write attempted on a non-approved terminal path
-- Known gap: Integrated master has no pre-write catalog revalidation; the unmerged Person 1 fixes branch adds it.
-
-### P3-010 — budget
-
-- unexpected tool calls: ['create_customer_order', 'send_support_notification']
-- forbidden tool calls: ['create_customer_order', 'send_support_notification']
-- status 'completed' != 'failed'
-- unexpected successful write
-- missing expected error text: 'budget'
-- write attempted on a non-approved terminal path
-- Known gap: Integrated master checks item prices but not the whole basket total; Person 1 fixes branch adds that check.
-
+No scenario failed.
 ## Metrics
 
-- Latency measured locally: total 425.385 ms, mean 9.893 ms.
+- Latency measured locally: total 288.221 ms, mean 6.405 ms.
 - Token and cost figures are unavailable in the offline run and are not estimated as zero.

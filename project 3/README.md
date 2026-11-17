@@ -116,11 +116,7 @@ Tunisianet, database, or model calls. From the project directory:
 ```
 
 The run writes `eval/results/trajectories.jsonl`, `summary.json`, and
-`summary.md`. The current integrated-`master` baseline is **43 cases, 40
-passed, 3 failed (93.0%)**; the three failures are documented product gaps in
-`errors.md`, so the evaluator exits `1` until those fixes are re-baselined. All
-nine injection cases pass. See `docs/person-3-result-schema.md` for the result
-fields and `PERSON3_HANDOFF.md` for scope, safety notes, and re-baseline work.
+`summary.md`. The combined branch passes 45 offline cases, including two scripted model responses. See `PERSON3_HANDOFF.md` for verification and scope.
 
 ## Environment and monitoring
 
