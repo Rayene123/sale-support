@@ -1,8 +1,11 @@
 """Hybrid workflow regressions using a provider stub and sourced product fixtures."""
+import json
+
 import pytest
+import requests
 
 from agent.specialist.coordinator import CaseConflict, Specialist
-from agent.specialist.planner import ModelUnavailable, OpenAIPlanner
+from agent.specialist.planner import ModelUnavailable, OllamaPlanner
 from agent.specialist.research import Researcher
 from agent.specialist.setup import SetupPlan
 from agent.specialist.store import CaseStore
@@ -31,15 +34,26 @@ class StubModel:
         self.response = response
         self.prompts = []
 
-    def with_structured_output(self, schema, *, method):
-        assert schema is SetupPlan and method == "function_calling"
+    def __enter__(self):
+        self.trust_env = None
         return self
 
-    def invoke(self, messages):
-        self.prompts.append(messages)
+    def __exit__(self, *args):
+        return False
+
+    def post(self, url, *, json, timeout, allow_redirects):
+        assert url == "http://127.0.0.1:11434/api/chat"
+        assert self.trust_env is False and allow_redirects is False
+        assert json["format"] == SetupPlan.model_json_schema() and json["stream"] is False
+        self.prompts.append(json["messages"])
         if isinstance(self.response, Exception):
             raise self.response
-        return self.response
+        return self
+
+    status_code = 200
+
+    def json(self):
+        return {"done_reason": "stop", "message": {"content": json.dumps(self.response)}}
 
 
 class Sources:
@@ -69,12 +83,12 @@ class Sources:
 
 
 @pytest.fixture
-def runner(tmp_path):
+def runner(tmp_path, monkeypatch):
     def build(response, sources=None, **kwargs):
         source = sources or Sources()
         model = StubModel(response)
-        service = Specialist(CaseStore(tmp_path / "case.db"), source.researcher(),
-                             planner=OpenAIPlanner(model), **kwargs)
+        monkeypatch.setattr("agent.specialist.planner.requests.Session", lambda: model)
+        service = Specialist.with_local_model(CaseStore(tmp_path / "case.db"), source.researcher(), **kwargs)
         return service, source, model
     return build
 
@@ -159,8 +173,50 @@ def test_unsupported_relationship_remains_unknown(runner):
     service, _, _ = runner(plan)
     case = service.start("C-001", PROMPT)
     assert case["status"] == "verification_blocked"
-    assert any("No approved verifier" in f["reason"] for f in case["findings"])
+    assert any("Could not establish power_delivery" in f["reason"] for f in case["findings"])
     assert case["proposal"] is None
+
+
+@pytest.mark.parametrize(("length", "declared", "check", "pairing"), [
+    ("300 mm", "GPU-300", "pass", "pass"),
+    ("330 mm", "GPU-300", "fail", "pass"),
+    ("300 mm", "not compatible with GPU-300", "pass", "unknown"),
+    ("29 A", "GPU-300", "unknown", "pass"),
+    (None, "GPU-300", "unknown", "pass"),
+])
+def test_model_selects_new_fields_but_evidence_determines_result(runner, length, declared, check, pairing):
+    plan = {
+        "budget_tnd": "2000",
+        "items": [line("case", "boitier_pc", "boîtier pc"), line("card", "carte_graphique", "carte graphique")],
+        "links": [{"source": "case", "target": "card", "kind": "clearance", "checks": [
+            {"source_field": "maximum GPU length", "target_field": "GPU length", "comparison": "at_least"},
+        ]}],
+    }
+    sources = Sources()
+    gpu_specs = {"MPN": "GPU-300"}
+    if length is not None:
+        gpu_specs["GPU length"] = length
+    sources.items.update(
+        case=[product("CASE-100", "Boîtier-PC", "130", {
+            "Maximum GPU length": "32 cm", "Compatible models": declared,
+        })],
+        card=[product("GPU-300", "Carte graphique", "800", gpu_specs)],
+    )
+    sources.queries.update({"boîtier pc": "case", "carte graphique": "card"})
+    service, _, _ = runner(plan, sources)
+    case = service.start("C-001", "Find a PC case and a GPU under 2000 TND that fit together.")
+    findings = {finding["code"]: finding for finding in case["findings"]}
+    clearance = findings["case->card:clearance:check:1"]
+    assert clearance["verdict"] == check
+    assert len(clearance["evidence"]) == (1 if length is None else 2)
+    assert findings["case->card:clearance"]["verdict"] == pairing
+    assert bool(case["proposal"]) == (check == pairing == "pass")
+
+
+@pytest.mark.parametrize("url", ["https://api.openai.com", "http://localhost:11434/api"])
+def test_ollama_endpoint_accepts_only_a_local_base_url(url):
+    with pytest.raises(ValueError, match="local Ollama service"):
+        OllamaPlanner(url)
 
 
 def test_model_failure_does_not_drop_items_into_the_old_parser(runner):
@@ -178,7 +234,7 @@ def test_revision_reuses_evidence_and_invalidates_old_proposal(runner):
     updated = service.revise(case["case_id"], "C-001", "New total budget of 1,450 TND", expected_revision=1)
     assert not source.calls and updated["status"] == "awaiting_approval"
     assert updated["proposal"]["hash"] != case["proposal"]["hash"]
-    assert len(model.prompts) == 2 and "previous_requirements" in model.prompts[-1][-1][1]
+    assert len(model.prompts) == 2 and "previous_requirements" in model.prompts[-1][-1]["content"]
     with pytest.raises(CaseConflict):
         service.decide(case["case_id"], "C-001", reviewer_id="admin-1", revision=1,
                        proposal_hash=case["proposal"]["hash"], decision="approve")

@@ -2,10 +2,9 @@
 import os
 
 # graph.py loads dotenv at import time. Disable that before test collection so
-# a developer's OPENAI_API_KEY can never cause ordinary graph tests to call an
-# external model service.
+# ordinary graph tests do not use the developer's local model.
 os.environ["PYTHON_DOTENV_DISABLED"] = "1"
-os.environ.pop("OPENAI_API_KEY", None)
+os.environ["SPECIALIST_LEGACY_LLM"] = "false"
 
 
 import socket

@@ -7,49 +7,50 @@ Use this page to track implementation against that brief.
 
 | Monday commitment | Current implementation and evidence |
 | --- | --- |
-| Interpret requirements and ask questions | The optional OpenAI planner produces typed item lines, quantities, ownership, exact-model references, hard specs, search alternatives and compatibility links. Missing information or detected omissions pause the case. |
+| Interpret requirements and ask questions | The local Ollama planner proposes item lines, quantities, ownership, exact models, hard specs, search alternatives and the relationships the setup needs. Missing information or detected omissions pause the case. |
 | Adapt research and explain a result from evidence | The coordinator searches per item, inspects exact listings and tries a bounded alternate query when the first setup cannot be verified. Each finding carries sources. Results give reasons from verified fields. |
-| Independently verify complete setups | The verifier handles direct display, USB and Ethernet links. It checks shared port use, units, prices and evidence freshness. Unknown connection types, ambiguous dock passthrough and unverified concurrent display modes block proposals. |
+| Independently verify complete setups | The verifier tests model-selected field comparisons against both products' published specifications. It also checks direct display, USB and Ethernet modes, shared port use, stock, prices and evidence freshness. A generic relationship needs an explicit declaration naming the other model to establish overall compatibility. Missing or conflicting evidence blocks proposals. |
 | Revise cases without losing useful work | Cases retain typed plans and saved evidence. The new revision checks the model's changes, preserves unaffected evidence, and supersedes the exact proposal. |
 | Require fresh approval and recover safely | Both workflows share the durable case, exact-revision approval, listing recheck, sandbox writes and receipt recovery. Hybrid order totals include quantities and exclude owned items. |
-| Compare configurations and verify failures | The original 30-fixture comparison still covers fixed, adaptive and independent-verifier configurations of the rules engine. Hybrid tests use a provider stub and exact product fixtures to cover multi-item requests, alternate research, unknowns, revisions and replay. A broader live-provider comparison still requires an available key. |
+| Compare configurations and verify failures | The original 30-fixture comparison still covers fixed, adaptive and independent-verifier configurations of the rules engine. Hybrid tests cover multi-item requests, model-selected checks, unknowns, revisions and replay using exact product fixtures. The local smoke tests exercise the installed model. |
 | Customer/admin integration, LangSmith and release | Phase 4 consumes the backend. The new website concept still uses simulated data. Hosted Supabase authorization/writes and tracing remain integration work. |
 
 ## Run the hybrid planner
 
-From Project 3, use the existing OpenAI dependency. Set `OPENAI_API_KEY`
-in the environment of the trusted server and optionally set
-`SPECIALIST_OPENAI_MODEL`. The key is read server-side. The provider receives
-the current purchasing prompt and the previous requirements, without customer
-identity, tool credentials, raw retailer pages or access to write tools.
+Start Ollama and make sure the model is installed. If needed, run
+`ollama pull ministral-3:8b`. The server defaults to the local endpoint at
+`127.0.0.1:11434`. Set `SPECIALIST_OLLAMA_MODEL` to use another installed
+model. The planner receives the purchasing prompt and the prior requirements
+for revisions. No API key is required.
 
 ```python
 from agent.specialist.coordinator import Specialist
-from agent.specialist.planner import OpenAIPlanner
 from agent.specialist.store import CaseStore
 
-service = Specialist(CaseStore(".specialist/cases.sqlite3"),
-                     planner=OpenAIPlanner.from_env())
+service = Specialist.with_local_model(CaseStore(".specialist/cases.sqlite3"))
 case = service.start("C-001", "Find a desktop, two keyboards, and a mouse under 1,500 TND.")
 ```
 
 One model call is allowed per case revision, with the existing shared step
 budget and revision limit. Research limits are two queries per line, at most
 two details per query and at most 18 combinations. The schema has up to 10
-distinct lines and up to 10 units per line. The full candidate cross-product
-is not enumerated. Supported connection facts determine what gets verified.
-The planner may describe other kinds, but an unknown or unsupported relationship
-cannot be counted as compatible.
+distinct lines and up to 10 units per line. The planner chooses what needs to
+match across the products. For example, it can ask whether a case's maximum GPU
+length is at least as large as the card's length. The verifier obtains both
+values from the actual product listings and compares them in common units. A
+result for one comparison covers that comparison only. An unresolved
+relationship keeps the case from reaching approval.
 
 The existing rule-based service remains available by omitting the planner.
 A failed model call in a hybrid case reports `planner_unavailable` so a
-multi-item request cannot silently shrink into a two-item case. An optional,
-one-request model smoke test uses synthetic input:
+multi-item request cannot silently shrink into a two-item case. Each of these
+smoke tests sends one synthetic request to Ollama without fetching product pages:
 
 ```powershell
-python -m eval.hybrid_smoke --ask-key
+python -m eval.hybrid_smoke
+python -m eval.hybrid_smoke --checks
 ```
 
-An OpenAI rate-limit response blocked the live smoke test. No successful
-model result, quota balance or provider outage classification was established.
-Offline tests inject a structured-output provider stub.
+The first checks multiple products and quantities. The second checks whether
+the model identifies GPU clearance on its own. Offline tests separately
+verify case outcomes, including what happens when the evidence is missing.

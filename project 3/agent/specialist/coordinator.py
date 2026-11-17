@@ -19,7 +19,7 @@ from .verify import verify_bundle
 from .setup import SetupPlan
 from .setup_research import candidates_in_price_order, cached_matches, matches_line, read_plan_findings
 from .setup_verify import total as setup_total, verify_setup
-from .planner import ModelUnavailable
+from .planner import ModelUnavailable, OllamaPlanner
 
 MODES = {"fixed", "adaptive", "adaptive_verifier"}
 ORDER = "create_customer_order"
@@ -135,6 +135,11 @@ class Specialist:
         self.step_limit = step_limit
         self.mode = mode
         self.planner = planner
+
+    @classmethod
+    def with_local_model(cls, store, researcher=None, *, writer=None, step_limit=96):
+        """Server entry point for free-form purchasing requests."""
+        return cls(store, researcher, writer=writer, step_limit=step_limit, planner=OllamaPlanner.from_env())
 
     def start(self, customer_id: str, text: str) -> dict:
         validate_identifier(customer_id)

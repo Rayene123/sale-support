@@ -39,8 +39,7 @@ def _derived_text(record: dict[str, Any]) -> str:
     """Model-influenced fields and write payloads, excluding raw untrusted evidence."""
     result = record.get("result") or {}
     draft = dict(result.get("draft") or {})
-    # draft_source is configuration metadata (e.g. "OPENAI_API_KEY is not
-    # set"), not customer-facing content or untrusted source text.
+    # draft_source is configuration metadata, not customer-facing content.
     draft.pop("draft_source", None)
     pieces = {
         "draft": draft or None,

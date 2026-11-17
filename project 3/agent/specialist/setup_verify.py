@@ -18,13 +18,13 @@ def total(plan: SetupPlan, items: dict[str, Listing]) -> Decimal | None:
 
 
 def _aliases(field: str) -> set[str]:
-    label = _fold(field).strip()
+    label = _fold(field).replace("_", " ").strip()
     groups = (
-        {"ram", "ram_gb", "memory", "memoire", "memoire vive", "installed ram"},
-        {"storage", "storage_gb", "ssd", "disque dur", "stockage"},
-        {"monitor_inches", "display size", "screen size", "taille ecran", "diagonale"},
+        {"ram", "ram gb", "memory", "memoire", "memoire vive", "installed ram"},
+        {"storage", "storage gb", "ssd", "disque dur", "stockage"},
+        {"monitor inches", "display size", "screen size", "taille ecran", "diagonale"},
         {"resolution", "native resolution", "listing resolution", "resolution du panneau"},
-        {"refresh_hz", "refresh rate", "taux de rafraichissement"},
+        {"refresh hz", "refresh rate", "taux de rafraichissement"},
         {"stock quantity", "quantite en stock", "available units"},
     )
     return next((group for group in groups if label in group), {label})
@@ -32,12 +32,12 @@ def _aliases(field: str) -> set[str]:
 
 def _values(item: Listing, field: str) -> list[tuple[str, str]]:
     aliases = _aliases(field)
-    return [(label, value) for label, value in item.specs.items() if _fold(label).strip() in aliases]
+    return [(label, value) for label, value in item.specs.items() if _fold(label).replace("_", " ").strip() in aliases]
 
 
 def _normalized(value: str):
     text = " ".join(_fold(value).strip().split())
-    match = re.fullmatch(r"(\d+(?:[.,]\d+)?)\s*(gb|go|tb|to|hz|inch(?:es)?|pouces?|[\"″])?(?:\s+ssd)?", text)
+    match = re.fullmatch(r"(\d+(?:[.,]\d+)?)\s*(gb|go|tb|to|hz|mm|cm|w|kw|v|a|inch(?:es)?|pouces?|[\"″])?(?:\s+ssd)?", text)
     if not match:
         return text
     number = Decimal(match.group(1).replace(",", "."))
@@ -48,6 +48,10 @@ def _normalized(value: str):
         return (number, "gb")
     if unit and (unit.startswith(("inch", "pouce")) or unit in {'"', "″"}):
         return (number, "inch")
+    if unit == "cm":
+        return (number * 10, "mm")
+    if unit == "kw":
+        return (number * 1000, "w")
     return (number, unit)
 
 
@@ -99,12 +103,66 @@ def _count(proof):
     return count
 
 
+def _link_checks(link, source, target):
+    """Evaluate the local model's proposed comparisons using only catalog facts."""
+    findings = []
+    for i, check in enumerate(link.checks, start=1):
+        out = _values(source, check.source_field)
+        into = _values(target, check.target_field)
+        source_values = {_normalized(v) for _, v in out if v.strip()}
+        target_values = {_normalized(v) for _, v in into if v.strip()}
+        verdict = "unknown"
+        if len(source_values) == 1 and len(target_values) == 1:
+            left, right = next(iter(source_values)), next(iter(target_values))
+            if check.comparison == "equals":
+                if type(left) is type(right) and (not isinstance(left, tuple) or left[1] == right[1]):
+                    verdict = "pass" if left == right else "fail"
+            elif isinstance(left, tuple) and isinstance(right, tuple) and left[1] == right[1] and left[1]:
+                ok = left[0] >= right[0] if check.comparison == "at_least" else left[0] <= right[0]
+                verdict = "pass" if ok else "fail"
+        findings.append(Finding(
+            code=f"{link.source}->{link.target}:{link.kind}:check:{i}", verdict=verdict,
+            reason=f"Compare {check.source_field} ({link.source}) {check.comparison} "
+                   f"{check.target_field} ({link.target})",
+            evidence=[_evidence(source, label, value) for label, value in out]
+                     + [_evidence(target, label, value) for label, value in into],
+        ))
+    return findings
+
+
+def _exact_compatibility(source, target, source_line, target_line):
+    """A generic positive verdict needs an explicit declaration for the other exact model."""
+    labels = {"compatible part numbers", "compatible models", "supported models",
+              "supported part numbers", "modeles compatibles", "references compatibles"}
+    identity = {"mpn", "part number", "reference", "model", "modele"}
+    for listing, other, line in ((source, target, target_line), (target, source, source_line)):
+        identifiers = {_fold(value).strip() for key, value in other.specs.items() if _fold(key) in identity}
+        if line.exact_model:
+            identifiers.add(_fold(line.exact_model).strip())
+        identifiers = {name for name in identifiers if len(name) >= 4 and any(c.isdigit() for c in name)}
+        for key, value in listing.specs.items():
+            if _fold(key) not in labels:
+                continue
+            # Take complete model tokens. "Not compatible with A200" and
+            # "A200 series" must not be interpreted as an exact model match.
+            models = {_fold(model).strip() for model in re.split(r"[,;\n|]", value)}
+            if match := identifiers & models:
+                return [_evidence(listing, key, value), _evidence(other, "exact model", sorted(match)[0])]
+    return []
+
+
 def _edge(link: Link, lines: dict[str, Item], items: dict[str, Listing], details: dict) -> Finding:
     source, target = items[link.source], items[link.target]
     first, second = lines[link.source], lines[link.target]
     key = f"{link.source}->{link.target}:{link.kind}"
     if link.kind not in {"video", "usb", "ethernet"}:
-        return Finding(code=key, verdict="unknown", reason=f"No approved verifier for {link.kind}")
+        proof = _exact_compatibility(source, target, first, second) if (
+            first.quantity == second.quantity == 1 and not (link.resolution or link.refresh_hz or link.transport)
+        ) else []
+        return Finding(code=key, verdict="pass" if proof else "unknown",
+                       reason="An exact product listing explicitly names the other compatible model"
+                       if proof else f"Could not establish {link.kind}; checked attributes alone do not prove the pairing",
+                       evidence=proof)
     if ((link.resolution or link.refresh_hz) and link.kind != "video") or first.quantity != 1:
         return Finding(code=key, verdict="unknown", reason="The requested connection topology or mode is not supported")
     if link.kind == "video" and (first.kind == "dock" or second.kind == "dock"):
@@ -176,7 +234,9 @@ def verify_setup(plan: SetupPlan, items: dict[str, Listing]) -> list[Finding]:
             findings.append(_spec(line, listing, spec))
 
     details = {}
-    findings.extend(_edge(link, lines, items, details) for link in plan.links)
+    for link in plan.links:
+        findings.extend(_link_checks(link, items[link.source], items[link.target]))
+        findings.append(_edge(link, lines, items, details))
     use = Counter()
     ports = {}
     displays = Counter()

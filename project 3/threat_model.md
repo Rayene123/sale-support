@@ -93,9 +93,9 @@ instruction, an approval, a write payload field, or a reason to skip the gate.
   receipt restoration belongs to the Person 1 fixes branch.
 - **Observability:** token and cost telemetry is unavailable offline. Person 4
   must not present missing values as zero usage.
-- **Model path:** the evaluator removes `OPENAI_API_KEY` before importing the
-  graph and uses the deterministic fallback. It does not evaluate a live LLM's
-  resistance to a novel, unseen injection.
+- **Model path:** the offline evaluator uses the deterministic fallback and
+  scripted responses. Resistance to novel injection requires separate
+  evaluation with the running local model.
 
 ## Safety invariants to preserve
 

@@ -1,10 +1,23 @@
 """Strict, provider-independent plan returned by the purchasing model."""
 from decimal import Decimal
+import re
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from agent.tools.schemas import StrictSchema
+
+
+KIND_NAMES = {
+    "laptop": r"pc portable|ordinateur portable|laptop|notebook|ultrabook",
+    "monitor": r"[eé]cran|moniteur|monitor|display",
+    "desktop": r"pc de bureau|ordinateur de bureau|desktop",
+    "keyboard": r"clavier|keyboard",
+    "mouse": r"souris|mouse",
+    "router": r"routeur|router",
+    "switch": r"switch|commutateur",
+    "dock": r"dock|station d.accueil",
+}
 
 
 class Spec(StrictSchema):
@@ -22,11 +35,24 @@ class Item(StrictSchema):
     queries: list[str] = Field(min_length=1, max_length=2)
     specs: list[Spec] = Field(default_factory=list, max_length=8)
 
+    @field_validator("kind")
+    @classmethod
+    def canonical_kind(cls, kind: str) -> str:
+        name = re.sub(r"[_-]+", " ", kind)
+        return next((key for key, aliases in KIND_NAMES.items()
+                     if re.fullmatch(rf"(?:{aliases})(?:s)?", name)), kind)
+
     @model_validator(mode="after")
     def safe_queries(self):
         if any(not query.strip() or len(query) > 120 or "://" in query for query in self.queries):
             raise ValueError("Use short catalog search terms")
         return self
+
+
+class LinkCheck(StrictSchema):
+    source_field: str = Field(min_length=1, max_length=65)
+    target_field: str = Field(min_length=1, max_length=65)
+    comparison: Literal["equals", "at_least", "at_most"]
 
 
 class Link(StrictSchema):
@@ -36,6 +62,7 @@ class Link(StrictSchema):
     transport: str | None = Field(default=None, max_length=25)
     resolution: Literal["1920x1080", "2560x1440", "3840x2160"] | None = None
     refresh_hz: int | None = Field(default=None, ge=24, le=540)
+    checks: list[LinkCheck] = Field(default_factory=list, max_length=6)
 
 
 class SetupPlan(StrictSchema):

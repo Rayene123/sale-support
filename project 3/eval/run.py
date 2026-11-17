@@ -117,13 +117,13 @@ def bounded_steps(value: int | None) -> Iterator[None]:
 @contextmanager
 def offline_model(case):
     """Keep provider calls local, including when exercising structured model parsing."""
-    with patch.dict(os.environ, {"OPENAI_API_KEY": ""}):
+    with patch.dict(os.environ, {"SPECIALIST_LEGACY_LLM": "false"}):
         if "model_response" not in case:
             yield
             return
-        with patch.object(graph, "ChatOpenAI") as provider:
-            os.environ["OPENAI_API_KEY"] = "offline-fixture"
-            invoke = provider.return_value.with_structured_output.return_value.invoke
+        with patch.object(graph, "OllamaPlanner") as provider:
+            os.environ["SPECIALIST_LEGACY_LLM"] = "true"
+            invoke = provider.from_env.return_value.structured
             invoke.return_value = deepcopy(case["model_response"])
             yield
             if not invoke.called:

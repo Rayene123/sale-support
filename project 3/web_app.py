@@ -166,7 +166,7 @@ def _render_result(result: dict, notice: str = "") -> str:
         labels = ", ".join(draft.get("proposed_labels", []))
         evidence = ", ".join(draft.get("evidence_ids", []))
         raw_source = draft.get("draft_source", "Agent draft")
-        source_label = "OpenAI draft" if str(raw_source).startswith("OpenAI") else "Offline fallback"
+        source_label = "Local model draft" if str(raw_source).startswith("Ollama") else "Offline fallback"
         body += f"""<section class="card proposal-card"><div class="card-head"><div class="proposal-title"><span class="spark">✦</span><div><div class="section-label">Suggested resolution</div><h2 style="margin-top:3px">Proposed action</h2></div></div><span class="model-tag">{_e(source_label)}</span></div>
           <div class="card-body"><div class="proposal-meta"><span class="meta-chip">Status: {_e(draft.get('proposed_status'))}</span>{''.join(f'<span class="meta-chip">{_e(label)}</span>' for label in draft.get('proposed_labels', []))}</div>
           <p class="response-label">Reply to customer</p><p class="response">{_e(draft.get('response'))}</p>

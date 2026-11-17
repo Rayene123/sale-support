@@ -11,8 +11,9 @@ planned tracing and evaluation-monitoring platform.
 
 The [November 16 enhanced brief](docs/monday-2026-11-16/README.md) defines
 the target. The [implementation comparison and hybrid API](docs/specialist-hybrid.md)
-describe what is currently working. The optional OpenAI planning layer handles
-multi-item requests alongside the deterministic research and approval rules.
+describe what is currently working. The local Ollama model plans multi-item
+requests and identifies what the products need to have in common. Independent
+research, verification, and approval rules check the plan against listing evidence.
 The server-side [Specialist core](docs/specialist-core.md) now handles laptop
 and monitor cases, sourcing exact product facts, testing direct display
 compatibility, and preserving revisions and sandbox receipts. It runs
@@ -46,9 +47,9 @@ The repository contains a support-ticket approval graph, a customer product
 search/order graph with structured LLM prompt parsing, product parsing and criteria schemas, sandbox tool
 adapters, and separate local customer and admin pages. Live Tunisianet search
 is enabled for the demo with bounded, read-only requests that check robots.txt
-and stop on access denial. Product prompts use the configured OpenAI model for
-structured intent extraction, with a visible basic-parser fallback if the API
-is unavailable. Customer-selected products still require explicit
+and stop on access denial. With `SPECIALIST_LEGACY_LLM=true`, product prompts use
+the local model for structured intent extraction. The customer sees when the
+basic parser handles the request. Customer-selected products still require explicit
 confirmation; order persistence also requires the configured trusted sandbox
 approval service.
 
@@ -111,8 +112,8 @@ uses the approved Tunisianet public search page. Product results are fetched
 from the live site; attribute filters are applied when the retailer publishes
 those attributes. Graph checkpoints remain in process memory.
 
-When an OpenAI API key is configured, the ticket path sends its ticket context
-to the selected model to draft a response. Order proposals use the exact
+With `SPECIALIST_LEGACY_LLM=true`, the ticket path uses Ollama to draft a
+response locally. Order proposals use the exact
 customer-selected catalog items and prices; the graph never chooses a product
 on the customer's behalf.
 

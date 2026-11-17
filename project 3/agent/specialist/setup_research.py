@@ -6,28 +6,20 @@ from decimal import Decimal
 import re
 
 from .contracts import Listing
+from .setup import KIND_NAMES
 from .setup_verify import total
+from .verify import _fold
 
 
-ALIASES = {
-    "laptop": r"pc portable|ordinateur portable|laptop|notebook|ultrabook",
-    "monitor": r"[eé]cran|moniteur|monitor|display",
-    "desktop": r"pc de bureau|ordinateur de bureau|desktop",
-    "keyboard": r"clavier|keyboard",
-    "mouse": r"souris|mouse",
-    "router": r"routeur|router",
-    "switch": r"switch|commutateur",
-    "dock": r"dock|station d.accueil",
-}
 _ACCESSORY = re.compile(r"^(?:support|c[aâ]ble|adaptateur|adapter|chargeur|charger|housse|sac)\b", re.I)
 
 
 def matches_line(listing, line):
-    kind = line.kind.replace("_", " ").replace("-", " ")
-    subject = ALIASES.get(line.kind, re.escape(kind))
-    if not re.search(rf"\b(?:{subject})\b", listing.name, re.I):
+    kind = "[-\\s]+".join(re.escape(word) for word in re.split(r"[_-]+", line.kind))
+    subject = KIND_NAMES.get(line.kind, kind)
+    if not re.search(rf"\b(?:{subject})\b", _fold(listing.name)):
         return False
-    if line.kind in ALIASES and _ACCESSORY.match(listing.name):
+    if line.kind in KIND_NAMES and _ACCESSORY.match(listing.name):
         return False
     if line.exact_model:
         expected = re.findall(r"[a-z0-9]+", line.exact_model.lower())
@@ -43,13 +35,13 @@ def matches_line(listing, line):
 def read_plan_findings(plan, text, previous=None):
     """Check a few common omissions independently. The reviewer sees the entire plan."""
     problems = []
-    expected = {name for name, expression in ALIASES.items()
+    expected = {name for name, expression in KIND_NAMES.items()
                 if re.search(rf"\b(?:{expression})(?:s)?\b", text, re.I)
                 and not re.search(rf"\b(?:without|remove|drop|sans)\s+(?:the\s+)?(?:{expression})(?:s)?\b", text, re.I)}
     if expected - {item.kind for item in plan.items}:
         problems.append("I may have missed an item. Please confirm the items and quantities for this setup.")
     words = {"two": 2, "three": 3, "four": 4, "deux": 2, "trois": 3, "quatre": 4}
-    for kind, expression in ALIASES.items():
+    for kind, expression in KIND_NAMES.items():
         match = re.search(rf"\b([2-9]|10|{'|'.join(words)})\s+(?:{expression})(?:s)?\b", text, re.I)
         if match:
             token = match.group(1).lower()

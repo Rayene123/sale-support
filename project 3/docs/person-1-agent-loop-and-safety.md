@@ -59,8 +59,8 @@ submits selected product IDs and quantities before the graph drafts an order
 for customer confirmation. A selection is restricted to returned products
 that are available, have a known price, and still satisfy every criterion.
 Orders use customer confirmation; support tickets use admin approval.
-The customer-facing prompt is parsed with the configured OpenAI model into a
-typed search intent. If the model is unavailable, a basic parser fallback is
+With `SPECIALIST_LEGACY_LLM=true`, Ollama parses the customer-facing prompt
+into a typed search intent. If the model is unavailable, a basic parser fallback is
 marked in state and shown to the customer. Product name matching also filters
 known accessories when the requested product is a laptop.
 Notifications carry exactly one context
