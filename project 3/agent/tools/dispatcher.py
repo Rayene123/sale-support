@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
-from agent.tools.mytek import search_mytek_products
+from agent.tools.mytek import search_mytek_products, search_tunisianet_products
 from agent.tools.reads import find_customer, get_order, get_ticket
 from agent.tools.writes import (
     create_customer_order,
@@ -78,8 +78,12 @@ def make_tool_executor(
     def execute(tool_name: str, payload: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(payload, dict):
             raise ToolDispatchError("Tool payload must be an object.")
-        if tool_name == "search_mytek_products":
-            result = search_mytek_products(payload.get("query", ""))
+        if tool_name == "search_tunisianet_products":
+            result = search_tunisianet_products(
+                payload.get("query", ""), criteria=payload.get("criteria"),
+            )
+        elif tool_name == "search_mytek_products":
+            result = search_mytek_products(payload.get("query", ""), criteria=payload.get("criteria"))
         elif tool_name == "find_customer":
             result = find_customer(
                 customer_id=payload.get("customer_id"),

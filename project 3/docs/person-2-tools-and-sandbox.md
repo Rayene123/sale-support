@@ -1,11 +1,11 @@
-# Person 2 — MYTEK Product Tools, Sandbox, and Side Effects
+# Person 2 — Tunisianet Product Tools, Sandbox, and Side Effects
 
 ## Mission
 
 Provide the typed, deterministic tool layer for the Shopline Ops agent. This
-person owns public MYTEK catalog retrieval plus the isolated ticket/order data
+person owns public Tunisianet catalog retrieval plus the isolated ticket/order data
 and approved side-effect tools. The tool boundary must make it impossible for
-the graph or model to turn product research into a real MYTEK checkout or
+the graph or model to turn product research into a real retailer checkout or
 payment.
 
 ## Ownership
@@ -39,27 +39,37 @@ Publish a tool contract with exact JSON examples before Person 1 connects the
 new graph branches. Every tool must return JSON-safe data and concise typed
 errors. Do not put tool implementations in `agent/graph.py`.
 
-## MYTEK product catalog scraper
+## Tunisianet product catalog scraper
 
-Implement read-only product search for public MYTEK product listings/details.
-The proposed input is `{"query": "..."}` and the proposed result is
-`{"products": [...]}`. Each product should include `product_id`, `name`,
-`source_url`, `price_tnd` (or null), `availability` (`available`, `in_stock`,
-`out_of_stock`, or `unknown`), and `retrieved_at`. Preserve source references
-so the admin can verify what the proposal is based on.
+Implement read-only product search for public Tunisianet search results and
+product details.
+The input is `{"query": "...", "criteria": {...}}` and the result is
+`{"products": [...]}`. Criteria include product name, minimum/maximum TND
+price, color, minimum/maximum weight in kg, and up to ten key/value
+characteristics such as capacity, inverter, or energy class. Each product
+should include `product_id`, `name`, `source_url`, `price_tnd` (or null),
+`availability` (`available`, `in_stock`, `out_of_stock`, or `unknown`),
+`retrieved_at`, and observed color/weight/characteristics when present.
+Preserve source references so customer and admin can verify the evidence.
 
 The scraper must:
 
 - access only public catalog pages and respect published site access rules;
 - use bounded requests, conservative rate limits, timeouts, and page limits;
-- never log in, add items to a MYTEK cart, submit checkout, or make a purchase;
+- never log in, add items to a retailer cart, submit checkout, or make a purchase;
 - treat all scraped text as untrusted content, including product descriptions;
 - distinguish unavailable or missing price data from invented values;
 - avoid bypassing access controls, CAPTCHAs, or other technical restrictions;
 - be testable with saved HTML fixtures so ordinary tests make no network calls.
 
-Potential interface name for coordination: `search_mytek_products(query)`.
-Person 2 must freeze its schema with Person 1 before graph integration.
+Current interface: `search_tunisianet_products(query, criteria=None)`. It
+fetches one public search page, checks the site's robots.txt, parses product
+cards and optionally fetches a small bounded number of product pages when
+attribute filters are requested. Requests have a short timeout, a transparent
+demo user-agent, and a one-second minimum interval. HTTP 403/429 responses stop
+the search; no access controls are bypassed. Price and stock come from search
+cards; color, weight, and other features are included only when present on the
+product detail page.
 
 ## Sandbox reads and writes
 
@@ -74,7 +84,7 @@ Required read capabilities:
 - `find_customer(customer_id or normalized email)` — only support-relevant
   fields and no payment credentials;
 - `get_order(order_id)` — status, items, amounts, shipment state, timestamps;
-- `search_mytek_products(query)` — normalized public catalog results.
+- `search_tunisianet_products(query, criteria)` — normalized public catalog results.
 
 Required side-effect capabilities:
 
@@ -90,7 +100,7 @@ Required side-effect capabilities:
 
 The graph's current proposed dispatcher calls
 `tool_executor(tool_name, payload)` with `find_customer`,
-`search_mytek_products`, `create_customer_order`, `update_ticket_database`,
+`search_tunisianet_products`, `create_customer_order`, `update_ticket_database`,
 and `send_support_notification`. For writes it passes an operation ID and an
 `approved_by` run reference; notification IDs use a distinct `:notification`
 suffix. The method names and payloads are published in `docs/tool-contracts.md`.
@@ -110,7 +120,7 @@ additive SQL function and reset extension are in
   with different content returns a conflict.
 - Notification writes go to an inspectable/resettable `notification_outbox`.
   The previous `email_outbox` table remains only for compatibility.
-- No tool submits a MYTEK purchase, transfers money, or contacts customers.
+- No tool submits a retailer purchase, transfers money, or contacts customers.
 - Detailed exceptions stay in local logs; callers receive safe typed errors.
 
 ## Tests and acceptance criteria
@@ -125,5 +135,6 @@ opt-in integration test outside the default test suite.
 ## Handoff
 
 See `docs/tool-contracts.md` for the current contract and integration limits.
-Live MYTEK search and database writes require verified public page markup and
-checked-in sandbox RPC definitions, respectively.
+The graph contract is integrated and covered by offline fake-dispatcher tests.
+Tunisianet search is enabled for the demo. Approved writes still require the
+trusted approval service and checked-in sandbox RPC definitions.

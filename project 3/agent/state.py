@@ -7,6 +7,7 @@ ApprovalChoice = Literal["approve", "reject", "decline", "timeout"]
 RunStatus = Literal[
     "running",
     "awaiting_approval",
+    "awaiting_customer_selection",
     "approved",
     "rejected",
     "completed",
@@ -48,12 +49,17 @@ class AgentState(TypedDict, total=False):
     ticket_id: str
     customer_id: str
     product_query: str
+    product_prompt_parser: Literal["llm", "rules_fallback", "provided"]
+    price_min_tnd: float | None
+    price_max_tnd: float | None
+    product_criteria: dict[str, Any]
     step_count: int
     status: RunStatus
     ticket: dict[str, Any] | None
     customer: dict[str, Any] | None
     order: dict[str, Any] | None
     products: list[ProductEvidence]
+    selected_products: list[dict[str, Any]]
     draft: dict[str, Any] | None
     proposed_actions: list[dict[str, Any]]
     approval: ApprovalDecision | None

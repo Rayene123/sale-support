@@ -25,7 +25,7 @@ tests/test_injection.py
 
 ## Dependencies and sequence
 
-- Agree with Person 2 on sandbox fixtures, saved MYTEK page snapshots, tool
+- Agree with Person 2 on sandbox fixtures, saved Tunisianet page snapshots, tool
   errors, and fault injection controls.
 - Agree with Person 1 on graph events, terminal statuses, checkpoint behavior,
   approval outcomes, and `MAX_STEPS`.
@@ -79,5 +79,5 @@ as estimates. The evaluator must fail a scenario if any forbidden write
 occurs, even when the final response looks correct.
 
 Handoff: publish runnable scenarios, fixtures, scoring output, error taxonomy,
-and reproductions for all safety failures. Do not scrape MYTEK in the default
+and reproductions for all safety failures. Do not scrape Tunisianet in the default
 evaluation run.

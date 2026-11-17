@@ -8,9 +8,10 @@ from pydantic import ValidationError
 
 from agent.tools.mytek import parse_product_html, search_mytek_products
 from agent.tools.reads import find_customer, get_order, get_ticket
-from agent.tools.schemas import CreateCustomerOrderInput, UpdateTicketInput
+from agent.tools.schemas import CreateCustomerOrderInput, MytekSearchCriteria, UpdateTicketInput
 from agent.tools.writes import create_customer_order, send_support_notification
 from agent.tools.dispatcher import ToolDispatchError, make_sandbox_approval_lookup, make_tool_executor
+from agent.tools import dispatcher
 from sandbox.store import SandboxStore
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,7 +55,38 @@ def test_product_parser_invalid_html_and_no_products():
 
 def test_scraper_is_explicitly_unverified_and_does_not_make_requests():
     assert search_mytek_products("laptop")["error"] == "scraper_unverified"
+    assert search_mytek_products("air conditioner", criteria={"color":"white", "price_min_tnd":"1000"})["error"] == "scraper_unverified"
     assert search_mytek_products(" ")["error"] == "invalid_input"
+
+
+def test_product_criteria_ranges_and_fields_are_validated():
+    criteria = MytekSearchCriteria.model_validate({
+        "name":"air conditioner", "price_min_tnd":"1000", "price_max_tnd":"2500",
+        "color":"white", "weight_max_kg":"35", "characteristics":{"capacity":"12000 BTU"},
+    })
+    assert criteria.color == "white" and criteria.characteristics["capacity"] == "12000 BTU"
+    with pytest.raises(ValidationError):
+        MytekSearchCriteria.model_validate({"price_min_tnd":"2500", "price_max_tnd":"1000"})
+    with pytest.raises(ValidationError):
+        MytekSearchCriteria.model_validate({"unsupported":"x"})
+
+
+def test_product_parser_extracts_color_weight_and_structured_characteristics():
+    import json
+    product = {
+        "@type":"Product", "sku":"AC-1", "name":"Air conditioner", "color":"White",
+        "weight":{"value":23000,"unitCode":"GRM"},
+        "additionalProperty":[
+            {"@type":"PropertyValue","name":"Capacity","value":"12000 BTU"},
+            {"@type":"PropertyValue","name":"Inverter","value":"Yes"},
+        ],
+        "offers":{"price":"1500.00","priceCurrency":"TND","availability":"https://schema.org/InStock"},
+    }
+    html = '<script type="application/ld+json">' + json.dumps(product) + '</script>'
+    parsed = parse_product_html(html, page_url="https://www.mytek.tn/ac.html")[0]
+    assert parsed["color"] == "White"
+    assert parsed["weight_kg"] == "23.000"
+    assert parsed["characteristics"] == {"Capacity":"12000 BTU", "Inverter":"Yes"}
 
 
 def test_reads_and_privacy_and_untrusted_message():
@@ -222,6 +254,19 @@ def test_graph_dispatcher_allowlists_tool_names():
     executor = make_tool_executor(approval_lookup=lambda *_: "approval", store=fixture_store())
     with pytest.raises(ToolDispatchError, match="not allowlisted"):
         executor("send_support_email", {})
+
+
+def test_graph_dispatcher_forwards_structured_catalog_criteria(monkeypatch):
+    received = []
+    def fake_search(query, *, criteria=None):
+        received.append((query, criteria))
+        return {"success": True, "data": {"products": []}}
+    monkeypatch.setattr(dispatcher, "search_mytek_products", fake_search)
+    executor = make_tool_executor(approval_lookup=lambda *_: None)
+    criteria = {"color":"white", "weight_max_kg":"35", "characteristics":{"capacity":"12000 BTU"}}
+    result = executor("search_mytek_products", {"query":"air conditioner", "criteria":criteria})
+    assert result["data"]["products"] == []
+    assert received == [("air conditioner", criteria)]
 
 
 class _ApprovalQuery:

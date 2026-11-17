@@ -243,7 +243,7 @@ begin
                or (v_item - array['product_id','name','quantity','unit_price_tnd','source_url','line_total_tnd']) <> '{}'::jsonb
                or length(v_item->>'product_id') not between 1 and 128
                or length(v_item->>'name') not between 1 and 300
-               or (v_item->>'source_url') !~ '^https://(www\.)?mytek\.tn/'
+               or (v_item->>'source_url') !~ '^https://(www\.)?(mytek\.tn|tunisianet\.com\.tn)/'
                or (v_item->>'unit_price_tnd') !~ '^\d{1,10}(\.\d{1,2})?$' then
                 raise exception 'invalid_order_item';
             end if;

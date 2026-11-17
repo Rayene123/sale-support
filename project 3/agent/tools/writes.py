@@ -326,7 +326,7 @@ def create_customer_order(
     *,
     store: SandboxStore | None = None,
 ) -> dict[str, Any]:
-    """Create an internal sandbox order record; never contacts MYTEK."""
+    """Create an internal sandbox order record; never contacts a retailer."""
 
     try:
         validated = CreateCustomerOrderInput.model_validate({

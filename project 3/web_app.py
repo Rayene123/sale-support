@@ -11,6 +11,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
 
 from agent.graph import run_ticket
+from customer_ui import handle_shop
 
 
 def _e(value: object) -> str:
@@ -109,16 +110,12 @@ def _page(content: str, notice: str = "") -> str:
 <body><div class="app">
   <aside class="sidebar">
     <div class="brand"><span class="brand-mark">S</span><span class="brand-text">Shopline Ops<small>COMMERCE SUPPORT</small></span></div>
-    <div class="nav-label">Workspace</div>
-    <a class="nav-link active" href="/"><span class="nav-icon">▤</span><span class="nav-copy">Support inbox</span><span class="nav-count">12</span></a>
-    <div class="nav-link disabled" aria-disabled="true" title="Not included in this demo"><span class="nav-icon">□</span><span class="nav-copy">Orders</span></div>
-    <div class="nav-link disabled" aria-disabled="true" title="Not included in this demo"><span class="nav-icon">♙</span><span class="nav-copy">Customers</span></div>
-    <div class="nav-label" style="margin-top:18px">Manage</div>
-    <div class="nav-link disabled" aria-disabled="true" title="Not included in this demo"><span class="nav-icon">▥</span><span class="nav-copy">Reports</span></div>
-    <div class="sidebar-bottom">Local demo workspace<div class="operator"><span class="avatar">AD</span><span>Admin reviewer</span></div></div>
+    <div class="nav-label">Admin workspace</div>
+    <a class="nav-link active" href="/admin"><span class="nav-icon">▤</span><span class="nav-copy">Support tickets</span></a>
+    <div class="sidebar-bottom">Ticket review only<div class="operator"><span class="avatar">AD</span><span>Admin reviewer</span></div></div>
   </aside>
   <div class="workspace">
-    <header class="topbar"><div class="crumb">Workspace&nbsp; / &nbsp;<strong>Support inbox</strong></div><div class="top-actions"><span class="desktop-only"><i class="live-dot"></i>Mock environment</span><span class="avatar">AD</span></div></header>
+    <header class="topbar"><div class="crumb">Admin workspace&nbsp; / &nbsp;<strong>Support tickets</strong></div><div class="top-actions"><a href="/shop" style="color:#176b50;text-decoration:none;font-weight:650">Open customer shop ↗</a><span class="desktop-only"><i class="live-dot"></i>Local demo</span><span class="avatar">AD</span></div></header>
     <main>
       {f'<div class="notice{notice_style}">{_e(notice)}</div>' if notice else ''}
       {content}
@@ -131,7 +128,7 @@ def _new_run_form(ticket_id: str = "TICKET-102") -> str:
     return f"""<div class="page-head"><div><div class="eyebrow">Customer care / Review queue</div>
       <h1>Support operations</h1><p class="subhead">Review an order issue and decide on the proposed customer response.</p></div></div>
       <section class="card form-card"><div class="card-head"><div><div class="section-label">Open a case</div><h2 style="margin-top:4px">Find a support ticket</h2></div><span class="case-id">DEMO DATA</span></div>
-      <div class="card-body"><form method="post" action="/"><input type="hidden" name="action" value="start">
+      <div class="card-body"><form method="post" action="/admin"><input type="hidden" name="action" value="start">
         <label class="section-label" for="ticket_id">Ticket ID</label><div class="search-row">
         <input id="ticket_id" name="ticket_id" value="{_e(ticket_id)}" placeholder="e.g. TICKET-102" required>
         <button class="approve" type="submit">Review ticket&nbsp; →</button></div>
@@ -191,8 +188,8 @@ def _render_result(result: dict, notice: str = "") -> str:
           <input type="hidden" name="ticket_id" value="{_e(result.get('ticket_id'))}">
           <input type="hidden" name="operation_id" value="{_e(draft.get('operation_id') if draft else '')}">"""
         body += f"""<section class="approval-card"><div class="approval-copy"><strong>Ready for your review</strong><span>Nothing is changed until you approve this response.</span></div>
-          <div class="actions"><form method="post" action="/">{common}<input type="hidden" name="action" value="reject"><button class="reject" type="submit">Reject proposal</button></form>
-          <form method="post" action="/">{common}<input type="hidden" name="action" value="approve"><button class="approve" type="submit">Approve &amp; apply&nbsp; →</button></form></div></section>"""
+          <div class="actions"><form method="post" action="/admin">{common}<input type="hidden" name="action" value="reject"><button class="reject" type="submit">Reject proposal</button></form>
+          <form method="post" action="/admin">{common}<input type="hidden" name="action" value="approve"><button class="approve" type="submit">Approve &amp; apply&nbsp; →</button></form></div></section>"""
     elif status == "completed":
         body += "<section class='approval-card'><div class='approval-copy'><strong>Update applied</strong><span>The approved mock ticket update has been recorded.</span></div><span class='status completed'>Complete</span></section>"
     elif status == "rejected":
@@ -202,7 +199,7 @@ def _render_result(result: dict, notice: str = "") -> str:
         body += "<section class='card' style='margin-top:17px'><div class='card-body'><div class='section-label'>Run details</div><p class='run-details'>" + "<br>".join(f"{_e(error)}" for error in errors) + "</p></div></section>"
     body += "</div>" if ticket else "</div></div>"
     if ticket and status in {"completed", "rejected", "failed"}:
-        body += "<section class='card new-review'><div class='card-body'><div><h2>Review another ticket?</h2><p>Return to the queue and start a new review.</p></div><a href='/'><button type='button'>Back to inbox&nbsp; →</button></a></div></section>"
+        body += "<section class='card new-review'><div class='card-body'><div><h2>Review another ticket?</h2><p>Return to the queue and start a new review.</p></div><a href='/admin'><button type='button'>Back to inbox&nbsp; →</button></a></div></section>"
     elif not ticket:
         body += _new_run_form()
     return _page(body, notice)
@@ -210,13 +207,22 @@ def _render_result(result: dict, notice: str = "") -> str:
 
 class ApprovalHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
-        if self.path != "/":
+        if self.path == "/":
+            self.send_response(303)
+            self.send_header("Location", "/admin")
+            self.end_headers()
+            return
+        if self.path == "/shop":
+            from customer_ui import _layout, _search_form
+            self._send_html(_layout(_search_form()))
+            return
+        if self.path != "/admin":
             self.send_error(404)
             return
         self._send_html(_page(_new_run_form()))
 
     def do_POST(self) -> None:
-        if self.path != "/":
+        if self.path not in {"/admin", "/shop"}:
             self.send_error(404)
             return
         try:
@@ -229,6 +235,10 @@ class ApprovalHandler(BaseHTTPRequestHandler):
             return
         form = parse_qs(self.rfile.read(length).decode("utf-8", errors="replace"), keep_blank_values=True)
         value = lambda key: form.get(key, [""])[0]
+        if self.path == "/shop":
+            page, status = handle_shop(form)
+            self._send_html(page, status=status)
+            return
         try:
             if value("action") == "start":
                 result = run_ticket(value("ticket_id").strip())
@@ -273,7 +283,7 @@ class ApprovalHandler(BaseHTTPRequestHandler):
 def main() -> None:
     host, port = "127.0.0.1", 8000
     server = HTTPServer((host, port), ApprovalHandler)
-    print(f"Approval app running at http://{host}:{port} (Ctrl+C to stop)")
+    print(f"Shopline demo running at http://{host}:{port} (admin: /admin, customer: /shop; Ctrl+C to stop)")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
