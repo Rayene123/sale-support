@@ -138,7 +138,7 @@ class _JSONLD(HTMLParser):
         self.documents: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag.lower() == "script" and dict(attrs).get("type", "").lower() == "application/ld+json":
+        if tag.lower() == "script" and (dict(attrs).get("type") or "").lower() == "application/ld+json":
             self.in_jsonld = True
             self.parts = []
 
@@ -425,3 +425,182 @@ def search_mytek_products(query: str, *, criteria: dict[str, Any] | None = None,
     if timeout <= 0 or timeout > 15 or max_pages < 1 or max_pages > 3:
         return {"success": False, "error": "invalid_input", "message": "Request bounds exceed the scraper limits.", "retryable": False}
     return search_tunisianet_products(query, criteria=criteria, timeout=timeout, max_results=max_pages * 8)
+
+_SPECIALIST_LISTS = {
+    "pc portable": "/702-ordinateur-portable?order=product.price.asc",
+    "ordinateur portable": "/702-ordinateur-portable?order=product.position.asc",
+    "écran pc": "/667-ecran-pc-tunisie?order=product.price.asc",
+    "moniteur": "/667-ecran-pc-tunisie?order=product.position.asc",
+}
+
+
+def search_specialist_catalog(query: str, *, max_results: int = 6) -> dict[str, Any]:
+    """Search inside a published product category, with a fixed result bound."""
+    path = _SPECIALIST_LISTS.get(query)
+    if not path or not 1 <= max_results <= 6:
+        return {"success": False, "error": "invalid_product_source"}
+    source = "https://www.tunisianet.com.tn" + path
+    try:
+        if not _robots_parser().can_fetch("ShoplineDemo/1.0", source):
+            return {"success": False, "error": "robots_disallowed"}
+        response = _bounded_get(source, timeout=8)
+        if response.status_code in (403, 429):
+            return {"success": False, "error": "source_blocked"}
+        response.raise_for_status()
+        response.encoding = response.apparent_encoding or response.encoding
+        parser = _CatalogCards()
+        parser.feed(response.text)
+        stamp = datetime.now(timezone.utc).isoformat()
+        rows = []
+        for card in parser.items:
+            href = urljoin(source, str(card["source_url"]))
+            if urlparse(href).hostname not in _HOSTS or not card["name"].strip() or not card["product_id"]:
+                continue
+            price = _tnd_price(card["price_raw"])
+            rows.append({"product_id": card["product_id"], "name": re.sub(r"\s+", " ", card["name"]).strip()[:300],
+                         "source_url": href, "price_tnd": str(price) if price is not None else None,
+                         "availability": card["availability"], "retrieved_at": stamp})
+            if len(rows) >= max_results:
+                break
+        return {"success": True, "data": {"products": rows}}
+    except requests.RequestException:
+        return {"success": False, "error": "source_unavailable"}
+
+
+class _DetailMetadata(HTMLParser):
+    """Read exact-page offer facts when the retailer uses microdata instead of JSON-LD."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.values = {}
+
+    def handle_starttag(self, tag, attrs):
+        data = dict(attrs)
+        key = data.get("property") or data.get("itemprop") or data.get("rel")
+        value = data.get("content") or data.get("href")
+        accepted = {"canonical", "og:title", "product:price:amount", "product:price:currency",
+                    "price", "priceCurrency", "availability"}
+        if key in accepted and isinstance(value, str):
+            self.values.setdefault(key, set()).add(value.strip())
+
+    def row(self, product_id, source_url):
+        names = self.values.get("og:title", set())
+        canonicals = self.values.get("canonical", set())
+        prices = self.values.get("product:price:amount", set()) | self.values.get("price", set())
+        currencies = self.values.get("product:price:currency", set()) | self.values.get("priceCurrency", set())
+        statuses = self.values.get("availability", set())
+        path = urlparse(source_url).path
+        if (canonicals != {source_url} or len(names) != 1
+                or not re.search(r"/" + re.escape(product_id) + r"-[^/]+\.html$", path)):
+            return None
+        normalized = {_tnd_price(value) for value in prices}
+        price = next(iter(normalized)) if len(normalized) == 1 and currencies == {"TND"} else None
+        availability = "unknown"
+        if len(statuses) == 1:
+            slug = next(iter(statuses)).rsplit("/", 1)[-1].lower()
+            availability = {"instock": "in_stock", "outofstock": "out_of_stock"}.get(slug, "unknown")
+        return {"product_id": product_id, "name": next(iter(names))[:300], "source_url": source_url,
+                "price_tnd": str(price) if price is not None else None, "availability": availability,
+                "retrieved_at": datetime.now(timezone.utc).isoformat()}
+
+
+class _ExactShortSpecs(HTMLParser):
+    """Keep only recognized specification fragments in this product's own summary."""
+
+    def __init__(self, product_id):
+        super().__init__(convert_charrefs=True)
+        self.target_id = "product-description-short-" + product_id
+        self.depth = 0
+        self.parts = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "div" and (self.depth or dict(attrs).get("id") == self.target_id):
+            self.depth += 1
+        if self.depth and tag in {"li", "br", "p"}:
+            self.parts.append(" - ")
+
+    def handle_endtag(self, tag):
+        if tag == "div" and self.depth:
+            self.depth -= 1
+
+    def handle_data(self, data):
+        if self.depth and len(self.parts) < 120:
+            self.parts.append(data[:500])
+
+    def specs(self):
+        result = {}
+        ports = []
+        for segment in re.split(r"\s+[–—-]\s+|[\r\n]+", " ".join(self.parts)):
+            segment = " ".join(segment.split()).strip()
+            if not segment or len(segment) > 240:
+                continue
+            if re.fullmatch(
+                r"(?:(?:ports? vid[ée]o|connectique|ports?|entr[ée]es?|sorties?)\s*:\s*)?"
+                r"\d+\s*[x×]\s*(?:ports?\s+)?(?:HDMI|DisplayPort|\bDP\b|(?:USB[- ]?C|type[- ]?c).*(?:DP|DisplayPort)\s+Alt Mode).*",
+                segment, re.I,
+            ):
+                ports.append(segment)
+            match = re.match(
+                r"(?:r[ée]solution(?:\s+(?:du panneau|native))?|d[ée]finition)"
+                r"\s*:?\s*(?:Full HD|FHD|QHD|UHD|4K)?\s*\(?([0-9]{4}\s*[x×]\s*[0-9]{4})\b",
+                segment, re.I,
+            )
+            if match:
+                result["Listing resolution"] = match.group(1).strip()
+        if ports:
+            result["Listing video ports"] = "; ".join(ports)[:240]
+        return result
+
+
+def inspect_tunisianet_product(product_id: str, source_url: str, *, timeout: float = 8.0) -> dict[str, Any]:
+    """Read one exact product page and its published offer and structured specs."""
+    try:
+        parsed = urlparse(source_url)
+        if (parsed.scheme != "https" or parsed.hostname not in _HOSTS
+                or parsed.port not in (None, 443) or parsed.username is not None
+                or parsed.password is not None or not parsed.path.endswith(".html")
+                or parsed.query or parsed.fragment or not product_id
+                or not 0 < timeout <= 15):
+            return {"success": False, "error": "invalid_product_source"}
+        if not _robots_parser().can_fetch("ShoplineDemo/1.0", source_url):
+            return {"success": False, "error": "robots_disallowed"}
+        response = _bounded_get(source_url, timeout=timeout)
+        if response.status_code in (403, 429):
+            return {"success": False, "error": "source_blocked"}
+        response.raise_for_status()
+        actual = urlparse(response.url)
+        if actual.scheme != "https" or actual.hostname not in _HOSTS or actual.path != parsed.path or actual.query:
+            return {"success": False, "error": "product_identity_unknown"}
+        response.encoding = response.apparent_encoding or response.encoding
+        html = response.text
+        rows = [row for row in parse_product_html(html, page_url=source_url)
+                if (urlparse(row["source_url"]).hostname in _HOSTS
+                    and urlparse(row["source_url"]).path == parsed.path)]
+        if len(rows) > 1:
+            return {"success": False, "error": "product_identity_unknown"}
+        if rows:
+            row = rows[0]
+        else:
+            metadata = _DetailMetadata()
+            metadata.feed(html)
+            row = metadata.row(product_id, source_url)
+            if row is None:
+                return {"success": False, "error": "product_identity_unknown"}
+        features = _ProductFeatures()
+        features.feed(html)
+        # Keep both values when independent parts of the page disagree.
+        specs = dict(row.get("characteristics") or {})
+        for label, value in features.features.items():
+            key = label if label not in specs or specs[label] == value else label + " (detail table)"
+            specs[key] = value
+        short_specs = _ExactShortSpecs(product_id)
+        short_specs.feed(html)
+        specs.update(short_specs.specs())
+        row.update(product_id=product_id, source_url=source_url, characteristics=specs)
+        return {"success": True, "data": row}
+    except requests.Timeout:
+        return {"success": False, "error": "source_timeout"}
+    except requests.RequestException:
+        return {"success": False, "error": "source_unavailable"}
+    except (AttributeError, TypeError, ValueError):
+        return {"success": False, "error": "invalid_product_evidence"}

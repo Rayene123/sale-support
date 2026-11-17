@@ -15,7 +15,7 @@ try {
     $$ select current_setting('request.jwt.claim.role',true) $$;
     select set_config('request.jwt.claim.role','service_role',false);`);
   for (const file of ['schema.sql', 'seed.sql', 'migrations/002_approved_commerce_writes.sql',
-    'migrations/003_tunisianet_order_sources.sql', 'migrations/004_replay_and_bootstrap.sql']) {
+    'migrations/003_tunisianet_order_sources.sql', 'migrations/004_replay_and_bootstrap.sql', 'migrations/005_specialist_receipts.sql']) {
     await db.exec(await readFile(new URL(`../../sandbox/${file}`, import.meta.url), 'utf8'));
   }
   console.log('PASS clean database bootstrap'); checks++;
@@ -33,6 +33,17 @@ try {
     await query("update approval_records set expires_at=now()-interval '1 hour' where operation_id='order-test-001'");
     assert.equal(await resolve('create_customer_order','order-test-001',order),'a-order-test-001');
     assert.deepEqual(await execute('create_customer_order','order-test-001',order),receipt);
+    assert.equal(await scalar("select count(*)::int from orders where operation_id='order-test-001'"),1);
+  });
+  await check('receipt lookup is read-only and bound to the exact approved run and body', async () => {
+    const read=(op,payload,run='run-test')=>scalar(
+      'select read_specialist_receipt($1,$2,$3,$4::jsonb)',
+      ['create_customer_order',op,run,JSON.stringify(payload)]);
+    assert.equal(await read('no-order-yet',order),null);
+    const receipt=await read('order-test-001',order);
+    assert.equal(receipt.operation_id,'order-test-001');
+    await assert.rejects(read('order-test-001',order,'another-run'),/approval_payload_mismatch/);
+    await assert.rejects(read('order-test-001',{...order,total_tnd:'3.00'}),/approval_payload_mismatch/);
     assert.equal(await scalar("select count(*)::int from orders where operation_id='order-test-001'"),1);
   });
   await check('changed payload, wrong run and revoked approval cannot replay', async () => {

@@ -7,7 +7,16 @@ support and order requests. LangGraph coordinates the workflow and its approval
 gate. Tunisianet product pages are a read-only catalog source. LangSmith is the
 planned tracing and evaluation-monitoring platform.
 
-## Target workflow
+## The Specialist purchase workflow
+
+The [team plan](docs/specialist-plan.md) targets a complete, verified IT setup.
+The server-side [Specialist core](docs/specialist-core.md) now handles laptop
+and monitor cases, sourcing exact product facts, testing direct display
+compatibility, and preserving revisions and sandbox receipts. It runs
+alongside the original Shopline Ops graph. The existing local web pages still
+use the original graph and simulation until Phase 4 connects the new case API.
+
+## Original Shopline Ops workflow
 
 1. Receive a customer support ticket or a product/order request associated
    with a customer.
