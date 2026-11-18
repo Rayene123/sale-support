@@ -1,11 +1,11 @@
 """Tests against the persisted case API; no retailer or paid API calls."""
 import pytest
 
-from agent.specialist.contracts import read_requirements
-from agent.specialist.coordinator import CaseConflict, Specialist
-from agent.specialist.store import CaseStore
-from agent.tools import mytek
-from eval.specialist_fixtures import Catalog
+from specialist.contracts.purchasing import read_requirements
+from specialist.workflow.coordinator import CaseConflict, Specialist
+from specialist.workflow.store import CaseStore
+from specialist.catalog import tunisianet
+from specialist.catalog.fixtures import Catalog
 
 
 PRIMARY = "Find a 16 GB laptop and 27-inch monitor under 3,000 TND at 1440p 120 Hz"
@@ -196,9 +196,9 @@ def test_price_fields_are_extracted_from_exact_detail_html(monkeypatch):
     class Robots:
         def can_fetch(self, agent, url): return True
 
-    monkeypatch.setattr(mytek, "_robots_parser", Robots)
-    monkeypatch.setattr(mytek, "_bounded_get", lambda url, timeout: Page())
-    result = mytek.inspect_tunisianet_product("P-10", Page.url)
+    monkeypatch.setattr(tunisianet, "_robots_parser", Robots)
+    monkeypatch.setattr(tunisianet, "_bounded_get", lambda url, timeout: Page())
+    result = tunisianet.inspect_tunisianet_product("P-10", Page.url)
     assert result["success"] and result["data"]["product_id"] == "P-10"
     assert result["data"]["price_tnd"] == "1999.00"
     assert result["data"]["availability"] == "in_stock"
@@ -237,7 +237,7 @@ def test_expired_approval_preserves_existing_receipt(specialist, monkeypatch):
     decision = decide(service, case)
     order = execute(service, case)
     assert order["status"] == "partially_completed"
-    monkeypatch.setattr("agent.specialist.coordinator.time.time", lambda: decision["approval"]["expires_at"] + 1)
+    monkeypatch.setattr("specialist.workflow.coordinator.time.time", lambda: decision["approval"]["expires_at"] + 1)
     after = execute(service, case)
     assert after["status"] == "timed_out" and after["receipts"] == order["receipts"]
     assert len(writer.rows) == 1
@@ -262,12 +262,12 @@ def test_tunisianet_microdata_and_exact_summary_are_scoped_to_the_product():
     </div>
     <div id="product-description-short-503">Ports : 1x DisplayPort</div>
     """
-    detail = mytek._DetailMetadata()
+    detail = tunisianet._DetailMetadata()
     detail.feed(html)
     assert detail.row("502", url)["price_tnd"] == "1275.00"
     assert detail.row("502", url)["availability"] == "in_stock"
     assert detail.row("503", url) is None
-    summary = mytek._ExactShortSpecs("502")
+    summary = tunisianet._ExactShortSpecs("502")
     summary.feed(html)
     assert summary.specs() == {
         "Listing video ports": "1x HDMI 1.4", "Listing resolution": "1920 x 1080",

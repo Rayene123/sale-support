@@ -24,8 +24,8 @@ model. The planner receives the purchasing prompt and the prior requirements
 for revisions. No API key is required.
 
 ```python
-from agent.specialist.coordinator import Specialist
-from agent.specialist.store import CaseStore
+from specialist.workflow.coordinator import Specialist
+from specialist.workflow.store import CaseStore
 
 service = Specialist.with_local_model(CaseStore(".specialist/cases.sqlite3"))
 case = service.start("C-001", "Find a desktop, two keyboards, and a mouse under 1,500 TND.")
@@ -47,8 +47,8 @@ multi-item request cannot silently shrink into a two-item case. Each of these
 smoke tests sends one synthetic request to Ollama without fetching product pages:
 
 ```powershell
-python -m eval.hybrid_smoke
-python -m eval.hybrid_smoke --checks
+python -m evaluation.planner_smoke
+python -m evaluation.planner_smoke --checks
 ```
 
 The first checks multiple products and quantities. The second checks whether

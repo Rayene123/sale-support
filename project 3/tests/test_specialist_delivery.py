@@ -7,18 +7,21 @@ import re
 import shutil
 import socket
 from threading import Thread
+from types import SimpleNamespace
 
 import pytest
 import requests
 
-from agent.observability import Observability, capture_event, model_attempt, model_tokens
-from agent.specialist.coordinator import Specialist
-from agent.specialist.sandbox_writer import SandboxWriter
-from agent.specialist.store import CaseStore
-from eval.specialist_fixtures import Catalog
-from sandbox.local_rpc import LocalSandbox
-from sandbox.store import SandboxStore
-from specialist_web import Workbench
+from specialist.observability import Observability, capture_event, model_attempt, model_tokens
+from specialist.workflow.coordinator import Specialist
+from specialist.sandbox.writer import SandboxWriter
+from specialist.workflow.store import CaseStore
+from specialist.catalog.fixtures import Catalog
+from specialist.sandbox.local_rpc import LocalSandbox
+from specialist.sandbox.store import SandboxStore
+from specialist.support import fixtures as support_fixtures
+from specialist.workbench.cli import reset_local
+from specialist.workbench.http import Workbench
 
 
 CONNECT = socket.socket.connect
@@ -85,10 +88,40 @@ def test_role_csrf_and_case_ownership_are_checked_on_the_server(tmp_path, loopba
             assert foreign["case_id"] in reviewer.get(f"{base}/admin/", timeout=5).text
 
 
+def test_support_ticket_review_uses_the_same_admin_session(tmp_path, loopback):
+    support_fixtures.reset_write_log()
+    try:
+        with serve(tmp_path) as (base, _), sign_in(base, "customer", "customer-test") as customer:
+            support = base + "/admin/support/"
+            assert "Reviewer sign in" in customer.get(support, timeout=5).text
+            assert customer.post(support, data={"action": "start", "ticket_id": "TICKET-102"}, timeout=5).status_code == 403
+            with sign_in(base, "admin", "reviewer-test") as reviewer:
+                draft = submit(reviewer, support, "start", ticket_id="TICKET-102")
+                assert draft.status_code == 200 and "Awaiting approval" in draft.text
+                assert support_fixtures.WRITE_LOG == []
+                fields = dict(re.findall(r'name="(run_id|operation_id)" value="([^"]+)"', draft.text))
+                reply = submit(reviewer, support, "approve", ticket_id="TICKET-102", **fields)
+                assert reply.status_code == 200 and "Completed" in reply.text
+                assert len(support_fixtures.WRITE_LOG) == 1
+    finally:
+        support_fixtures.reset_write_log()
+
+
+def test_unconfirmed_local_reset_preserves_existing_cases(tmp_path):
+    cases = CaseStore(tmp_path / "cases.db")
+    state = {"case_id": "saved-case", "customer_id": "C-001"}
+    cases.insert(state)
+    client = SimpleNamespace(rpc=lambda _: SimpleNamespace(execute=lambda: SimpleNamespace(data={"success": False})))
+
+    with pytest.raises(RuntimeError, match="Case history was preserved"):
+        reset_local(cases, client)
+    assert cases.get("saved-case", "C-001") == state
+
+
 def test_local_sql_approval_recheck_and_receipts_through_the_workbench(tmp_path, loopback):
-    dependency = Path(__file__).resolve().parent / "sql/node_modules/@electric-sql/pglite"
+    dependency = Path(__file__).resolve().parents[1] / "specialist/sandbox/sql/node_modules/@electric-sql/pglite"
     if not shutil.which("node") or not (os.getenv("PGLITE_MODULE") or dependency.exists()):
-        pytest.skip("Install the local SQL test dependency with npm install --prefix tests/sql")
+        pytest.skip("Install the local SQL test dependency with npm ci --prefix specialist/sandbox/sql")
     catalog = Catalog()
     database = tmp_path / "sandbox"
 

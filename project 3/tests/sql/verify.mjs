@@ -1,23 +1,13 @@
 // Real PostgreSQL SQL execution in an isolated, in-memory PGlite database.
 // This tests transactions and replay, not multi-connection concurrency or Supabase auth.
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-const { PGlite } = await import(process.env.PGLITE_MODULE || '@electric-sql/pglite');
-const db = new PGlite();
+import { openSandbox } from '../../specialist/sandbox/sql/database.mjs';
+const db = await openSandbox();
 const query = (sql, params = []) => db.query(sql, params);
 const scalar = async (sql, params = []) => Object.values((await query(sql, params)).rows[0])[0];
 let checks = 0;
 async function check(name, fn) { await fn(); checks++; console.log(`PASS ${name}`); }
 try {
-  await db.exec(`create role anon; create role authenticated; create role service_role;
-    create schema auth;
-    create function auth.role() returns text language sql as
-    $$ select current_setting('request.jwt.claim.role',true) $$;
-    select set_config('request.jwt.claim.role','service_role',false);`);
-  for (const file of ['schema.sql', 'seed.sql', 'migrations/002_approved_commerce_writes.sql',
-    'migrations/003_tunisianet_order_sources.sql', 'migrations/004_replay_and_bootstrap.sql', 'migrations/005_specialist_receipts.sql']) {
-    await db.exec(await readFile(new URL(`../../sandbox/${file}`, import.meta.url), 'utf8'));
-  }
   console.log('PASS clean database bootstrap'); checks++;
   const customer = await scalar('select customer_id from clients order by customer_id limit 1');
   const ticket = await scalar('select ticket_id from tickets order by ticket_id limit 1');

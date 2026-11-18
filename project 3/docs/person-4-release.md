@@ -2,13 +2,13 @@
 
 The [November 16 team brief](monday-2026-11-16/README.md) is the acceptance
 baseline. The Phase 4 workbench exercises the purchasing backend with a
-minimal interface. The original ticket path remains available through
-`python web_app.py` on port 8000.
+minimal interface. Reviewers can open **Support tickets** in the same workbench
+for the secondary fixture-based ticket flow.
 
 ## Setup and modes
 
 Follow the [README setup](../README.md) from a clean checkout. Start Ollama
-and run `python specialist_web.py` from Project 3. Enter the customer
+and run `python -m specialist` from Project 3. Enter the customer
 passcode printed by the server at `http://127.0.0.1:8767/customer/`.
 Use the separate reviewer passcode at `http://127.0.0.1:8767/admin/`.
 Use the same hostname throughout the session.
@@ -17,7 +17,8 @@ The default harness uses fictional catalog listings, the actual local LLM,
 and persistent local PostgreSQL through PGlite. The SQL schema, approvals,
 actions, reset, and receipt lookup are shared with the hosted sandbox. The
 app binds to loopback and authenticates two distinct test accounts using
-server-held identities. Keep it on your machine.
+server-held identities. Support reviews use process-local ticket fixtures in
+both profiles. Keep the workbench on your machine.
 
 | Option | Purpose |
 | --- | --- |
@@ -50,19 +51,17 @@ must approve the new total, and that retry recovers the confirmed receipt.
 
 ## Reset and evaluate
 
-Stop the workbench before running `python specialist_web.py --reset-local`.
+Stop the workbench before running `python -m specialist --reset-local`.
 Use the same profile switches as when starting the app. This clears that
 profile's local cases and restores its sandbox fixtures. Hosted resets use
-`python -m sandbox.reset` against the dedicated sandbox.
+`python -m specialist.sandbox.reset --supabase` against the dedicated sandbox.
 
 ```powershell
 python -m pytest -q
-Push-Location tests/sql
-npm test
-Pop-Location
-python -m eval.specialist --output .specialist/rules-benchmark.json
-python -m eval.run --output .specialist/legacy/trajectories.jsonl
-python -m eval.local_specialist --output .specialist/local-benchmark.json
+npm test --prefix specialist/sandbox/sql
+python -m evaluation.comparison
+python -m evaluation.legacy.run
+python -m evaluation.local_model
 ```
 
 The last command invokes the selected local model. Benchmark results contain
@@ -85,26 +84,34 @@ export. Network export runs on a bounded background queue.
 - Verify the catalog and sandbox labels before testing either mode.
 - Run the local database migration, reset and recovery checks.
 - Record the offline comparison and the local model benchmark with failures.
-- Smoke-test the hosted sandbox and LangSmith in the team's own accounts.
+- Verify the hosted sandbox using the approval and receipt flow below.
+- Confirm a trace arrives in the team's LangSmith project when configured.
 - Keep the workbench as the test interface for the later frontend.
 
 ## Verification report · November 18
 
 | Check | Observed result |
 | --- | --- |
-| Python suite | 160 passed, including role isolation and the HTTP recovery flow backed by local SQL. |
+| Python suite | 162 passed after the refactor, including role isolation, ticket review, a failed reset and the HTTP recovery flow backed by local SQL. |
 | SQL suite | 12 checks passed against the project's schema and migrations. |
 | Secondary support and order workflow | 45 offline scenarios passed. |
 | Fixed / adaptive / adaptive plus verifier | 14/30, 11/30 and 30/30 correct. The verifier mode produced zero false positives. |
-| Local Ministral model | [8/8 scenarios](../eval/results/specialist-local-model.json), zero false positives, p50 6.51 s and p95 34.53 s. |
-| Browser workbench | Customer request, reviewer approval, sandbox order and notification, and both confirmed receipts observed in Chromium. |
+| Local Ministral model | [8/8 scenarios](../evaluation/reference/specialist-local-model.json), zero false positives, p50 6.51 s and p95 34.53 s. |
+| Browser workbench | The refactored launcher completed a customer request using Ollama, reviewer approval, and two confirmed local SQL receipts in Chromium. |
 | Live catalog | The workbench inspected one laptop and three monitors from Tunisianet. The listings did not establish a shared connection, so the case stopped before approval. |
-| Clean checkout | Fresh Python and Node installs, the Python and SQL checks, and a local reset succeeded. |
+| Clean export | A fresh Python environment and Node install from the refactored files, the launcher, the full Python suite and a local reset succeeded. |
+| Hosted Supabase sandbox | Migrations 002–005 applied in one transaction. The workbench used Ollama and fictional listings, blocked execution before approval, required fresh approval after a simulated price change, and recovered a confirmed notification after a simulated lost reply. Replay left one order and one queued notification. A fresh hosted client read both receipts. |
 
 The model sample covers display, USB, Ethernet, cross-product dimensions,
 missing specifications, an over-budget setup and a clarification. Its timing
 includes local generation and fictional catalog calls. It is a small fixture
 sample. The comparative rules benchmark covers a separate 30-case set.
+
+After the refactor, the same model benchmark passed 8/8 with zero false
+positives. The deterministic comparison and 45 earlier graph scenarios kept
+their results. The refactored app opened five cases saved before the folder
+changes and read both receipts from the existing hosted test order. A bounded
+live catalog check returned five candidates and 12 specs on one exact listing.
 
 ## Postmortem
 
@@ -122,7 +129,11 @@ The live model's first search was too narrow to find a laptop. The second
 research pass now uses bounded category searches for known laptop and monitor
 types and can broaden both ends before trying another pairing.
 
-The hosted sandbox adapter and LangSmith exporter are configurable. A live
-hosted acceptance run requires the team's dedicated Supabase credentials and
-a live trace run requires the team's LangSmith key. The local tests exercise
-the same commerce SQL and isolate a trace transport failure.
+The hosted run produced sandbox order `S-f7d8e7a971a74dc983d395c901709bf8`.
+The migration used the checked-in SQL permissions. A hosted privileges check
+confirmed that the service role can access the outbox and execute the order and
+receipt functions, while anonymous and authenticated client roles lack those
+permissions. The hosted sandbox reset was left for intentional fixture resets.
+
+LangSmith live verification still requires the team's LangSmith key. Local
+tests verify trace filtering and isolate a trace transport failure.

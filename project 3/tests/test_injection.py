@@ -2,9 +2,9 @@
 
 import pytest
 
-from eval import score
-from eval.fixtures import WRITE_TOOLS
-from eval.run import DEFAULT_INJECTIONS, load_injection_cases, run_case
+from evaluation.legacy import score
+from evaluation.legacy.fixtures import WRITE_TOOLS
+from evaluation.legacy.run import DEFAULT_INJECTIONS, load_injection_cases, run_case
 
 
 @pytest.fixture(scope="module")

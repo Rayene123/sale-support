@@ -4,13 +4,13 @@ import json
 import pytest
 import requests
 
-from agent.specialist.coordinator import CaseConflict, Specialist
-from agent.specialist.planner import ModelUnavailable, OllamaPlanner
-from agent.specialist.research import Researcher
-from agent.specialist.setup import SetupPlan
-from agent.specialist.setup_research import ground_plan, read_plan_findings
-from agent.specialist.store import CaseStore
-from eval.specialist_fixtures import Catalog, product
+from specialist.workflow.coordinator import CaseConflict, Specialist
+from specialist.workflow.planner import ModelUnavailable, OllamaPlanner
+from specialist.catalog.research import Researcher
+from specialist.contracts.setup import SetupPlan
+from specialist.workflow.planning import ground_plan, read_plan_findings
+from specialist.workflow.store import CaseStore
+from specialist.catalog.fixtures import Catalog, product
 
 
 PROMPT = "Find a desktop, two keyboards, and a mouse under 1,500 TND."
@@ -107,7 +107,7 @@ def runner(tmp_path, monkeypatch):
     def build(response, sources=None, **kwargs):
         source = sources or Sources()
         model = StubModel(response)
-        monkeypatch.setattr("agent.specialist.planner.requests.Session", lambda: model)
+        monkeypatch.setattr("specialist.workflow.planner.requests.Session", lambda: model)
         service = Specialist.with_local_model(CaseStore(tmp_path / "case.db"), source.researcher(), **kwargs)
         return service, source, model
     return build

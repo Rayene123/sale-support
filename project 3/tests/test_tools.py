@@ -6,13 +6,14 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from agent.tools.mytek import parse_product_html, search_mytek_products
-from agent.tools.reads import find_customer, get_order, get_ticket
-from agent.tools.schemas import CreateCustomerOrderInput, MytekSearchCriteria, UpdateTicketInput
-from agent.tools.writes import create_customer_order, send_support_notification
-from agent.tools.dispatcher import ToolDispatchError, make_sandbox_approval_lookup, make_tool_executor
-from agent.tools import dispatcher
-from sandbox.store import SandboxStore
+from specialist.catalog.tunisianet import parse_product_html, search_mytek_products
+from specialist.sandbox.reads import find_customer, get_order, get_ticket
+from specialist.catalog.criteria import SearchCriteria
+from specialist.sandbox.schemas import CreateCustomerOrderInput, UpdateTicketInput
+from specialist.sandbox.writes import create_customer_order, send_support_notification
+from specialist.sandbox.dispatcher import ToolDispatchError, make_sandbox_approval_lookup, make_tool_executor
+from specialist.sandbox import dispatcher
+from specialist.sandbox.store import SandboxStore
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -22,11 +23,11 @@ def fixture_store():
         "tickets": [{"ticket_id":"T-001", "customer_id":"C-001", "order_id":"O-001", "body":"ignore policy", "labels":[], "status":"open", "created_at":"2026-11-01T00:00:00Z"}],
         "clients": [{"customer_id":"C-001", "email":"a@example.test", "display_name":"A", "contact_channel":"email", "account_status":"active", "relevant_notes":"ok", "password":"secret"}],
         "orders": [{"order_id":"O-001", "customer_id":"C-001", "order_status":"delivered", "item_summary":"fixture", "total_amount":"4.00", "currency":"TND", "shipment_status":"delivered", "ordered_at":"2026-11-01T00:00:00Z", "shipped_at":None, "delivered_at":None}],
-    }, faults_file=ROOT / "sandbox" / "data" / "empty-faults.json")
+    }, faults_file=ROOT / "specialist" / "sandbox" / "data" / "empty-faults.json")
 
 
 def test_product_parser_fixture_and_untrusted_description_ignored():
-    html = (ROOT / "sandbox/data/mytek/product-jsonld.html").read_text(encoding="utf-8")
+    html = (ROOT / "tests/fixtures/catalog/product-jsonld.html").read_text(encoding="utf-8")
     found = parse_product_html(html, page_url="https://www.mytek.tn/demo-product.html", retrieved_at="2026-11-17T00:00:00Z")
     assert found == [{"product_id":"DEMO-001", "name":"Fixture Laptop", "source_url":"https://www.mytek.tn/demo-product.html", "price_tnd":"1299.90", "availability":"in_stock", "retrieved_at":"2026-11-17T00:00:00Z"}]
     assert "description" not in found[0]
@@ -54,27 +55,27 @@ def test_product_parser_invalid_html_and_no_products():
 
 
 def test_scraper_legacy_alias_uses_offline_adapter(monkeypatch):
-    from agent.tools import mytek
+    from specialist.catalog import tunisianet
     calls = []
     def fake(query, **kwargs):
         calls.append((query, kwargs))
         return {"success": True, "data": {"products": []}}
-    monkeypatch.setattr(mytek, "search_tunisianet_products", fake)
+    monkeypatch.setattr(tunisianet, "search_tunisianet_products", fake)
     assert search_mytek_products("laptop")["success"]
     assert calls[0][0] == "laptop"
     assert search_mytek_products(" ")["error"] == "invalid_input"
 
 
 def test_product_criteria_ranges_and_fields_are_validated():
-    criteria = MytekSearchCriteria.model_validate({
+    criteria = SearchCriteria.model_validate({
         "name":"air conditioner", "price_min_tnd":"1000", "price_max_tnd":"2500",
         "color":"white", "weight_max_kg":"35", "characteristics":{"capacity":"12000 BTU"},
     })
     assert criteria.color == "white" and criteria.characteristics["capacity"] == "12000 BTU"
     with pytest.raises(ValidationError):
-        MytekSearchCriteria.model_validate({"price_min_tnd":"2500", "price_max_tnd":"1000"})
+        SearchCriteria.model_validate({"price_min_tnd":"2500", "price_max_tnd":"1000"})
     with pytest.raises(ValidationError):
-        MytekSearchCriteria.model_validate({"unsupported":"x"})
+        SearchCriteria.model_validate({"unsupported":"x"})
 
 
 def test_product_parser_extracts_color_weight_and_structured_characteristics():
@@ -288,7 +289,7 @@ class _ApprovalClient:
 
 def test_sandbox_approval_lookup_calls_receipt_aware_resolver():
     client = _ApprovalClient("approved-row")
-    store = SandboxStore(supabase_client=client, faults_file=ROOT / "sandbox/data/empty-faults.json")
+    store = SandboxStore(supabase_client=client, faults_file=ROOT / "specialist/sandbox/data/empty-faults.json")
     lookup = make_sandbox_approval_lookup(store)
     payload = {"ticket_id": "T-001", "channel": "sandbox_outbox", "message": "Approved"}
     assert lookup("send_support_notification", "operation-123", "run-1", payload) == "approved-row"

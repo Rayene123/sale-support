@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from agent import tools
-from agent.graph import run_operator, run_ticket
+from specialist.support import fixtures as tools
+from specialist.support.graph import run_operator, run_ticket
 
 
 @pytest.fixture(autouse=True)
@@ -277,7 +277,7 @@ def test_support_ticket_uses_person_two_reads_and_privacy_safe_writes():
 
 
 def test_invalid_customer_never_calls_model(monkeypatch):
-    from agent import graph
+    from specialist.support import graph
     def forbidden(*args):
         raise AssertionError("Paid model must not run for invalid input")
     monkeypatch.setattr(graph, "_llm_product_prompt", forbidden)
@@ -328,7 +328,7 @@ def test_partial_retry_preserves_order_and_only_retries_notification():
 
 
 def test_expired_proposal_writes_nothing(monkeypatch):
-    from agent import graph
+    from specialist.support import graph
     calls = []
     paused = select_order_products(start_order(calls), calls)
     monkeypatch.setattr(graph.time, "time", lambda: paused["draft"]["expires_at"] + 1)
@@ -338,7 +338,7 @@ def test_expired_proposal_writes_nothing(monkeypatch):
 
 
 def test_demo_receipts_are_idempotent_and_conflicts_fail():
-    from customer_ui import _customer_executor, _DEMO_RECEIPTS
+    from evaluation.legacy.order_simulation import _customer_executor, _DEMO_RECEIPTS
     _DEMO_RECEIPTS.clear()
     payload = {"operation_id": "test-demo", "approved_by": "run-demo", "total_tnd": 120}
     first = _customer_executor("create_customer_order", payload)
@@ -369,18 +369,18 @@ def test_repeated_partial_failures_stop_within_budget():
 
 
 def test_customer_demo_completes_without_real_services(monkeypatch):
-    import customer_ui
-    from agent import graph
-    customer_ui._DEMO_RECEIPTS.clear()
+    from evaluation.legacy import order_simulation
+    from specialist.support import graph
+    order_simulation._DEMO_RECEIPTS.clear()
     base = fake_commerce_adapter([])
-    monkeypatch.setattr(customer_ui, "search_tunisianet_products",
+    monkeypatch.setattr(order_simulation, "search_tunisianet_products",
                         lambda *a, **k: base("search_tunisianet_products", {}))
-    listed = run_operator(ORDER_REQUEST, tool_executor=customer_ui._customer_executor)
+    listed = run_operator(ORDER_REQUEST, tool_executor=order_simulation._customer_executor)
     selected = run_operator(ORDER_REQUEST, run_id=listed["run_id"],
                             selection={"items": [{"product_id": "MYTEK-001", "quantity": 1}]},
-                            tool_executor=customer_ui._customer_executor)
+                            tool_executor=order_simulation._customer_executor)
     done = run_operator(ORDER_REQUEST, {"decision": "approve", "operation_id": selected["operation_id"]},
-                        run_id=listed["run_id"], tool_executor=customer_ui._customer_executor)
+                        run_id=listed["run_id"], tool_executor=order_simulation._customer_executor)
     assert done["status"] == "completed"
-    assert len(customer_ui._DEMO_RECEIPTS) == 2
-    assert "Simulation completed" in customer_ui._render(done, ORDER_REQUEST)
+    assert len(order_simulation._DEMO_RECEIPTS) == 2
+    assert all(receipt["result"]["simulated"] for receipt in order_simulation._DEMO_RECEIPTS.values())

@@ -4,14 +4,14 @@ import json
 
 import pytest
 
-from eval import score
-from eval.fixtures import (
+from evaluation.legacy import score
+from evaluation.legacy.fixtures import (
     FIXTURES,
     WRITE_TOOLS,
     EvalToolError,
     make_eval_executor,
 )
-from eval.run import (
+from evaluation.legacy.run import (
     DEFAULT_INJECTIONS,
     DEFAULT_SCENARIOS,
     load_injection_cases,
@@ -197,7 +197,7 @@ def test_summary_schema_and_metrics_are_published(scenarios):
 def test_load_jsonl_rejects_invalid_lines(tmp_path):
     bad = tmp_path / "bad.jsonl"
     bad.write_text("{not json}\n", encoding="utf-8")
-    from eval.run import EvaluationError
+    from evaluation.legacy.run import EvaluationError
 
     with pytest.raises(EvaluationError):
         load_scenarios(bad)

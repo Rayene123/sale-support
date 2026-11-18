@@ -2,7 +2,7 @@
 
 Owner: Person 3. Consumer: Person 4 (LangSmith dashboards and final report).
 
-The evaluator produces three files in `eval/results/`:
+The evaluator produces three files in `.specialist/evaluation/support/`:
 
 | File | Format | Purpose |
 | --- | --- | --- |
@@ -18,11 +18,11 @@ Do not treat `summary.md` as the contract. Build dashboards from
 From `project 3`:
 
 ```powershell
-.\.venv\Scripts\python.exe -m eval.run --output eval/results/trajectories.jsonl
+.\.venv\Scripts\python.exe -m evaluation.legacy.run --output .specialist/evaluation/support/trajectories.jsonl
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-`eval.run` prints the pass/fail totals and exits `0` only when every case
+`evaluation.legacy.run` prints the pass/fail totals and exits `0` only when every case
 passes. It exits `1` when any scored case fails; the combined branch runs 45 evaluation cases. Runner exceptions produce a failed case with a `runner_error` type. Successful approval traces include `approved_draft`, the independent snapshot used to verify write contents.
 
 ## Raw trajectory record (`trajectories.jsonl`)
