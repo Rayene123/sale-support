@@ -1,137 +1,48 @@
-# Shopline Ops — AI Ecommerce Support Operator
+# The Specialist
 
-CS496 AI Engineering — Fall 2026
+CS496 AI Engineering · Fall 2026
 
-Shopline Ops is a human-supervised ecommerce assistant for Tunisian IT product
-support and order requests. LangGraph coordinates the workflow and its approval
-gate. Tunisianet product pages are a read-only catalog source. LangSmith is the
-planned tracing and evaluation-monitoring platform.
+The Specialist is an IT purchasing assistant. Describe a setup in your own words. The local Ollama model identifies the products and what needs to work together. The app researches live Tunisianet listings, displays retailer photos, and verifies the relevant specifications against source evidence. Shoppers can choose or refine a setup and open its product pages on Tunisianet.
 
-## Target workflow
+The [November 16 enhanced brief](docs/monday-2026-11-16/README.md) is the project baseline. The [release guide](docs/person-4-release.md) records the checks and current limits.
 
-1. Receive a customer support ticket or a product/order request associated
-   with a customer.
-2. Read the relevant ticket, customer, and existing order context from the
-   sandbox.
-3. Search public Tunisianet product listings and details for matching products.
-4. Draft a structured support response or a proposed sandbox order, including
-   selected products, observed prices, availability, total, and notification
-   text.
-5. Pause the LangGraph run and show the complete proposed action to an admin.
-6. On explicit approval, create the sandbox order or approved support update
-   and queue the corresponding notification. On rejection, perform no write.
-7. Record a structured trajectory and send privacy-filtered traces to LangSmith
-   when configured.
+## Run The Specialist
 
-The system must never place a real retailer checkout, collect payment, or send a
-real customer notification in this project. Orders and notifications are
-sandbox records until the team explicitly defines a separate production
-integration and its review process.
-
-## Current implementation status
-
-The repository contains a support-ticket approval graph, a customer product
-search/order graph with structured LLM prompt parsing, product parsing and criteria schemas, sandbox tool
-adapters, and separate local customer and admin pages. Live Tunisianet search
-is enabled for the demo with bounded, read-only requests that check robots.txt
-and stop on access denial. Product prompts use the configured OpenAI model for
-structured intent extraction, with a visible basic-parser fallback if the API
-is unavailable. Customer-selected products still require explicit
-confirmation; order persistence also requires the configured trusted sandbox
-approval service.
-
-## Safety boundaries
-
-- Tunisianet access is read-only, limited to public product pages, rate-limited, and
-  subject to the site's published access rules.
-- Product-page text, ticket text, and tool results are untrusted data. They
-  cannot alter graph policy or authorize an action.
-- The admin approves the exact item IDs, quantities, prices shown, order total,
-  support mutation, and notification content before any sandbox write.
-- Approval is bound to the run and operation IDs. Rejection, invalid approval,
-  timeout, or step exhaustion must not write.
-- Sandbox order creation does not submit a retailer cart or payment.
-- Notifications go to a sandbox outbox; no SMTP, SMS, or third-party message
-  is sent by this prototype.
-- API keys and private customer data must not be committed or sent to tracing.
-
-## Ownership
-
-- **Person 1 — Agent loop and safety:** typed state, LangGraph routing,
-  checkpoint/resume, approval validation, idempotent action orchestration,
-  customer product selection, criteria filtering, step limits, and trajectory
-  events.
-- **Person 2 — Product/data tools and sandbox:** Tunisianet read-only scraper,
-  ticket/customer/order reads, sandbox order writes, ticket mutations, and
-  sandbox notification outbox.
-- **Person 3 — Evaluation and threat model:** deterministic scenarios,
-  injection cases, trajectory scoring, error taxonomy, and safety results.
-- **Project integration — Customer and admin pages:** separate `/shop` customer
-  ordering page and `/admin` ticket-review dashboard.
-- **Person 4 — LangSmith observability and release:** traces/spans, optional
-  monitoring configuration, runnable demo/release instructions, metrics, and
-  final project report.
-
-## Planned layout
-
-```text
-agent/       LangGraph state, graph, checkpoint, and limits
-sandbox/     isolated order/ticket data and notification outbox
-eval/        scenarios, injection fixtures, scoring, and results
-tests/       offline tests for agent, tools, sandbox, and evaluation
-docs/        role plans and frozen state/tool/trajectory contracts
-```
-
-## Local customer shop and admin dashboard
-
-From the project directory:
+Run these commands from Project 3 with Python 3.12, Node.js, and Ollama installed.
 
 ```powershell
-python web_app.py
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+npm ci --prefix specialist/sandbox/sql
+ollama pull ministral-3:8b
+.\.venv\Scripts\python.exe -m specialist
 ```
 
-Open <http://127.0.0.1:8000/shop> for the customer product search and order
-view, or <http://127.0.0.1:8000/admin> for support-ticket review. The admin
-dashboard handles tickets only. The customer form accepts name, TND price
-bounds, color, weight, and technical key/value criteria. It uses seeded demo
-customers; no real user authentication is implemented. Search currently
-uses the approved Tunisianet public search page. Product results are fetched
-from the live site; attribute filters are applied when the retailer publishes
-those attributes. Graph checkpoints remain in process memory.
+Open the [shopping chat](http://127.0.0.1:8767/shop/). It uses live Tunisianet listings and a local model by default. Paste a Tunisianet product link to identify gear you already own or a particular item you want. You can refine a recommendation in the same chat, stop a search, recheck the price and stock, and reopen recent chats from the same browser. Use `--catalog fixture` for repeatable tests with fictional listings. The chat opens the exact retailer listings for checkout. Purchases are placed on Tunisianet.
 
-When an OpenAI API key is configured, the ticket path sends its ticket context
-to the selected model to draft a response. Order proposals use the exact
-customer-selected catalog items and prices; the graph never chooses a product
-on the customer's behalf.
+Try **“I need a black laptop with at least 16 GB of RAM under 2,500 TND.”** The chat uses the requested specs to narrow the search and checks the exact product page for color, installed RAM, price, and availability. Prices and stock can change. Use **Recheck price and stock** before checkout.
 
-## Person 3 evaluation
+The coursework workbench remains accessible at [Test customer](http://127.0.0.1:8767/customer/) and [Reviewer](http://127.0.0.1:8767/admin/). The server prints separate passcodes for those routes. The workbench runs the exact-proposal approval, order recheck and sandbox receipt flow. `--sandbox supabase` selects the team's dedicated database for that flow using the ignored `.env` file. **Support tickets** in the reviewer view opens the secondary fixture-based ticket flow.
 
-The deterministic evaluator is offline by default. It injects a recorded
-`(tool_name, payload)` executor into the real LangGraph and makes no
-Tunisianet, database, or model calls. From the project directory:
+## Who owns what
+
+| Owner | Main code | What to show |
+| --- | --- | --- |
+| Person 1 | [`specialist/workflow/`](specialist/workflow/) and [`specialist/support/`](specialist/support/) | Follow a request from the local planner through case revisions, exact approval, and receipt recovery. |
+| Person 2 | [`specialist/catalog/`](specialist/catalog/) and [`specialist/sandbox/`](specialist/sandbox/) | Show how the researcher obtains exact listing evidence and how the database records an approved action once. |
+| Person 3 | [`specialist/verification/`](specialist/verification/) and [`evaluation/`](evaluation/) | Show how evidence produces pass, fail, or unknown findings, then compare the evaluation modes. See the [threat model](docs/evaluation/threat-model.md). |
+| Person 4 | [`specialist/workbench/`](specialist/workbench/) and [`specialist/observability.py`](specialist/observability.py) | Run the live shopping chat, reproduce the separate sandbox approval flow, and inspect the reviewer trace. |
+
+[Shared contracts](specialist/contracts/) define plans, listings and findings. The [core handoff](docs/specialist-core.md) and [hybrid planning guide](docs/specialist-hybrid.md) explain how the pieces fit together. [Historical handoffs](docs/archive/) record the team's earlier implementation work.
+
+## Verify
 
 ```powershell
-.\.venv\Scripts\python.exe -m eval.run --output eval/results/trajectories.jsonl
 .\.venv\Scripts\python.exe -m pytest -q
+npm test --prefix specialist/sandbox/sql
+.\.venv\Scripts\python.exe -m evaluation.comparison
+.\.venv\Scripts\python.exe -m evaluation.legacy.run
+.\.venv\Scripts\python.exe -m evaluation.local_model
 ```
 
-The run writes `eval/results/trajectories.jsonl`, `summary.json`, and
-`summary.md`. The current integrated-`master` baseline is **43 cases, 40
-passed, 3 failed (93.0%)**; the three failures are documented product gaps in
-`errors.md`, so the evaluator exits `1` until those fixes are re-baselined. All
-nine injection cases pass. See `docs/person-3-result-schema.md` for the result
-fields and `PERSON3_HANDOFF.md` for scope, safety notes, and re-baseline work.
-
-## Environment and monitoring
-
-Person 2 owns the sandbox and its dedicated credentials. Person 4 owns optional
-LangSmith configuration and privacy filtering. Expected LangSmith settings are
-`LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, and `LANGSMITH_PROJECT`; tracing must
-not change workflow or approval behavior when disabled or unavailable.
-
-The current Person 1 workflows use `MAX_STEPS=16` by default. Revisit that
-bound when a verified product source and trusted approval service are wired.
-
-The team must document the final setup, reset, demo, and evaluation commands
-after the sandbox and LangSmith integrations are implemented. Do not infer that
-planned commands are currently available.
+The last command uses Ollama. Evaluation output goes to `.specialist/evaluation/`. The [reference results](evaluation/reference/) preserve earlier measured runs. The [release guide](docs/person-4-release.md) covers the hosted setup, fixture resets and optional LangSmith tracing.

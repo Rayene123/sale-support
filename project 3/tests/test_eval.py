@@ -4,14 +4,14 @@ import json
 
 import pytest
 
-from eval import score
-from eval.fixtures import (
+from evaluation.legacy import score
+from evaluation.legacy.fixtures import (
     FIXTURES,
     WRITE_TOOLS,
     EvalToolError,
     make_eval_executor,
 )
-from eval.run import (
+from evaluation.legacy.run import (
     DEFAULT_INJECTIONS,
     DEFAULT_SCENARIOS,
     load_injection_cases,
@@ -173,14 +173,13 @@ def test_natural_language_scenario_normalizes_before_resume(scenarios):
     assert score.score_case(record)["passed"] is True
 
 
-def test_known_gaps_are_detected_as_safety_failures(scenarios):
+def test_unsafe_catalog_and_budget_paths_stop_before_writes(scenarios):
     for case_id in ("P3-007", "P3-008", "P3-010"):
         case = next(item for item in scenarios if item["id"] == case_id)
         record = run_case(case, kind="scenario")
         scored = score.score_case(record)
-        assert record["known_gap"]
-        assert scored["passed"] is False
-        assert scored["dimensions"]["approval_safety"] is False
+        assert scored["passed"], scored["failures"]
+        assert not any(call["tool"] in WRITE_TOOLS for call in record["tool_calls"])
 
 
 def test_summary_schema_and_metrics_are_published(scenarios):
@@ -198,7 +197,7 @@ def test_summary_schema_and_metrics_are_published(scenarios):
 def test_load_jsonl_rejects_invalid_lines(tmp_path):
     bad = tmp_path / "bad.jsonl"
     bad.write_text("{not json}\n", encoding="utf-8")
-    from eval.run import EvaluationError
+    from evaluation.legacy.run import EvaluationError
 
     with pytest.raises(EvaluationError):
         load_scenarios(bad)
@@ -209,3 +208,48 @@ def test_all_cases_are_json_serializable():
     json.dumps(records)
     assert len(records) == 2
     assert {record["kind"] for record in records} == {"scenario", "injection"}
+
+@pytest.mark.parametrize("change", ["missing_order", "customer", "operation_suffix", "price", "channel", "search_limit"])
+def test_corrupted_passing_trace_is_rejected(change):
+    if change in {"price", "channel", "search_limit"}:
+        case_id = "P3-INJ-007" if change == "search_limit" else "P3-INJ-006"
+        case = next(row for row in load_injection_cases() if row["id"] == case_id)
+        record = run_case(case, kind="injection")
+    else:
+        record = run_case(load_scenarios()[0], kind="scenario")
+    assert score.score_case(record)["passed"]
+    calls = record["tool_calls"]
+    order = next(c for c in calls if c["tool"] == "create_customer_order")
+    if change == "missing_order":
+        calls.remove(order)
+    elif change == "customer":
+        order["payload"]["customer_id"] = "C-009"
+    elif change == "operation_suffix":
+        order["payload"]["operation_id"] += ":arbitrary"
+    elif change == "price":
+        order["payload"]["items"][0]["unit_price_tnd"] = 0.01
+    elif change == "channel":
+        next(c for c in calls if c["tool"] == "send_support_notification")["payload"]["channel"] = "email"
+    else:
+        search = next(c for c in calls if c["tool"] == "search_tunisianet_products")
+        calls.extend([search] * 3)
+    scored = score.score_case(record)
+    assert not scored["passed"] and scored["failures"]
+    assert not all(scored["dimensions"].values())
+
+
+def test_lost_response_replays_original_effect_and_rejects_conflicting_retry():
+    executor, recorder = make_eval_executor("order-write-failure")
+    payload = {"operation_id": "operation-repeat", "customer_id": "C-001"}
+    with pytest.raises(EvalToolError):
+        executor("create_customer_order", payload)
+    saved = recorder.calls[0].result
+    assert executor("create_customer_order", payload) == saved
+    with pytest.raises(EvalToolError, match="operation_conflict"):
+        executor("create_customer_order", dict(payload, customer_id="C-002"))
+    assert len(score._successful_writes({"tool_calls": recorder.to_json()})) == 1
+
+
+def test_every_published_case_meets_its_contract():
+    failures = [s for record in run_all() if not (s := score.score_case(record))["passed"]]
+    assert failures == []

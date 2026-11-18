@@ -5,14 +5,14 @@ from pathlib import Path
 
 import pytest
 
-from sandbox.store import SandboxStore, DatabaseFailure
-from sandbox import reset
+from specialist.sandbox.store import SandboxStore, DatabaseFailure
+from specialist.sandbox import reset
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_seed_fixture_counts_and_required_scenarios():
-    seed = (ROOT / "sandbox/seed.sql").read_text(encoding="utf-8")
+    seed = (ROOT / "specialist/sandbox/seed.sql").read_text(encoding="utf-8")
     customers = seed.split("-- CUSTOMERS", 1)[1].split("-- ORDERS", 1)[0]
     orders = seed.split("-- ORDERS", 1)[1].split("-- TICKETS", 1)[0]
     tickets = seed.split("-- SUPPORT TICKETS", 1)[1]
@@ -24,8 +24,8 @@ def test_seed_fixture_counts_and_required_scenarios():
 
 
 def test_failure_fixtures_are_bounded_and_deterministic(tmp_path):
-    faults = json.loads((ROOT / "sandbox/data/faults.json").read_text(encoding="utf-8"))
-    store = SandboxStore.in_memory({}, faults_file=ROOT / "sandbox/data/faults.json")
+    faults = json.loads((ROOT / "specialist/sandbox/data/faults.json").read_text(encoding="utf-8"))
+    store = SandboxStore.in_memory({}, faults_file=ROOT / "specialist/sandbox/data/faults.json")
     with pytest.raises(DatabaseFailure):
         store._trigger_read_failure("get_ticket", "T-001")
     store._trigger_read_failure("get_ticket", "T-001")
@@ -36,7 +36,7 @@ def test_failure_fixtures_are_bounded_and_deterministic(tmp_path):
 
 
 def test_schema_has_only_sandbox_side_effect_storage():
-    schema = (ROOT / "sandbox/schema.sql").read_text(encoding="utf-8").lower()
+    schema = (ROOT / "specialist/sandbox/schema.sql").read_text(encoding="utf-8").lower()
     assert "email_outbox" in schema
     assert "approval_records" in schema
     assert "create table" in schema
@@ -52,13 +52,13 @@ def test_database_configuration_requires_explicit_sandbox_allowlist(monkeypatch)
 
 
 def test_ordinary_sandbox_operations_do_not_use_network():
-    store = SandboxStore.in_memory({"tickets": []}, faults_file=ROOT / "sandbox/data/empty-faults.json")
+    store = SandboxStore.in_memory({"tickets": []}, faults_file=ROOT / "specialist/sandbox/data/empty-faults.json")
     assert store.mode == "memory"
     assert store.client is None
 
 
 def test_commerce_migration_is_additive_and_service_role_only():
-    migration = (ROOT / "sandbox/migrations/002_approved_commerce_writes.sql").read_text(encoding="utf-8")
+    migration = (ROOT / "specialist/sandbox/migrations/002_approved_commerce_writes.sql").read_text(encoding="utf-8")
     assert "create or replace function public.execute_approved_commerce_write" in migration
     assert "create or replace function public.record_commerce_approval" in migration
     assert "create or replace function public.execute_support_write" not in migration
@@ -87,28 +87,28 @@ class _ResetClient:
     def rpc(self, function): return _ResetRPC(self, function)
 
 
-def test_reset_calls_legacy_fixture_reset_then_commerce_cleanup(monkeypatch, tmp_path, capsys):
+def test_reset_uses_one_atomic_rpc(monkeypatch, tmp_path, capsys):
     client = _ResetClient()
-    monkeypatch.setattr(reset, "ENV_FILE", tmp_path / "no-env-file")
+    monkeypatch.setattr(reset, "load_settings", lambda: None)
     monkeypatch.setenv("SUPABASE_URL", "https://sandbox.invalid")
     monkeypatch.setenv("SUPABASE_SANDBOX_URL", "https://sandbox.invalid")
     monkeypatch.setattr(reset.SandboxStore, "from_env", lambda: SandboxStore(supabase_client=client, faults_file=tmp_path / "no-faults.json"))
     reset.reset_supabase()
-    assert client.calls == ["reset_approved_commerce_state", "reset_sale_support_sandbox"]
+    assert client.calls == ["reset_sale_support_sandbox"]
     assert "Sandbox reset completed successfully" in capsys.readouterr().out
 
 
 def test_reset_refuses_before_fixture_reset_if_migration_rpc_is_missing(monkeypatch, tmp_path):
     class MissingMigrationClient(_ResetClient):
         def rpc(self, function):
-            if function == "reset_approved_commerce_state":
+            if function == "reset_sale_support_sandbox":
                 raise RuntimeError("function is missing")
             return super().rpc(function)
     client = MissingMigrationClient()
-    monkeypatch.setattr(reset, "ENV_FILE", tmp_path / "no-env-file")
+    monkeypatch.setattr(reset, "load_settings", lambda: None)
     monkeypatch.setenv("SUPABASE_URL", "https://sandbox.invalid")
     monkeypatch.setenv("SUPABASE_SANDBOX_URL", "https://sandbox.invalid")
     monkeypatch.setattr(reset.SandboxStore, "from_env", lambda: SandboxStore(supabase_client=client, faults_file=tmp_path / "no-faults.json"))
-    with pytest.raises(RuntimeError, match="Reset stopped before fixture restoration"):
+    with pytest.raises(RuntimeError, match="Sandbox reset failed"):
         reset.reset_supabase()
     assert client.calls == []
