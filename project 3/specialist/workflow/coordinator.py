@@ -29,7 +29,8 @@ class Specialist:
     """Call with authenticated server identities. Does not authenticate users itself."""
 
     def __init__(self, store: CaseStore, researcher: Researcher | None = None, *,
-                 writer=None, step_limit: int = 96, mode: Mode = "adaptive_verifier", planner=None):
+                 writer=None, step_limit: int = 96, mode: Mode = "adaptive_verifier", planner=None,
+                 record_customer_message: bool = False):
         if mode not in MODES or not 1 <= step_limit <= 256:
             raise ValueError("Unsupported mode or step limit")
         self.store = store
@@ -38,11 +39,13 @@ class Specialist:
         self.step_limit = step_limit
         self.mode = mode
         self.planner = planner
+        self.record_customer_message = record_customer_message
 
     @classmethod
-    def with_local_model(cls, store, researcher=None, *, writer=None, step_limit=96):
+    def with_local_model(cls, store, researcher=None, *, writer=None, step_limit=96, record_customer_message=False):
         """Server entry point for free-form purchasing requests."""
-        return cls(store, researcher, writer=writer, step_limit=step_limit, planner=OllamaPlanner.from_env())
+        return cls(store, researcher, writer=writer, step_limit=step_limit, planner=OllamaPlanner.from_env(),
+                   record_customer_message=record_customer_message)
 
     def start(self, customer_id: str, text: str) -> dict:
         validate_identifier(customer_id)
@@ -61,6 +64,8 @@ class Specialist:
         if self.planner:
             case["planner_kind"] = "hybrid"
             self._interpret(case, text)
+        if self.record_customer_message:
+            case["customer_message"] = text.strip()
         self.store.insert(case)
         if case["status"] == "research_pending":
             return self.research(case["case_id"], customer_id)
@@ -89,6 +94,8 @@ class Specialist:
                 advance_revision(case)
                 case.update(requirements=requirements.model_dump(mode="json"), changes=[])
                 self._research(case)
+            if self.record_customer_message:
+                case["customer_message"] = text.strip()
             return case
 
     def _interpret(self, case, text, previous=None):

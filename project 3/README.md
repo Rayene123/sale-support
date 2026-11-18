@@ -18,7 +18,7 @@ ollama pull ministral-3:8b
 .\.venv\Scripts\python.exe -m specialist
 ```
 
-Open the [shopping page](http://127.0.0.1:8767/shop/). The default uses live Tunisianet listings and a local model. Use `--catalog fixture` for repeatable tests with fictional listings. Shopping choices are saved locally for the browser session, and purchases take place on the retailer’s website.
+Open the [shopping chat](http://127.0.0.1:8767/shop/). It uses live Tunisianet listings and a local model by default. The chat keeps the request and follow-ups together, showing a short recommendation with product photos, prices and retailer links when a match is available. Use `--catalog fixture` for repeatable tests with fictional listings. Purchases take place on the retailer’s website.
 
 The coursework workbench remains accessible at [Test customer](http://127.0.0.1:8767/customer/) and [Reviewer](http://127.0.0.1:8767/admin/). The server prints separate passcodes for those routes. The workbench runs the exact-proposal approval, order recheck and sandbox receipt flow. `--sandbox supabase` selects the team's dedicated database for that flow using the ignored `.env` file. **Support tickets** in the reviewer view opens the secondary fixture-based ticket flow.
 

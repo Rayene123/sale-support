@@ -13,7 +13,7 @@ from .shop_view import render_shop
 CASE_ROUTE = re.compile(r"/shop/([a-f0-9-]{36})/?")
 ASSETS = {"site.css": "text/css; charset=utf-8", "site.js": "text/javascript; charset=utf-8"}
 CSP = (
-    "default-src 'none'; style-src 'self'; script-src 'self'; "
+    "default-src 'none'; style-src 'self'; script-src 'self'; connect-src 'self'; "
     "img-src https://www.tunisianet.com.tn https://tunisianet.com.tn; "
     "form-action 'self'; frame-ancestors 'none'; base-uri 'none'"
 )

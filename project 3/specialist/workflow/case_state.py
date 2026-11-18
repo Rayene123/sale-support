@@ -23,7 +23,8 @@ def can_revise(case):
 def advance_revision(case):
     if case["revision"] >= MAX_REVISIONS:
         raise CaseConflict("Case reached its revision limit")
-    case["history"].append({key: deepcopy(case[key]) for key in
-                            ("revision", "run_id", "requirements", "setup", "proposal", "approval", "status") if key in case})
+    fields = ("revision", "run_id", "requirements", "setup", "proposal", "approval", "status",
+              "customer_message", "questions")
+    case["history"].append({key: deepcopy(case[key]) for key in fields if key in case})
     case.update(revision=case["revision"] + 1, run_id=str(uuid4()), status="research_pending",
                 proposal=None, approval=None, findings=[], alternatives=[], candidate=None)

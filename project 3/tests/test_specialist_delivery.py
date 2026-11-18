@@ -41,7 +41,7 @@ def serve(tmp_path, *, researcher=None, writer=None, shop=False):
     store = CaseStore(tmp_path / "cases.db")
     catalog = (researcher or Catalog()).researcher()
     service = Specialist(store, catalog, writer=writer)
-    shop_service = Specialist(CaseStore(tmp_path / "shopping.db"), catalog) if shop else None
+    shop_service = Specialist(CaseStore(tmp_path / "shopping.db"), catalog, record_customer_message=True) if shop else None
     observer = Observability(tmp_path / "metrics.jsonl")
     with Workbench(0, service, observer, customer="C-001", reviewer="R-001",
                    passwords={"customer": "customer-test", "admin": "reviewer-test"},
@@ -113,18 +113,28 @@ def test_storefront_keeps_shopper_choices_separate_from_sandbox_approval(tmp_pat
     with serve(tmp_path, shop=True) as (base, service), requests.Session() as shopper, requests.Session() as stranger:
         shopper.trust_env = stranger.trust_env = False
         page = shopper.get(base, timeout=5)
-        assert page.url.endswith("/shop/") and "Find the gear" in page.text
+        assert page.url.endswith("/shop/") and "What are you shopping for?" in page.text
         assert shopper.post(page.url, data={"action": "start", "request": "Find a laptop"}, timeout=5).status_code == 403
         result = submit(shopper, page.url, "start", request="Find a laptop and monitor under 3000 TND")
-        assert result.status_code == 200 and "Your recommendation." in result.text
-        assert "2,630 TND" in result.text and "Connection verified" in result.text
+        assert result.status_code == 200 and "Here’s what I’d get." in result.text
+        assert "2,630 TND" in result.text and "Find a laptop and monitor under 3000 TND" in result.text
+        assert "What was verified" not in result.text and "Search activity" not in result.text
         assert stranger.get(result.url, timeout=5).status_code == 404
         assert service.store.recent() == []
         fields = dict(re.findall(r'name="(proposal_hash|revision)" value="([^"]+)"', result.text))
         assert submit(shopper, result.url, "select", **{**fields, "revision": "0"}).status_code == 409
         choice = submit(shopper, result.url, "select", **fields)
-        assert choice.status_code == 200 and "Your selected setup." in choice.text
+        assert choice.status_code == 200 and "Kept for this chat" in choice.text
         assert service.store.recent() == []
+        followup = submit(shopper, result.url, "revise", request="Make the budget 2900 TND", revision="1")
+        assert followup.status_code == 200
+        assert "Find a laptop and monitor under 3000 TND" in followup.text
+        assert "Make the budget 2900 TND" in followup.text
+        assert "Kept for this chat" not in followup.text
+
+        miss = submit(shopper, page.url, "start", request="Find a laptop and monitor under 50 TND")
+        assert miss.status_code == 200 and "I couldn’t find a setup I’d recommend yet." in miss.text
+        assert "Unverified" not in miss.text and 'class="product"' not in miss.text
 
 
 def test_unconfirmed_local_reset_preserves_existing_cases(tmp_path):

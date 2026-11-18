@@ -64,7 +64,7 @@ def main():
         researcher = DemoCatalog().researcher() if fixture else None
         factory = Specialist.with_local_model if args.planner == "local" else Specialist
         service = factory(store, researcher, writer=SandboxWriter(sandbox))
-        shop = factory(shopping_cases, researcher)
+        shop = factory(shopping_cases, researcher, record_customer_message=True)
         try:
             exporter = langsmith_exporter()
         except Exception:
