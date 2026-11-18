@@ -5,6 +5,7 @@ from http.cookies import CookieError, SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import re
 from secrets import token_bytes, token_urlsafe
+from threading import Lock
 from time import time
 from urllib.parse import parse_qs, urlsplit
 
@@ -18,6 +19,7 @@ from .views import case_list, e, login, page, render_case
 
 ROUTE = re.compile(r"/(customer|admin)(?:/([0-9a-f-]{36}|login|logout|support))?/?")
 COOKIE_AGE = 8 * 60 * 60
+SHOP_COOKIE_AGE = 30 * 24 * 60 * 60
 
 
 class Workbench(ThreadingHTTPServer):
@@ -29,10 +31,14 @@ class Workbench(ThreadingHTTPServer):
         self.fixture, self.sandbox = fixture, sandbox
         self.shop_service = shop_service
         self.session_key = token_bytes(32)
+        self.shop_key = shop_service.store.session_signing_key() if shop_service is not None else self.session_key
+        self.shop_requests = {}
+        self.shop_request_lock = Lock()
         super().__init__(("127.0.0.1", port), Handler)
 
     def sign(self, role, data):
-        return hmac_new(self.session_key, f"{role}:{data}".encode(), sha256).hexdigest()
+        secret = self.shop_key if role == "shop" else self.session_key
+        return hmac_new(secret, f"{role}:{data}".encode(), sha256).hexdigest()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -171,8 +177,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def issue_session(self, role):
         csrf = token_urlsafe(24)
-        data = f"{int(time()) + COOKIE_AGE}.{csrf}"
-        return csrf, self.cookie(role, data + "." + self.server.sign(role, data))
+        age = SHOP_COOKIE_AGE if role == "shop" else COOKIE_AGE
+        data = f"{int(time()) + age}.{csrf}"
+        return csrf, self.cookie(role, data + "." + self.server.sign(role, data), age)
 
     def redirect(self, location, *, cookie=None):
         self.send_response(303)

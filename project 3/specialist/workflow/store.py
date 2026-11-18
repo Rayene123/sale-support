@@ -3,6 +3,7 @@ from contextlib import contextmanager
 import json
 import sqlite3
 from pathlib import Path
+from secrets import token_bytes
 
 
 class CaseStore:
@@ -25,6 +26,20 @@ class CaseStore:
         with self._connect() as db:
             db.execute("INSERT INTO specialist_cases VALUES (?, ?, ?)",
                        (state["case_id"], state["customer_id"], json.dumps(state)))
+
+    def session_signing_key(self):
+        with self._connect() as db:
+            db.execute("CREATE TABLE IF NOT EXISTS shop_identity (id INTEGER PRIMARY KEY, key BLOB NOT NULL)")
+            db.execute("INSERT OR IGNORE INTO shop_identity VALUES (1, ?)", (token_bytes(32),))
+            return db.execute("SELECT key FROM shop_identity WHERE id=1").fetchone()[0]
+
+    def recent_chats(self, owner):
+        with self._connect() as db:
+            return db.execute("""
+                SELECT id, coalesce(json_extract(state, '$.history[0].customer_message'),
+                                    json_extract(state, '$.customer_message'), 'Shopping chat')
+                FROM specialist_cases WHERE owner=? ORDER BY rowid DESC LIMIT 12
+            """, (owner,)).fetchall()
 
     def get(self, case_id, customer_id):
         with self._connect() as db:

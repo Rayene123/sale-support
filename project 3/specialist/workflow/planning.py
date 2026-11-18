@@ -3,8 +3,8 @@
 from decimal import Decimal
 import re
 
-from specialist.contracts.setup import KIND_NAMES, SetupPlan
-from specialist.contracts.text import fold_text
+from specialist.contracts.setup import KIND_NAMES, SetupPlan, Spec
+from specialist.contracts.text import COLORS, COLOR_FIELDS, color_family, fold_text
 
 
 _DISPLAY_MODES = {"1920x1080": r"1920\s*[x×]\s*1080|\b1080p\b|\bfull hd\b",
@@ -21,15 +21,38 @@ def _mentioned(text, label):
     return f" {normalized(label)} " in f" {normalized(text)} "
 
 
+def _mentions_color(text, color):
+    return any(_mentioned(text, alias) for alias in (color, *COLORS[color]))
+
+
 def ground_plan(plan: SetupPlan, text: str, previous: SetupPlan | None) -> SetupPlan:
     """Keep supported connection checks independent of unstated model preferences."""
     prior_items = {item.id: item for item in previous.items} if previous else {}
     prior_links = {(link.source, link.target, link.kind): link for link in previous.links} if previous else {}
+    colors = [color for color in COLORS if _mentions_color(text, color)]
+    color_is_required = len(colors) == 1 and not re.search(
+        r"\b(?:prefer|preferably|ideally|optional|if possible)\b", text, re.I
+    )
+    if color_is_required:
+        aliases = "|".join((colors[0], *COLORS[colors[0]]))
+        color_is_required = not re.search(
+            rf"\b(?:not|no|without|avoid|except|sauf|sans)\s+(?:{aliases})\b", fold_text(text)
+        )
     items = []
     for item in plan.items:
         prior = prior_items.get(item.id)
-        specs = [spec for spec in item.specs if (prior and spec in prior.specs) or _mentioned(text, spec.value)
-                 or (spec.value.casefold() in {"yes", "oui", "true"} and _mentioned(text, spec.field))]
+        specs = []
+        for spec in item.specs:
+            color = color_family(spec.value) if fold_text(spec.field) in COLOR_FIELDS else None
+            if color:
+                if (not colors and prior and spec in prior.specs) or (color_is_required and color in colors):
+                    specs.append(Spec(field="color", value=color, comparison="equals"))
+            elif (prior and spec in prior.specs) or _mentioned(text, spec.value) or (
+                    spec.value.casefold() in {"yes", "oui", "true"} and _mentioned(text, spec.field)):
+                specs.append(spec)
+        if len(plan.items) == 1 and not item.owned and color_is_required and len(specs) < 8:
+            if not any(fold_text(spec.field) in COLOR_FIELDS for spec in specs):
+                specs.append(Spec(field="color", value=colors[0], comparison="equals"))
         items.append(item.model_copy(update={"specs": specs}))
     links = []
     for link in plan.links:
@@ -64,7 +87,7 @@ def read_plan_findings(plan, text, previous=None):
     problems = []
     expected = {name for name, expression in KIND_NAMES.items()
                 if re.search(rf"\b(?:{expression})(?:s)?\b", text, re.I)
-                and not re.search(rf"\b(?:without|remove|drop|sans)\s+(?:the\s+)?(?:{expression})(?:s)?\b", text, re.I)}
+                and not re.search(rf"\b(?:without|remove|drop|sans|no)\s+(?:the\s+)?(?:{expression})(?:s)?\b", text, re.I)}
     if expected - {item.kind for item in plan.items}:
         problems.append("I may have missed an item. Please confirm the items and quantities for this setup.")
     words = {"two": 2, "three": 3, "four": 4, "deux": 2, "trois": 3, "quatre": 4}

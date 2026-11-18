@@ -11,6 +11,7 @@ from specialist.contracts.setup import SetupPlan
 from specialist.workflow.planning import ground_plan, read_plan_findings
 from specialist.workflow.store import CaseStore
 from specialist.catalog.fixtures import Catalog, product
+from specialist.workbench.shop_view import render_shop
 
 
 PROMPT = "Find a desktop, two keyboards, and a mouse under 1,500 TND."
@@ -123,6 +124,77 @@ def test_three_types_and_four_units_are_verified_and_priced(runner):
     assert payload["total_tnd"] == "1315.00"
     assert len([f for f in case["findings"] if "->" in f["code"] and f["verdict"] == "pass"]) == 2
     assert case["approval"] is None
+
+
+def test_shopper_single_laptop_drops_model_added_monitor_and_keeps_specs(runner):
+    plan = {
+        "budget_tnd": "3000", "items": [line("pc", "laptop", "pc portable", specs=[
+            {"field": "RAM", "value": "16 GB", "comparison": "at_least"},
+        ]), line("screen", "monitor", "écran pc")],
+        "links": [{"source": "pc", "target": "screen", "kind": "video"}],
+    }
+    service, source, model = runner(plan, Catalog(), record_customer_message=True)
+    case = service.start("C-001", "Find me a laptop with 16 GB RAM under 3000 TND.")
+    assert case["status"] == "awaiting_approval"
+    assert list(case["proposal"]["evidence"]) == ["pc"]
+    assert case["proposal"]["evidence"]["pc"]["product_id"] == "L1"
+    revised = service.revise(case["case_id"], "C-001", "Make the budget 2000 TND", expected_revision=1)
+    assert revised["proposal"]["evidence"]["pc"]["product_id"] == "L1"
+    assert len(model.prompts) == 1
+    assert not any("M1" in call for call in source.lookups)
+
+
+def test_shopper_uses_budget_color_and_minimum_ram_to_find_and_verify_laptop(runner):
+    class Laptops(Sources):
+        def researcher(self):
+            return Researcher(self.search, self.inspect, self.search)
+
+    catalog = Laptops()
+    catalog.items["laptops"] = [
+        product("A1", "Laptop A / 16 Go / Bleu", "1400", {"Mémoire": "16 Go", "Couleur": "Bleu"}),
+        product("A2", "Laptop B / 8 Go / Noir", "1500", {"Mémoire": "8 Go", "Couleur": "Noir"}),
+        product("A3", "Laptop C / 16 Go / Noir", "1690", {"Mémoire": "8 Go", "Couleur": "Noir"}),
+        product("A4", "Laptop D / 24 Go DDR5 / Noir", "1725", {"Mémoire": "24 Go", "Couleur": "Noir"}),
+    ]
+    catalog.queries["pc portable 16 Go noir"] = "laptops"
+    plan = {"budget_tnd": 2500, "items": [line("pc", "laptop", "pc portable noir 16 Go RAM minimum", specs=[
+        {"field": "RAM", "value": "16 GB", "comparison": "at_least"},
+    ])]}
+    service, source, _ = runner(plan, catalog, record_customer_message=True)
+    case = service.start("C-001", "hi , i need laptop , black , 16 gb minimun and under 2500 dt .")
+    assert source.calls == ["pc portable 16 Go noir", "A3", "A4"]
+    assert case["proposal"]["evidence"]["pc"]["product_id"] == "A4"
+    assert all(fact["verdict"] == "pass" for fact in case["findings"])
+    assert "It’s black, has 24 GB of RAM" in render_shop("test", fixture=True, case=case)
+
+
+def test_shopper_explains_when_the_only_color_match_has_insufficient_ram(runner):
+    catalog = Catalog()
+    catalog.rows["L0"]["characteristics"]["Couleur"] = "Noir"
+    catalog.rows["L1"]["characteristics"]["Couleur"] = "Bleu"
+    catalog.rows["L2"]["price_tnd"] = "2600"
+    plan = {"budget_tnd": 2500, "items": [line("pc", "laptop", "pc portable", specs=[
+        {"field": "RAM", "value": "16 GB", "comparison": "at_least"},
+    ])]}
+    service, _, _ = runner(plan, catalog, record_customer_message=True)
+    case = service.start("C-001", "Find a black laptop with 16 GB RAM or more under 2500 TND.")
+    assert case["proposal"] is None
+    assert "had only 8 GB of RAM" in render_shop("test", fixture=True, case=case)
+
+
+def test_shopper_uses_exact_owned_retailer_link_without_charging_for_it(runner):
+    source = Sources()
+    desktop = source.items["pc"][0]
+    desktop.update(product_id="99501", source_url="https://www.tunisianet.com.tn/99501-desktop-a.html")
+    service, _, model = runner(expected_plan(), source, record_customer_message=True)
+    case = service.start("C-001", f'I already own {desktop["source_url"]}?ref=example. ' + PROMPT)
+    assert case["status"] == "awaiting_approval"
+    assert source.calls.count("99501") == 1
+    assert "ref=example" not in str(model.prompts)
+    assert case["proposal"]["evidence"]["pc"]["product_id"] == "99501"
+    order = case["proposal"]["actions"][0]["payload"]
+    assert order["total_tnd"] == "115.00"
+    assert [row["product_id"] for row in order["items"]] == ["K1", "M1"]
 
 
 def test_shared_port_is_not_counted_twice(runner):

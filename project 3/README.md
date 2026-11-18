@@ -18,7 +18,9 @@ ollama pull ministral-3:8b
 .\.venv\Scripts\python.exe -m specialist
 ```
 
-Open the [shopping chat](http://127.0.0.1:8767/shop/). It uses live Tunisianet listings and a local model by default. The chat keeps the request and follow-ups together, showing a short recommendation with product photos, prices and retailer links when a match is available. Use `--catalog fixture` for repeatable tests with fictional listings. Purchases take place on the retailer’s website.
+Open the [shopping chat](http://127.0.0.1:8767/shop/). It uses live Tunisianet listings and a local model by default. Paste a Tunisianet product link to identify gear you already own or a particular item you want. You can refine a recommendation in the same chat, stop a search, recheck the price and stock, and reopen recent chats from the same browser. Use `--catalog fixture` for repeatable tests with fictional listings. The chat opens the exact retailer listings for checkout. Purchases are placed on Tunisianet.
+
+Try **“I need a black laptop with at least 16 GB of RAM under 2,500 TND.”** The chat uses the requested specs to narrow the search and checks the exact product page for color, installed RAM, price, and availability. Prices and stock can change. Use **Recheck price and stock** before checkout.
 
 The coursework workbench remains accessible at [Test customer](http://127.0.0.1:8767/customer/) and [Reviewer](http://127.0.0.1:8767/admin/). The server prints separate passcodes for those routes. The workbench runs the exact-proposal approval, order recheck and sandbox receipt flow. `--sandbox supabase` selects the team's dedicated database for that flow using the ignored `.env` file. **Support tickets** in the reviewer view opens the secondary fixture-based ticket flow.
 
@@ -29,7 +31,7 @@ The coursework workbench remains accessible at [Test customer](http://127.0.0.1:
 | Person 1 | [`specialist/workflow/`](specialist/workflow/) and [`specialist/support/`](specialist/support/) | Follow a request from the local planner through case revisions, exact approval, and receipt recovery. |
 | Person 2 | [`specialist/catalog/`](specialist/catalog/) and [`specialist/sandbox/`](specialist/sandbox/) | Show how the researcher obtains exact listing evidence and how the database records an approved action once. |
 | Person 3 | [`specialist/verification/`](specialist/verification/) and [`evaluation/`](evaluation/) | Show how evidence produces pass, fail, or unknown findings, then compare the evaluation modes. See the [threat model](docs/evaluation/threat-model.md). |
-| Person 4 | [`specialist/workbench/`](specialist/workbench/) and [`specialist/observability.py`](specialist/observability.py) | Run the customer and reviewer flows, inspect the trace, and reproduce the release checks. |
+| Person 4 | [`specialist/workbench/`](specialist/workbench/) and [`specialist/observability.py`](specialist/observability.py) | Run the live shopping chat, reproduce the separate sandbox approval flow, and inspect the reviewer trace. |
 
 [Shared contracts](specialist/contracts/) define plans, listings and findings. The [core handoff](docs/specialist-core.md) and [hybrid planning guide](docs/specialist-hybrid.md) explain how the pieces fit together. [Historical handoffs](docs/archive/) record the team's earlier implementation work.
 

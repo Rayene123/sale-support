@@ -9,6 +9,8 @@ from specialist.observability import capture_event
 from specialist.verification.display import verify_bundle
 from specialist.verification.setup import verify_setup
 
+from .cancellation import check_cancelled
+
 
 EVIDENCE_MAX_AGE_S = 15 * 60
 MAX_VERIFICATIONS = 18
@@ -54,6 +56,7 @@ def record_event(case, actor, name, detail, *, started=None):
 
 
 def charge_step(case):
+    check_cancelled()
     if case["steps"] >= case["step_limit"]:
         raise BudgetExhausted
     case["steps"] += 1
@@ -66,6 +69,7 @@ def call_tool(case, actor, action, info, invoke):
         result = invoke()
     except Exception:
         result = {"success": False, "error": "tool_call_failed"}
+    check_cancelled()
     if not isinstance(result, dict):
         result = {"success": False, "error": "invalid_tool_response"}
     error = result.get("error") if result.get("success") is not True else None

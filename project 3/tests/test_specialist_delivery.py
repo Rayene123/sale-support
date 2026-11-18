@@ -8,6 +8,7 @@ import shutil
 import socket
 from threading import Thread
 from types import SimpleNamespace
+from uuid import uuid4
 
 import pytest
 import requests
@@ -135,6 +136,45 @@ def test_storefront_keeps_shopper_choices_separate_from_sandbox_approval(tmp_pat
         miss = submit(shopper, page.url, "start", request="Find a laptop and monitor under 50 TND")
         assert miss.status_code == 200 and "I couldn’t find a setup I’d recommend yet." in miss.text
         assert "Unverified" not in miss.text and 'class="product"' not in miss.text
+
+
+def test_shop_rechecks_prices_and_hands_checkout_to_the_retailer(tmp_path, loopback):
+    catalog = Catalog()
+    with serve(tmp_path, researcher=catalog, shop=True) as (base, service), requests.Session() as shopper:
+        shopper.trust_env = False
+        result = submit(shopper, base + "/shop/", "start", request="Find a laptop and monitor under 3000 TND")
+        fields = dict(re.findall(r'name="(proposal_hash|revision)" value="([^"]+)"', result.text))
+        catalog.rows["L1"]["price_tnd"] = "1850.00"
+        updated = submit(shopper, result.url, "refresh", **fields)
+        assert updated.status_code == 200
+        assert "2,680 TND" in updated.text and "The price went up by 50 TND." in updated.text
+        order = submit(shopper, result.url, "revise", request="Order this", revision="2")
+        assert order.status_code == 200
+        assert "Open the listings below to place your order on Tunisianet." in order.text
+        assert "2,680 TND" in order.text and service.store.recent() == []
+
+
+def test_shop_recovers_recent_chats_after_restart_and_drops_stopped_search(tmp_path, loopback):
+    with requests.Session() as shopper, requests.Session() as stranger:
+        shopper.trust_env = stranger.trust_env = False
+        with serve(tmp_path, shop=True) as (base, _):
+            home = base + "/shop/"
+            request = "Find a laptop and monitor under 3000 TND"
+            operation = str(uuid4())
+            token = csrf(shopper.get(home, timeout=5).text)
+            stop = shopper.post(home + "stop/", data={"csrf": token, "operation": operation}, timeout=5)
+            assert stop.status_code == 204
+            cancelled = submit(shopper, home, "start", request=request, operation=operation)
+            assert cancelled.status_code == 409 and "Search stopped." in cancelled.text
+            assert "Recent chats" not in shopper.get(home, timeout=5).text
+            result = submit(shopper, home, "start", request=request)
+            assert result.status_code == 200
+            case_path = result.url.removeprefix(base)
+        with serve(tmp_path, shop=True) as (base, _):
+            assert case_path in shopper.get(base + "/shop/", timeout=5).text
+            assert shopper.get(base + case_path, timeout=5).status_code == 200
+            assert case_path not in stranger.get(base + "/shop/", timeout=5).text
+            assert stranger.get(base + case_path, timeout=5).status_code == 404
 
 
 def test_unconfirmed_local_reset_preserves_existing_cases(tmp_path):

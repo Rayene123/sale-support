@@ -7,19 +7,20 @@ import re
 
 from specialist.contracts.purchasing import Finding, Listing
 from specialist.contracts.setup import Item, Link, SetupPlan, setup_total
-from specialist.contracts.text import fold_text
+from specialist.contracts.text import COLOR_FIELDS, RAM_FIELDS, color_family, fold_text
 from .display import _display_mode, _evidence, _ports
 
 
 def _aliases(field: str) -> set[str]:
     label = fold_text(field).replace("_", " ").strip()
     groups = (
-        {"ram", "ram gb", "memory", "memoire", "memoire vive", "installed ram"},
+        RAM_FIELDS,
         {"storage", "storage gb", "ssd", "disque dur", "stockage"},
         {"monitor inches", "display size", "screen size", "taille ecran", "diagonale"},
         {"resolution", "native resolution", "listing resolution", "resolution du panneau"},
         {"refresh hz", "refresh rate", "taux de rafraichissement"},
         {"stock quantity", "quantite en stock", "available units"},
+        COLOR_FIELDS,
     )
     return next((group for group in groups if label in group), {label})
 
@@ -53,8 +54,13 @@ def _spec(line: Item, listing: Listing, constraint) -> Finding:
     values = _values(listing, constraint.field)
     values = [(label, value) for label, value in values
               if not re.search(r"\b(?:maximum|supported|up to|jusqu|extensible|upgrade|optional)\b", fold_text(value))]
-    normalized = {_normalized(value) for _, value in values}
-    expected = _normalized(constraint.value)
+    def normalize(value):
+        if fold_text(constraint.field) in COLOR_FIELDS:
+            return color_family(value) or _normalized(value)
+        return _normalized(value)
+
+    normalized = {normalize(value) for _, value in values}
+    expected = normalize(constraint.value)
     valid = None
     if len(normalized) == 1:
         actual = next(iter(normalized))

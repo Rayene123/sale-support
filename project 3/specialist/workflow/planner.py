@@ -17,6 +17,9 @@ DEFAULT_MODEL = "ministral-3:8b"
 
 SYSTEM = """Plan an IT setup from the customer's request. Return the setup JSON only.
 Preserve every requested item, exact quantity, budget in TND, and hard constraint.
+Do not add optional accessories or optional companions. A request for a new laptop by itself is one laptop with no links.
+Treat a product described as already owned as an owned reference, and retain it across follow-ups.
+Ask one question only when an essential detail is missing. Put soft preferences in queries rather than hard specs.
 Mark an item owned only when the customer explicitly says they already own it.
 Ask for an owned item's exact model if missing. Keep stable IDs
 and prior requirements on follow-ups unless asked to change them. Use one or two short

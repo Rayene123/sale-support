@@ -48,7 +48,7 @@ def execute_next(store, researcher, writer, case_id, customer_id, *, expected_re
                 case["status"] = "timed_out"
                 record_event(case, "coordinator", "expire_approval", {"receipts_preserved": len(case["receipts"])})
                 return case
-            if action["action"] == ORDER and not _refresh(case, researcher):
+            if action["action"] == ORDER and not refresh_proposal(case, researcher):
                 return case
             # Commit the intent before an external write, so a restarted process
             # checks for a receipt even if the RPC committed after our last save.
@@ -93,7 +93,7 @@ def _record(case, action, receipt, *, started=None):
     record_event(case, "sandbox", "receipt_confirmed", {"action": action["action"], "operation_id": operation}, started=started)
 
 
-def _refresh(case, researcher):
+def refresh_proposal(case, researcher):
     old = load_listings(case["proposal"]["evidence"])
     lines = {line.id: line for line in SetupPlan.model_validate(case["setup"]).items} if case.get("setup") else {}
     fresh = {}
@@ -132,5 +132,10 @@ def _refresh(case, researcher):
             if role in fresh:
                 kept.append(fresh[role].model_dump(mode="json"))
             case["evidence"][role] = kept
+            pins = case.get("shopping_pins", {})
+            if role in pins and pins[role]["product_id"] == item.product_id:
+                pins[role] = fresh[role].model_dump(mode="json") if role in fresh else {
+                    **pins[role], "fetched_at": "",
+                }
         return False
     return True

@@ -1,9 +1,23 @@
 # The Specialist release and test guide
 
 The [November 16 team brief](monday-2026-11-16/README.md) is the acceptance
-baseline. The Phase 4 workbench exercises the purchasing backend with a
-minimal interface. Reviewers can open **Support tickets** in the same workbench
-for the secondary fixture-based ticket flow.
+baseline. Use the customer-facing shopping chat for live recommendations and the
+coursework workbench for sandbox approvals and receipts. Reviewers can open
+**Support tickets** in the workbench for the secondary fixture-based ticket flow.
+
+## Try the shopping chat
+
+1. Start `python -m specialist` and open the [shopping chat](http://127.0.0.1:8767/shop/).
+2. Ask for a black laptop with at least 16 GB of RAM under 2,500 TND. Confirm
+   that the answer lists the price, matching specs, a product photo when the
+   retailer provides one, and a link to the exact product.
+3. Refine the request in the same chat. For example, say “Make the budget
+   2,000 TND.” Reopen the conversation from **Recent chats** in the same browser.
+4. Use **Recheck price and stock**. If the offer changes, the chat re-evaluates
+   the recommendation against the request. **Stop** cancels the remaining
+   search work once the current catalog or model call returns.
+5. Say “Order this.” The chat points to the exact Tunisianet listing for
+   checkout. The shopper completes any purchase on the retailer’s site.
 
 ## Setup and modes
 
@@ -88,9 +102,20 @@ export. Network export runs on a bounded background queue.
 - Record the offline comparison and the local model benchmark with failures.
 - Verify the hosted sandbox using the approval and receipt flow below.
 - Confirm a trace arrives in the team's LangSmith project when configured.
-- Keep the workbench as the test interface for the later frontend.
+- Verify the live chat clears the composer on send, preserves requested specs,
+  and hands checkout to the exact retailer listing.
 
 ## Verification report · November 18
+
+The latest shopping chat checks passed **169 Python tests**. The local SQL
+suite passed **12 checks**. Chrome smoke testing covered an actual Tunisianet
+recommendation, enlarging the product photo, the mobile layout, clearing the
+composer, reopening recent chats, rechecking price and stock, stopping a search,
+and checkout handoff. Replaying the black laptop request returned the
+[HP 15-fd0418nk](https://www.tunisianet.com.tn/pc-portable-tunisie/99826-pc-portable-hp-laptop-15-fd0418nk-n100-16-go-256-go-ssd-windows-11-noir.html)
+with 16 GB of RAM at 1,725 TND, in stock at the time of the check.
+
+The results below record the earlier refactor and coursework acceptance runs.
 
 | Check | Observed result |
 | --- | --- |
