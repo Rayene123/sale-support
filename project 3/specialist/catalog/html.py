@@ -10,6 +10,7 @@ from urllib.parse import urljoin, urlparse
 
 from pydantic import Field
 
+from specialist.contracts.purchasing import catalog_image_url
 from specialist.contracts.validation import StrictSchema
 
 
@@ -34,6 +35,7 @@ class ProductResult(StrictSchema):
     color: str | None = Field(default=None, max_length=80)
     weight_kg: Decimal | None = Field(default=None, ge=0, max_digits=8, decimal_places=3)
     characteristics: dict[str, str] | None = None
+    image_url: str | None = None
 
 
 def _product_weight(value: Any) -> Decimal | None:
@@ -153,11 +155,14 @@ def parse_product_html(html: str, *, page_url: str, retrieved_at: str | None = N
                     pass
             availability_raw = str(offers.get("availability", "")).rsplit("/", 1)[-1].casefold() if isinstance(offers, dict) else ""
             availability = ({"instock": "in_stock", "limitedavailability": "available", "onlineonly": "available", "outofstock": "out_of_stock"}.get(availability_raw, "unknown"))
+            raw_images = item.get("image")
+            candidates = raw_images[:8] if isinstance(raw_images, list) else [raw_images]
+            image = next((url for candidate in candidates if (url := product_image(candidate, page_url))), None)
             normalized = ProductResult(product_id=str(sku or product_url), name=name.strip()[:300],
                 source_url=product_url, price_tnd=price, availability=availability,
                 retrieved_at=stamp, color=str(item["color"])[:80] if item.get("color") else None,
                 weight_kg=_product_weight(item.get("weight")),
-                characteristics=_product_characteristics(item.get("additionalProperty")))
+                characteristics=_product_characteristics(item.get("additionalProperty")), image_url=image)
             product = normalized.model_dump(mode="json", exclude_none=True)
             product["price_tnd"] = str(price) if price is not None else None
             products.append(product)
@@ -270,6 +275,12 @@ class _ProductFeatures(HTMLParser):
         self.depth = max(0, self.depth - 1)
 
 
+def product_image(value, source_url):
+    if isinstance(value, dict):
+        value = value.get("contentUrl") or value.get("url")
+    return catalog_image_url(urljoin(source_url, value)) if isinstance(value, str) and value else None
+
+
 class _DetailMetadata(HTMLParser):
     """Read exact-page offer facts when the retailer uses microdata instead of JSON-LD."""
 
@@ -281,10 +292,16 @@ class _DetailMetadata(HTMLParser):
         data = dict(attrs)
         key = data.get("property") or data.get("itemprop") or data.get("rel")
         value = data.get("content") or data.get("href")
-        accepted = {"canonical", "og:title", "product:price:amount", "product:price:currency",
+        accepted = {"canonical", "og:title", "og:image", "product:price:amount", "product:price:currency",
                     "price", "priceCurrency", "availability"}
         if key in accepted and isinstance(value, str):
             self.values.setdefault(key, set()).add(value.strip())
+
+    def product_image(self, source_url):
+        if self.values.get("canonical") != {source_url}:
+            return None
+        images = {url for value in self.values.get("og:image", ()) if (url := product_image(value, source_url))}
+        return next(iter(images)) if len(images) == 1 else None
 
     def row(self, product_id, source_url):
         names = self.values.get("og:title", set())

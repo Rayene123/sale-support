@@ -17,6 +17,22 @@ Mode = Literal["fixed", "adaptive", "adaptive_verifier"]
 Money = Decimal
 
 
+def catalog_image_url(value):
+    """Accept raster images served by the retailer catalog."""
+    if not isinstance(value, str) or len(value) > 2048:
+        return None
+    try:
+        parsed = urlparse(value)
+        allowed = (parsed.scheme == "https"
+                   and parsed.hostname in {"www.tunisianet.com.tn", "tunisianet.com.tn"}
+                   and parsed.username is None and parsed.password is None
+                   and parsed.port in (None, 443) and not parsed.fragment
+                   and re.search(r"\.(?:jpe?g|png|webp|avif)$", parsed.path, re.I))
+        return value if allowed else None
+    except ValueError:
+        return None
+
+
 class Requirements(StrictSchema):
     items: list[Role] = Field(default_factory=list, max_length=2)
     budget_tnd: Money | None = Field(default=None, gt=0, max_digits=9, decimal_places=2)
@@ -44,6 +60,12 @@ class Listing(StrictSchema):
     price_tnd: Money | None = Field(default=None, ge=0, max_digits=12, decimal_places=2)
     availability: Literal["in_stock", "available", "unknown", "out_of_stock"]
     specs: dict[str, str] = Field(default_factory=dict, max_length=80)
+    image_url: str | None = None
+
+    @field_validator("image_url", mode="before")
+    @classmethod
+    def safe_image(cls, value):
+        return catalog_image_url(value)
 
     @field_validator("source_url")
     @classmethod

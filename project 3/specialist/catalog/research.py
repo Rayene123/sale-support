@@ -123,6 +123,7 @@ def normalize_listing(data) -> Listing | None:
         return Listing(product_id=data.get("product_id"), name=data.get("name"),
                        source_url=data.get("source_url"), fetched_at=data.get("retrieved_at"),
                        price_tnd=data.get("price_tnd"), availability=data.get("availability", "unknown"),
+                       image_url=data.get("image_url"),
                        specs={str(k)[:100]: str(v)[:240] for k, v in list(specs.items())[:80]})
     except (ValidationError, ValueError):
         return None

@@ -37,13 +37,15 @@ def loopback(monkeypatch):
 
 
 @contextmanager
-def serve(tmp_path, *, researcher=None, writer=None):
+def serve(tmp_path, *, researcher=None, writer=None, shop=False):
     store = CaseStore(tmp_path / "cases.db")
-    service = Specialist(store, (researcher or Catalog()).researcher(), writer=writer)
+    catalog = (researcher or Catalog()).researcher()
+    service = Specialist(store, catalog, writer=writer)
+    shop_service = Specialist(CaseStore(tmp_path / "shopping.db"), catalog) if shop else None
     observer = Observability(tmp_path / "metrics.jsonl")
     with Workbench(0, service, observer, customer="C-001", reviewer="R-001",
                    passwords={"customer": "customer-test", "admin": "reviewer-test"},
-                   fixture=True, sandbox="Local sandbox only") as server:
+                   fixture=True, sandbox="Local sandbox only", shop_service=shop_service) as server:
         thread = Thread(target=server.serve_forever)
         thread.start()
         try:
@@ -105,6 +107,24 @@ def test_support_ticket_review_uses_the_same_admin_session(tmp_path, loopback):
                 assert len(support_fixtures.WRITE_LOG) == 1
     finally:
         support_fixtures.reset_write_log()
+
+
+def test_storefront_keeps_shopper_choices_separate_from_sandbox_approval(tmp_path, loopback):
+    with serve(tmp_path, shop=True) as (base, service), requests.Session() as shopper, requests.Session() as stranger:
+        shopper.trust_env = stranger.trust_env = False
+        page = shopper.get(base, timeout=5)
+        assert page.url.endswith("/shop/") and "Find the gear" in page.text
+        assert shopper.post(page.url, data={"action": "start", "request": "Find a laptop"}, timeout=5).status_code == 403
+        result = submit(shopper, page.url, "start", request="Find a laptop and monitor under 3000 TND")
+        assert result.status_code == 200 and "Your recommendation." in result.text
+        assert "2,630 TND" in result.text and "Connection verified" in result.text
+        assert stranger.get(result.url, timeout=5).status_code == 404
+        assert service.store.recent() == []
+        fields = dict(re.findall(r'name="(proposal_hash|revision)" value="([^"]+)"', result.text))
+        assert submit(shopper, result.url, "select", **{**fields, "revision": "0"}).status_code == 409
+        choice = submit(shopper, result.url, "select", **fields)
+        assert choice.status_code == 200 and "Your selected setup." in choice.text
+        assert service.store.recent() == []
 
 
 def test_unconfirmed_local_reset_preserves_existing_cases(tmp_path):

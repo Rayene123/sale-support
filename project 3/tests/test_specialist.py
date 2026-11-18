@@ -188,8 +188,11 @@ def test_price_fields_are_extracted_from_exact_detail_html(monkeypatch):
         status_code = 200
         url = "https://www.tunisianet.com.tn/model.html"
         apparent_encoding = encoding = "utf-8"
-        text = """<script type="application/ld+json">
-        {"@type":"Product","sku":"model","name":"Laptop Model","offers":{"price":"1999.00","priceCurrency":"TND","availability":"https://schema.org/InStock"}}</script>
+        text = """<link rel="canonical" href="https://www.tunisianet.com.tn/model.html">
+        <meta property="og:image" content="/laptop.jpg">
+        <script type="application/ld+json">
+        {"@type":"Product","sku":"model","name":"Laptop Model","image":"https://untrusted.example/image.jpg",
+        "offers":{"price":"1999.00","priceCurrency":"TND","availability":"https://schema.org/InStock"}}</script>
         <dl><dt class="name">Video outputs</dt><dd class="value">HDMI 2560x1440 @ 120 Hz</dd></dl>"""
         def raise_for_status(self): pass
 
@@ -202,6 +205,7 @@ def test_price_fields_are_extracted_from_exact_detail_html(monkeypatch):
     assert result["success"] and result["data"]["product_id"] == "P-10"
     assert result["data"]["price_tnd"] == "1999.00"
     assert result["data"]["availability"] == "in_stock"
+    assert result["data"]["image_url"] == "https://www.tunisianet.com.tn/laptop.jpg"
     assert result["data"]["characteristics"]["Video outputs"] == "HDMI 2560x1440 @ 120 Hz"
 
 @pytest.mark.parametrize("source_note", [

@@ -31,7 +31,7 @@ def reset_local(cases, client):
 def main():
     parser = ArgumentParser(description=__doc__)
     parser.add_argument("--port", default=8767, type=int)
-    parser.add_argument("--catalog", choices=("fixture", "live"), default="fixture")
+    parser.add_argument("--catalog", choices=("fixture", "live"), default="live")
     parser.add_argument("--sandbox", choices=("local", "supabase"), default="local")
     parser.add_argument("--planner", choices=("local", "rules"), default="local")
     parser.add_argument("--data-dir", type=Path, default=Path(".specialist"))
@@ -48,12 +48,14 @@ def main():
         parser.error("Use distinct customer and reviewer identities and passcodes.")
     directory = args.data_dir / f"{args.catalog}-{args.sandbox}-{args.planner}"
     store = CaseStore(directory / "cases.db")
+    shopping_cases = CaseStore(directory / "shopping.db")
     fixture = args.catalog == "fixture"
     with ExitStack() as stack:
         if args.sandbox == "local":
             client = stack.enter_context(LocalSandbox(directory / "sandbox"))
             if args.reset_local:
                 reset_local(store, client)
+                shopping_cases.clear()
                 print("Local cases cleared and sandbox fixtures restored.")
                 return
             sandbox = SandboxStore(supabase_client=client)
@@ -62,14 +64,16 @@ def main():
         researcher = DemoCatalog().researcher() if fixture else None
         factory = Specialist.with_local_model if args.planner == "local" else Specialist
         service = factory(store, researcher, writer=SandboxWriter(sandbox))
+        shop = factory(shopping_cases, researcher)
         try:
             exporter = langsmith_exporter()
         except Exception:
             exporter = None
         observer = Observability(directory / "metrics.jsonl", exporter=exporter)
         with Workbench(args.port, service, observer, customer=customer, reviewer=reviewer, passwords=passwords,
-                       fixture=fixture, sandbox=f"{args.sandbox.title()} sandbox only") as server:
-            print(f"Customer http://127.0.0.1:{server.server_port}/customer/", flush=True)
+                       fixture=fixture, sandbox=f"{args.sandbox.title()} sandbox only", shop_service=shop) as server:
+            print(f"Shopping http://127.0.0.1:{server.server_port}/shop/", flush=True)
+            print(f"Test customer http://127.0.0.1:{server.server_port}/customer/", flush=True)
             print(f"Reviewer http://127.0.0.1:{server.server_port}/admin/", flush=True)
             for role, password in passwords.items():
                 if not os.getenv(f"SPECIALIST_{role.upper()}_PASSWORD"):

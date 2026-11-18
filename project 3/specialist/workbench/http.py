@@ -11,6 +11,7 @@ from urllib.parse import parse_qs, urlsplit
 
 from specialist.workflow.case_state import CaseConflict
 
+from .shop import serve_shop
 from .support import render_support, review_ticket
 from .views import case_list, e, login, page, render_case
 
@@ -22,10 +23,11 @@ COOKIE_AGE = 8 * 60 * 60
 class Workbench(ThreadingHTTPServer):
     daemon_threads = False
 
-    def __init__(self, port, service, observer, *, customer, reviewer, passwords, fixture, sandbox):
+    def __init__(self, port, service, observer, *, customer, reviewer, passwords, fixture, sandbox, shop_service=None):
         self.service, self.observer = service, observer
         self.customer, self.reviewer, self.passwords = customer, reviewer, passwords
         self.fixture, self.sandbox = fixture, sandbox
+        self.shop_service = shop_service
         self.session_key = token_bytes(32)
         super().__init__(("127.0.0.1", port), Handler)
 
@@ -55,7 +57,11 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_error(400)
         path = urlsplit(self.path).path
         if path == "/" and method == "GET":
-            return self.redirect("/customer/")
+            return self.redirect("/shop/" if server.shop_service is not None else "/customer/")
+        if path == "/shop" and method == "GET" and server.shop_service is not None:
+            return self.redirect("/shop/")
+        if path.startswith("/shop/") and server.shop_service is not None:
+            return serve_shop(self, method, path)
         match = ROUTE.fullmatch(path)
         if not match:
             return self.send_error(404)
@@ -72,8 +78,8 @@ class Handler(BaseHTTPRequestHandler):
                 if target == "login":
                     if not compare_digest(fields.get("password", "").encode(), server.passwords[role].encode()):
                         return self.render(role, login(role), error="Invalid passcode.", status=401)
-                    data = f"{int(time()) + COOKIE_AGE}.{token_urlsafe(24)}"
-                    return self.redirect(f"/{role}/", cookie=self.cookie(role, data + "." + server.sign(role, data)))
+                    _, cookie = self.issue_session(role)
+                    return self.redirect(f"/{role}/", cookie=cookie)
                 if not csrf or not compare_digest(fields.get("csrf", "").encode(), csrf.encode()):
                     return self.send_error(403)
                 if target == "logout":
@@ -163,6 +169,11 @@ class Handler(BaseHTTPRequestHandler):
     def cookie(role, value, age=COOKIE_AGE):
         return f"specialist_{role}={value}; Path=/{role}; Max-Age={age}; HttpOnly; SameSite=Strict"
 
+    def issue_session(self, role):
+        csrf = token_urlsafe(24)
+        data = f"{int(time()) + COOKIE_AGE}.{csrf}"
+        return csrf, self.cookie(role, data + "." + self.server.sign(role, data))
+
     def redirect(self, location, *, cookie=None):
         self.send_response(303)
         self.send_header("Location", location)
@@ -176,13 +187,18 @@ class Handler(BaseHTTPRequestHandler):
         data = page(role, body, error=error, csrf=csrf,
                     source="Fictional catalog fixtures" if self.server.fixture else "Live Tunisianet catalog",
                     sandbox=self.server.sandbox).encode()
+        self.send_document(data, status=status)
+
+    def send_document(self, data, *, status=200, cookie=None, content_type="text/html; charset=utf-8", csp=None):
         self.send_response(status)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(data)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "same-origin")
-        self.send_header("Content-Security-Policy",
+        self.send_header("Content-Security-Policy", csp or
                          "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'")
+        if cookie:
+            self.send_header("Set-Cookie", cookie)
         self.end_headers()
         self.wfile.write(data)

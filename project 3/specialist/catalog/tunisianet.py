@@ -242,14 +242,16 @@ def inspect_tunisianet_product(product_id: str, source_url: str, *, timeout: flo
                     and urlparse(row["source_url"]).path == parsed.path)]
         if len(rows) > 1:
             return {"success": False, "error": "product_identity_unknown"}
+        metadata = _DetailMetadata()
+        metadata.feed(html)
         if rows:
             row = rows[0]
         else:
-            metadata = _DetailMetadata()
-            metadata.feed(html)
             row = metadata.row(product_id, source_url)
             if row is None:
                 return {"success": False, "error": "product_identity_unknown"}
+        if image := row.get("image_url") or metadata.product_image(source_url):
+            row["image_url"] = image
         features = _ProductFeatures()
         features.feed(html)
         # Keep both values when independent parts of the page disagree.

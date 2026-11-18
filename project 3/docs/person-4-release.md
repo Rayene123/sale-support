@@ -8,12 +8,13 @@ for the secondary fixture-based ticket flow.
 ## Setup and modes
 
 Follow the [README setup](../README.md) from a clean checkout. Start Ollama
-and run `python -m specialist` from Project 3. Enter the customer
+and run `python -m specialist --catalog fixture` from Project 3 for this
+reproducible test. Enter the customer
 passcode printed by the server at `http://127.0.0.1:8767/customer/`.
 Use the separate reviewer passcode at `http://127.0.0.1:8767/admin/`.
 Use the same hostname throughout the session.
 
-The default harness uses fictional catalog listings, the actual local LLM,
+The fixture profile uses fictional catalog listings, the actual local LLM,
 and persistent local PostgreSQL through PGlite. The SQL schema, approvals,
 actions, reset, and receipt lookup are shared with the hosted sandbox. The
 app binds to loopback and authenticates two distinct test accounts using
@@ -23,6 +24,7 @@ both profiles. Keep the workbench on your machine.
 | Option | Purpose |
 | --- | --- |
 | `--catalog live` | Read public Tunisianet listing pages under the existing retrieval limits. |
+| `--catalog fixture` | Run a reproducible workbench test using fictional listings. |
 | `--planner rules` | Run the original deterministic laptop and monitor flow without Ollama. |
 | `--port 8768` | Run a second profile on a separate port. |
 | `--data-dir path` | Use a separate directory for cases, local SQL, and metrics. |

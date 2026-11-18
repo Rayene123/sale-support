@@ -2,11 +2,11 @@
 
 CS496 AI Engineering · Fall 2026
 
-The Specialist is an IT purchasing assistant. Describe a setup in your own words. The local Ollama model identifies the products and what needs to work together. The app researches listings, verifies the relevant specifications against source evidence, and prepares a sandbox order for a reviewer. Approval applies to one exact proposal. The app rechecks listings before writing and recovers confirmed receipts on retry.
+The Specialist is an IT purchasing assistant. Describe a setup in your own words. The local Ollama model identifies the products and what needs to work together. The app researches live Tunisianet listings, displays retailer photos, and verifies the relevant specifications against source evidence. Shoppers can choose or refine a setup and open its product pages on Tunisianet.
 
 The [November 16 enhanced brief](docs/monday-2026-11-16/README.md) is the project baseline. The [release guide](docs/person-4-release.md) records the checks and current limits.
 
-## Run the workbench
+## Run The Specialist
 
 Run these commands from Project 3 with Python 3.12, Node.js, and Ollama installed.
 
@@ -18,9 +18,9 @@ ollama pull ministral-3:8b
 .\.venv\Scripts\python.exe -m specialist
 ```
 
-Open [Customer](http://127.0.0.1:8767/customer/) to submit a request and [Reviewer](http://127.0.0.1:8767/admin/) to inspect evidence, approve actions, and see the run trace. The server prints separate local passcodes. **Support tickets** in the reviewer view opens the secondary, fixture-based ticket review. Try `TICKET-102` to exercise that flow.
+Open the [shopping page](http://127.0.0.1:8767/shop/). The default uses live Tunisianet listings and a local model. Use `--catalog fixture` for repeatable tests with fictional listings. Shopping choices are saved locally for the browser session, and purchases take place on the retailer’s website.
 
-The default profile uses a fictional catalog and a persistent local database. `--catalog live` uses public Tunisianet listings within the catalog access limits. `--sandbox supabase` selects the team's dedicated database and reads its settings from the ignored `.env` file. Sandbox orders and notifications are internal test records. All app profiles use the same launcher.
+The coursework workbench remains accessible at [Test customer](http://127.0.0.1:8767/customer/) and [Reviewer](http://127.0.0.1:8767/admin/). The server prints separate passcodes for those routes. The workbench runs the exact-proposal approval, order recheck and sandbox receipt flow. `--sandbox supabase` selects the team's dedicated database for that flow using the ignored `.env` file. **Support tickets** in the reviewer view opens the secondary fixture-based ticket flow.
 
 ## Who owns what
 
